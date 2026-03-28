@@ -40,9 +40,17 @@ export default function NoticeDetailPage() {
         <button onClick={() => navigate('/notice')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-medium flex-1">공지사항</p>
         {canWriteNotice && (
-          <button className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full border-none cursor-pointer">
-            수정
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate('/notice/write', { state: { mode: 'edit', notice } })}
+              className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full border-none cursor-pointer"
+            >
+              수정
+            </button>
+            <button className="text-xs text-danger-light bg-danger px-3 py-1.5 rounded-full border-none cursor-pointer">
+              삭제
+            </button>
+          </div>
         )}
       </div>
 

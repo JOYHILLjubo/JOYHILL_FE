@@ -98,7 +98,7 @@ export default function MyPage() {
             <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
             <MenuItem label="내 마을 관리" onPress={() => navigate('/village/manage')} />
             <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
-            <MenuItem label="공지사항 관리" />
+            {/* <MenuItem label="공지사항 관리" /> */}
             <MenuItem label="전체 통계 리포트" last />
           </div>
         </div>
@@ -113,7 +113,7 @@ export default function MyPage() {
             <MenuItem label="청년부 전체 관리" onPress={() => navigate('/village/manage')} />
             <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
             <MenuItem label="설교 업로드" onPress={() => navigate('/sermon/upload')} />
-            <MenuItem label="공지사항 관리" />
+            {/* <MenuItem label="공지사항 관리" /> */}
             <MenuItem label="전체 통계 리포트" last />
           </div>
         </div>
@@ -129,7 +129,7 @@ export default function MyPage() {
               <MenuItem label="청년부 전체 관리" onPress={() => navigate('/village/manage')} />
               <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
               <MenuItem label="설교 업로드" onPress={() => navigate('/sermon/upload')} />
-              <MenuItem label="공지사항 관리" />
+              {/* <MenuItem label="공지사항 관리" /> */}
               <MenuItem label="전체 통계 리포트" last />
             </div>
           </div>

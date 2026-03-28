@@ -26,9 +26,9 @@ function getSundaysOfMonth(year, month) {
 function toKey(date) { return date.toISOString().slice(0, 10) }
 function formatDate(date) { return `${date.getMonth() + 1}/${date.getDate()}` }
 
-const DATE_COL_W = 56
 const CHECK_COL_W = 40
-const MEMBER_COL_W = CHECK_COL_W * 2
+const MEMBER_NAME_COL_W = 72
+const DATE_GROUP_W = CHECK_COL_W * 2
 const BTN_SIZE = 22
 
 const btnStyle = (checked, type) => ({
@@ -81,7 +81,7 @@ export default function AttendanceHistoryPage() {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  const totalW = DATE_COL_W + famMembers.length * MEMBER_COL_W
+  const totalW = MEMBER_NAME_COL_W + sundays.length * DATE_GROUP_W
 
   return (
     <div className="pb-24 flex flex-col" style={{ minHeight: '100dvh' }}>
@@ -114,9 +114,9 @@ export default function AttendanceHistoryPage() {
       <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1 }}>
         <table style={{ minWidth: totalW, width: totalW, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
           <colgroup>
-            <col style={{ width: DATE_COL_W }} />
-            {famMembers.map((m) => (
-              <Fragment key={m.id}>
+            <col style={{ width: MEMBER_NAME_COL_W }} />
+            {sundays.map((s) => (
+              <Fragment key={toKey(s)}>
                 <col style={{ width: CHECK_COL_W }} />
                 <col style={{ width: CHECK_COL_W }} />
               </Fragment>
@@ -124,15 +124,25 @@ export default function AttendanceHistoryPage() {
           </colgroup>
           <thead>
             <tr style={{ borderBottom: '1px solid #E0E0E0', background: '#fff' }}>
-              <th style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 2, textAlign: 'left', fontSize: 11, color: '#888', fontWeight: 500, padding: '8px 0 8px 12px', borderRight: '1px solid #E0E0E0' }}>날짜</th>
-              {famMembers.map((m) => (
-                <th key={m.id} colSpan={2} style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#333', padding: '8px 0', borderLeft: '1px solid #E0E0E0' }}>{m.name}</th>
+              <th
+                rowSpan={2}
+                style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 2, textAlign: 'left', fontSize: 11, color: '#888', fontWeight: 500, padding: '8px 0 8px 12px', borderRight: '1px solid #E0E0E0' }}
+              >
+                이름
+              </th>
+              {sundays.map((s) => (
+                <th
+                  key={toKey(s)}
+                  colSpan={2}
+                  style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#333', padding: '8px 0', borderLeft: '1px solid #E0E0E0' }}
+                >
+                  {formatDate(s)}
+                </th>
               ))}
             </tr>
             <tr style={{ borderBottom: '1px solid #E0E0E0', background: '#FAFAFA' }}>
-              <th style={{ position: 'sticky', left: 0, background: '#FAFAFA', zIndex: 2, borderRight: '1px solid #E0E0E0' }} />
-              {famMembers.map((m) => (
-                <Fragment key={m.id}>
+              {sundays.map((s) => (
+                <Fragment key={toKey(s)}>
                   <th style={{ textAlign: 'center', fontSize: 10, color: '#4285F4', fontWeight: 500, padding: '5px 0', borderLeft: '1px solid #E0E0E0' }}>예배</th>
                   <th style={{ textAlign: 'center', fontSize: 10, color: '#F9AB00', fontWeight: 500, padding: '5px 0' }}>팸</th>
                 </Fragment>
@@ -140,19 +150,18 @@ export default function AttendanceHistoryPage() {
             </tr>
           </thead>
           <tbody>
-            {sundays.map((s, rowIdx) => {
-              const dateKey = toKey(s)
+            {famMembers.map((m, rowIdx) => {
               const rowBg = rowIdx % 2 === 0 ? '#fff' : '#FAFAFA'
               return (
-                <tr key={dateKey} style={{ borderBottom: '1px solid #E0E0E0', background: rowBg }}>
+                <tr key={m.id} style={{ borderBottom: '1px solid #E0E0E0', background: rowBg }}>
                   <td style={{ position: 'sticky', left: 0, background: rowBg, zIndex: 1, borderRight: '1px solid #E0E0E0', padding: '10px 0 10px 12px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#333' }}>{formatDate(s)}</span>
-                    <span style={{ display: 'block', fontSize: 10, color: '#888', marginTop: 1 }}>일요일</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#333' }}>{m.name}</span>
                   </td>
-                  {famMembers.map((m) => {
+                  {sundays.map((s) => {
+                    const dateKey = toKey(s)
                     const record = getRecord(m.id, dateKey)
                     return (
-                      <Fragment key={m.id}>
+                      <Fragment key={dateKey}>
                         <td style={{ textAlign: 'center', padding: '10px 0', verticalAlign: 'middle', borderLeft: '1px solid #E0E0E0' }}>
                           <button onClick={() => toggle(m.id, dateKey, 'worship')} style={btnStyle(record.worship === true, 'worship')}>✓</button>
                         </td>

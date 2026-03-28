@@ -130,7 +130,7 @@ export default function NewcomerPage() {
       {/* 등록 모달 */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-t-2xl w-full max-w-[430px] p-5 pb-10" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-t-2xl w-full max-w-[430px] p-5 pb-10 mb-10" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <p className="text-base font-medium">새가족 등록</p>
               <button onClick={() => setShowModal(false)} className="text-gray-500 text-lg bg-transparent border-none cursor-pointer">✕</button>
