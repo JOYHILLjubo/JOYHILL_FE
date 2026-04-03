@@ -1,18 +1,16 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import BottomNav from '../components/BottomNav'
 
-const FAM_MEMBERS = [
-  { id: 1, name: '김민수', role: '팸원' },
-  { id: 2, name: '이은혜', role: '팸원' },
-  { id: 3, name: '박준호', role: '팸원' },
-  { id: 4, name: '정하늘', role: '팸원' },
-  { id: 5, name: '최수진', role: '팸원' },
-  { id: 6, name: '한소망', role: '팸원' },
-  { id: 7, name: '조은별', role: '팸원' },
-  { id: 8, name: '송하린', role: '팸원' },
-]
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+
+const FAM_ROLE_LABELS = {
+  admin: '관리자',
+  pastor: '교역자',
+  village_leader: '마을장',
+  leader: '리더',
+  member: '팸원',
+}
 
 const avatarColors = [
   { bg: 'bg-success-light', text: 'text-success' },
@@ -22,72 +20,291 @@ const avatarColors = [
 ]
 
 function getAvatarColor(id) {
-  return avatarColors[id % avatarColors.length]
+  return avatarColors[Math.abs(Number(id) || 0) % avatarColors.length]
 }
 
-// 이번 주 일요일 날짜 키 (YYYY-MM-DD)
+function buildApiUrl(path) {
+  return `${API_BASE_URL}${path}`
+}
+
+function formatLocalDateKey(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function getThisSundayKey() {
   const today = new Date()
-  const day = today.getDay() // 0=일, 1=월 ...
   const sunday = new Date(today)
-  sunday.setDate(today.getDate() - day)
-  return sunday.toISOString().slice(0, 10)
+  sunday.setDate(today.getDate() - today.getDay())
+  return formatLocalDateKey(sunday)
 }
 
-// 표시용 날짜 (YYYY-MM-DD → MM/DD)
 function formatSundayKey(key) {
-  const [, m, d] = key.split('-')
-  return `${parseInt(m)}/${parseInt(d)}`
+  const [, month, day] = key.split('-')
+  return `${parseInt(month, 10)}/${parseInt(day, 10)}`
 }
 
-// 주차 표시 (예: 3월 3주차)
 function getSundayLabel(key) {
-  const date = new Date(key)
-  const month = date.getMonth() + 1
-  const firstSunday = new Date(date.getFullYear(), date.getMonth(), 1)
-  while (firstSunday.getDay() !== 0) firstSunday.setDate(firstSunday.getDate() + 1)
+  const [year, month, day] = key.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  const firstSunday = new Date(year, month - 1, 1)
+
+  while (firstSunday.getDay() !== 0) {
+    firstSunday.setDate(firstSunday.getDate() + 1)
+  }
+
   const week = Math.floor((date - firstSunday) / (7 * 24 * 60 * 60 * 1000)) + 1
   return `${month}월 ${week}주차`
 }
 
+function mapFamMembers(items) {
+  return items.map((item) => ({
+    id: item.id,
+    name: item.name ?? '',
+    role: item.role ?? 'member',
+  }))
+}
+
+function buildAttendanceMap(records) {
+  const next = {}
+
+  records.forEach((record) => {
+    if (!record?.famMemberId) return
+
+    next[record.famMemberId] = {
+      worship: record.worshipPresent === true,
+      fam: record.famPresent === true,
+    }
+  })
+
+  return next
+}
+
+async function requestApi(path, { method = 'GET', headers = {}, body } = {}) {
+  const requestOptions = {
+    method,
+    headers: { ...headers },
+    credentials: 'include',
+  }
+
+  if (body !== undefined) {
+    requestOptions.body = JSON.stringify(body)
+    requestOptions.headers['Content-Type'] = 'application/json'
+  }
+
+  let response
+
+  try {
+    response = await fetch(buildApiUrl(path), requestOptions)
+  } catch {
+    throw new Error('백엔드 서버에 연결할 수 없습니다. JOYHILL_BE가 실행 중인지 확인해주세요.')
+  }
+
+  const payload = await response.json().catch(() => null)
+
+  return { response, payload }
+}
+
+function getApiErrorMessage(result, fallbackMessage) {
+  if (result.response.status === 401) {
+    return '세션이 만료되었습니다. 다시 로그인해주세요.'
+  }
+
+  if (result.response.status === 403) {
+    return '권한이 없습니다.'
+  }
+
+  return result.payload?.error?.message ?? fallbackMessage
+}
+
+async function requestTokenRefresh() {
+  const result = await requestApi('/api/auth/refresh', {
+    method: 'POST',
+  })
+
+  if (!result.response.ok || !result.payload?.success || !result.payload?.data?.accessToken) {
+    throw new Error(getApiErrorMessage(result, '세션이 만료되었습니다. 다시 로그인해주세요.'))
+  }
+
+  return result.payload.data.accessToken
+}
+
 export default function AttendancePage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, accessToken, setAccessToken, logout } = useAuth()
 
-  // 현재 주차 키 — 렌더 시마다 계산 (일요일 넘어가면 자동 최신화)
   const sundayKey = useMemo(() => getThisSundayKey(), [])
-
-  // { memberId: { worship: true|null, fam: true|null } }
-  // 키 구조에 sundayKey 포함해서, 다음 주 일요일이 되면 새 키로 초기화됨
+  const [famMembers, setFamMembers] = useState([])
   const [attendanceMap, setAttendanceMap] = useState({})
+  const [saved, setSaved] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [pageError, setPageError] = useState('')
+  const [saveError, setSaveError] = useState('')
 
-  const getChecked = (memberId, type) =>
-    attendanceMap[`${sundayKey}_${memberId}`]?.[type] ?? null
+  const famName = user?.fam ?? ''
+
+  const handleExpiredSession = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
+  const callAuthedApi = async (path, options = {}) => {
+    try {
+      let token = accessToken
+
+      if (!token) {
+        token = await requestTokenRefresh()
+        setAccessToken(token)
+      }
+
+      let result = await requestApi(path, {
+        ...options,
+        headers: {
+          ...(options.headers ?? {}),
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (result.response.status === 401) {
+        token = await requestTokenRefresh()
+        setAccessToken(token)
+
+        result = await requestApi(path, {
+          ...options,
+          headers: {
+            ...(options.headers ?? {}),
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      }
+
+      if (!result.response.ok || !result.payload?.success) {
+        throw new Error(getApiErrorMessage(result, '요청을 처리하지 못했습니다.'))
+      }
+
+      return result.payload.data
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('다시 로그인')) {
+        handleExpiredSession()
+      }
+
+      throw err
+    }
+  }
+
+  const loadData = async () => {
+    if (!famName) {
+      setPageError('소속 팸 정보가 없어 출석을 불러올 수 없습니다.')
+      setFamMembers([])
+      setAttendanceMap({})
+      setIsLoading(false)
+      return
+    }
+
+    setIsLoading(true)
+    setPageError('')
+    setSaveError('')
+    setSaved(false)
+
+    try {
+      const params = new URLSearchParams({
+        famName,
+        date: sundayKey,
+      })
+
+      const [membersData, attendanceData] = await Promise.all([
+        callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?period=1month`),
+        callAuthedApi(`/api/attendance?${params.toString()}`),
+      ])
+
+      setFamMembers(Array.isArray(membersData) ? mapFamMembers(membersData) : [])
+      setAttendanceMap(Array.isArray(attendanceData) ? buildAttendanceMap(attendanceData) : {})
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : '출석 정보를 불러오지 못했습니다.')
+      setFamMembers([])
+      setAttendanceMap({})
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadData()
+  }, [famName, sundayKey])
+
+  useEffect(() => {
+    if (!saved) return undefined
+
+    const timeoutId = window.setTimeout(() => {
+      setSaved(false)
+    }, 2000)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [saved])
+
+  const getChecked = (memberId, type) => attendanceMap[memberId]?.[type] ?? null
 
   const toggleCheck = (memberId, type) => {
-    const mapKey = `${sundayKey}_${memberId}`
+    setSaved(false)
+    setSaveError('')
     setAttendanceMap((prev) => {
-      const current = prev[mapKey]?.[type] ?? null
+      const current = prev[memberId]?.[type] ?? null
+
       return {
         ...prev,
-        [mapKey]: {
-          ...prev[mapKey],
+        [memberId]: {
+          ...prev[memberId],
           [type]: current === true ? null : true,
         },
       }
     })
   }
 
-  const worshipCount = FAM_MEMBERS.filter(
-    (m) => getChecked(m.id, 'worship') === true
-  ).length
-  const famCount = FAM_MEMBERS.filter(
-    (m) => getChecked(m.id, 'fam') === true
-  ).length
+  const worshipCount = famMembers.filter((member) => getChecked(member.id, 'worship') === true).length
+  const famCount = famMembers.filter((member) => getChecked(member.id, 'fam') === true).length
+
+  const handleSave = async () => {
+    if (!famName) {
+      setSaveError('소속 팸 정보가 없어 저장할 수 없습니다.')
+      return
+    }
+
+    if (famMembers.length === 0) {
+      setSaveError('저장할 팸원이 없습니다.')
+      return
+    }
+
+    setIsSaving(true)
+    setSaveError('')
+    setSaved(false)
+
+    try {
+      await callAuthedApi('/api/attendance', {
+        method: 'POST',
+        body: {
+          famName,
+          date: sundayKey,
+          records: famMembers.map((member) => ({
+            famMemberId: member.id,
+            worshipPresent: getChecked(member.id, 'worship') === true,
+            famPresent: getChecked(member.id, 'fam') === true,
+          })),
+        },
+      })
+
+      setSaved(true)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : '출석 저장에 실패했습니다.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <div className="pb-24">
-      {/* 헤더 */}
       <div className="flex items-center gap-3 px-5 pt-4 pb-2">
         <button
           onClick={() => navigate('/home')}
@@ -98,15 +315,28 @@ export default function AttendancePage() {
         <div>
           <p className="text-base font-medium">출석 체크</p>
           <p className="text-xs text-gray-500 mt-0.5">
-            {user.fam} · {getSundayLabel(sundayKey)} ({formatSundayKey(sundayKey)})
+            {famName || '소속 팸 없음'} · {getSundayLabel(sundayKey)} ({formatSundayKey(sundayKey)})
           </p>
         </div>
       </div>
 
-      {/* 요약 칩 */}
+      {pageError && (
+        <div className="px-5 pb-2">
+          <div className="border border-danger-light bg-danger-light rounded-xl px-4 py-3">
+            <p className="text-xs text-danger">{pageError}</p>
+            <button
+              onClick={() => void loadData()}
+              className="mt-2 text-xs text-danger bg-white px-3 py-1.5 rounded-full border border-danger-light cursor-pointer"
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2 px-5 py-2 border-b border-gray-300">
         <span className="text-xs bg-primary-light text-primary px-2.5 py-1 rounded-full">
-          전체 {FAM_MEMBERS.length}
+          전체 {famMembers.length}
         </span>
         <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full bg-gray-100">
           예배 {worshipCount}
@@ -116,7 +346,6 @@ export default function AttendancePage() {
         </span>
       </div>
 
-      {/* 체크 열 헤더 */}
       <div className="flex px-5 py-2 border-b border-gray-300">
         <div className="flex-1" />
         <div className="w-[52px] text-center">
@@ -127,62 +356,65 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {/* 멤버 리스트 */}
       <div className="px-5">
-        {FAM_MEMBERS.map((member) => {
-          const color = getAvatarColor(member.id)
-          const worshipChecked = getChecked(member.id, 'worship') === true
-          const famChecked = getChecked(member.id, 'fam') === true
-          return (
-            <div
-              key={member.id}
-              className="flex items-center py-3 border-b border-gray-300 last:border-b-0"
-            >
-              <div className="flex-1 flex items-center gap-2.5">
-                <div
-                  className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text}`}
-                >
-                  {member.name[0]}
+        {isLoading ? (
+          <p className="text-sm text-gray-500 text-center py-10">출석 정보를 불러오는 중입니다.</p>
+        ) : famMembers.length === 0 ? (
+          <p className="text-sm text-gray-500 text-center py-10">등록된 팸원이 없습니다.</p>
+        ) : (
+          famMembers.map((member) => {
+            const color = getAvatarColor(member.id)
+            const worshipChecked = getChecked(member.id, 'worship') === true
+            const famChecked = getChecked(member.id, 'fam') === true
+
+            return (
+              <div
+                key={member.id}
+                className="flex items-center py-3 border-b border-gray-300 last:border-b-0"
+              >
+                <div className="flex-1 flex items-center gap-2.5">
+                  <div
+                    className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text}`}
+                  >
+                    {member.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm">{member.name}</p>
+                    <p className="text-[11px] text-gray-500">{FAM_ROLE_LABELS[member.role] ?? member.role}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm">{member.name}</p>
-                  <p className="text-[11px] text-gray-500">{member.role}</p>
+                <div className="w-[52px] flex justify-center">
+                  <button
+                    onClick={() => toggleCheck(member.id, 'worship')}
+                    className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${
+                      worshipChecked
+                        ? 'bg-primary-light text-primary'
+                        : 'bg-transparent text-transparent'
+                    }`}
+                    style={!worshipChecked ? { border: '1.5px solid #CCCCCC' } : {}}
+                  >
+                    ✓
+                  </button>
+                </div>
+                <div className="w-[52px] flex justify-center">
+                  <button
+                    onClick={() => toggleCheck(member.id, 'fam')}
+                    className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${
+                      famChecked
+                        ? 'bg-warning-light text-warning'
+                        : 'bg-transparent text-transparent'
+                    }`}
+                    style={!famChecked ? { border: '1.5px solid #CCCCCC' } : {}}
+                  >
+                    ✓
+                  </button>
                 </div>
               </div>
-              {/* 예배 체크 */}
-              <div className="w-[52px] flex justify-center">
-                <button
-                  onClick={() => toggleCheck(member.id, 'worship')}
-                  className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${
-                    worshipChecked
-                      ? 'bg-primary-light text-primary'
-                      : 'bg-transparent text-transparent'
-                  }`}
-                  style={!worshipChecked ? { border: '1.5px solid #CCCCCC' } : {}}
-                >
-                  ✓
-                </button>
-              </div>
-              {/* 팸모임 체크 */}
-              <div className="w-[52px] flex justify-center">
-                <button
-                  onClick={() => toggleCheck(member.id, 'fam')}
-                  className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${
-                    famChecked
-                      ? 'bg-warning-light text-warning'
-                      : 'bg-transparent text-transparent'
-                  }`}
-                  style={!famChecked ? { border: '1.5px solid #CCCCCC' } : {}}
-                >
-                  ✓
-                </button>
-              </div>
-            </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
 
-      {/* 범례 */}
       <div className="flex gap-3 justify-center py-3 border-t border-gray-300">
         <div className="flex items-center gap-1">
           <div className="w-2.5 h-2.5 rounded-full bg-primary-light" />
@@ -198,10 +430,20 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {/* 저장 버튼 */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
-        <button className="w-full py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors border-none cursor-pointer">
-          출석 저장하기
+        {saveError && <p className="text-xs text-danger mb-2">{saveError}</p>}
+        <button
+          onClick={handleSave}
+          disabled={isLoading || isSaving || famMembers.length === 0}
+          className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${
+            saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'
+          } ${
+            isLoading || isSaving || famMembers.length === 0
+              ? 'cursor-not-allowed opacity-60'
+              : 'cursor-pointer'
+          }`}
+        >
+          {isSaving ? '저장 중...' : saved ? '✓ 저장되었습니다' : '출석 저장하기'}
         </button>
       </div>
     </div>

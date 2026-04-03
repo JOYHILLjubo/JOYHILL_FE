@@ -1,3 +1,4 @@
+import HomePageConnected from './HomePageConnected'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSermon } from '../context/SermonContext'
@@ -10,7 +11,7 @@ function getYoutubeVideoId(url) {
   return matchWatch?.[1] || matchShort?.[1] || null
 }
 
-export default function HomePage() {
+function LegacyHomePage() {
   const navigate = useNavigate()
   const { sermon } = useSermon()
 
@@ -128,3 +129,5 @@ export default function HomePage() {
     </div>
   )
 }
+
+export default HomePageConnected

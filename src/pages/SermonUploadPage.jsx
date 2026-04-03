@@ -1,3 +1,4 @@
+import SermonUploadPageConnected from './SermonUploadPageConnected'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -17,7 +18,7 @@ function getYoutubeThumbnail(url) {
   return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null
 }
 
-export default function SermonUploadPage() {
+function LegacySermonUploadPage() {
   const navigate = useNavigate()
   const { isPastorOrAbove, isAdmin } = useAuth()
   const { sermon, setSermon } = useSermon()
@@ -178,3 +179,5 @@ export default function SermonUploadPage() {
     </div>
   )
 }
+
+export default SermonUploadPageConnected

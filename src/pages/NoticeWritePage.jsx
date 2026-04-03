@@ -1,3 +1,4 @@
+import NoticeWritePageConnected from './NoticeWritePageConnected'
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -19,7 +20,7 @@ function formatNoticeDate(date = new Date()) {
   return `${year}.${month}.${day}`
 }
 
-export default function NoticeWritePage() {
+function LegacyNoticeWritePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { canWriteNotice, user } = useAuth()
@@ -184,3 +185,5 @@ export default function NoticeWritePage() {
     </div>
   )
 }
+
+export default NoticeWritePageConnected

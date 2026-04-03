@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useOrg } from '../context/OrgContext'
+import AccountManagePageConnected from './AccountManagePageConnected'
 
 const ROLE_LABELS = {
   admin: '관리자',
@@ -10,6 +11,7 @@ const ROLE_LABELS = {
   leader: '리더',
   member: '청년',
 }
+
 // 마을장 포함
 const ROLE_OPTIONS = ['member', 'leader', 'village_leader', 'pastor', 'admin']
 const ROLE_CHANGE_NOTES = {
@@ -232,7 +234,7 @@ function UserEditView({ initial, isNew, onSave, onBack, onDelete, onRoleChange }
 }
 
 // ─── 메인 ───
-export default function AccountManagePage() {
+function LegacyAccountManagePage() {
   const navigate = useNavigate()
   const { users, addUser, updateUser, deleteUser, changeUserRole } = useOrg()
 
@@ -350,3 +352,5 @@ export default function AccountManagePage() {
     </div>
   )
 }
+
+export default AccountManagePageConnected

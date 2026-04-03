@@ -1,3 +1,4 @@
+import PrayerPageConnected from './PrayerPageConnected'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
@@ -63,7 +64,7 @@ function getColor(id) {
   return avatarColors[id % avatarColors.length]
 }
 
-export default function PrayerPage() {
+function LegacyPrayerPage() {
   const navigate = useNavigate()
   const weeks = getWeeks()
   const [selectedWeek, setSelectedWeek] = useState(getThisWeek())
@@ -196,3 +197,5 @@ export default function PrayerPage() {
     </div>
   )
 }
+
+export default PrayerPageConnected

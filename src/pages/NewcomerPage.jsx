@@ -1,3 +1,4 @@
+import NewcomerPageConnected from './NewcomerPageConnected'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -23,7 +24,7 @@ const initialNewcomers = [
   { id: 2, name: '박새벽', phone: '010-9876-5432', birth: '2000-11-30', registeredAt: '2025-03-09', note: '', fam: '사랑팸' },
 ]
 
-export default function NewcomerPage() {
+function LegacyNewcomerPage() {
   const navigate = useNavigate()
   const { canManageNewcomer } = useAuth()
 
@@ -164,3 +165,5 @@ export default function NewcomerPage() {
     </div>
   )
 }
+
+export default NewcomerPageConnected

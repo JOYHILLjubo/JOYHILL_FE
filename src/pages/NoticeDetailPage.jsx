@@ -1,3 +1,4 @@
+import NoticeDetailPageConnected from './NoticeDetailPageConnected'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { notices } from './NoticePage'
@@ -10,7 +11,7 @@ const tagColors = {
   신청: { bg: 'bg-danger-light', text: 'text-danger' },
 }
 
-export default function NoticeDetailPage() {
+function LegacyNoticeDetailPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { id } = useParams()
@@ -112,3 +113,5 @@ export default function NoticeDetailPage() {
     </div>
   )
 }
+
+export default NoticeDetailPageConnected

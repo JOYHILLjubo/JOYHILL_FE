@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 // 더미 아이디 중복 확인 (실제는 API)
 const EXISTING_IDS = ['joy_admin', 'kim_leader', 'test123']
 
-export default function SignupAccountPage() {
+function LegacySignupAccountPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { setUser } = useAuth()
@@ -161,3 +161,5 @@ export default function SignupAccountPage() {
     </div>
   )
 }
+
+export default LegacySignupAccountPage

@@ -1,7 +1,8 @@
+import PrayerWritePageConnected from './PrayerWritePageConnected'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export default function PrayerWritePage() {
+function LegacyPrayerWritePage() {
   const navigate = useNavigate()
   const [content, setContent] = useState('')
 
@@ -76,3 +77,5 @@ export default function PrayerWritePage() {
     </div>
   )
 }
+
+export default PrayerWritePageConnected

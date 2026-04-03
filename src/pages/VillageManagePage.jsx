@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useOrg } from '../context/OrgContext'
 import BottomNav from '../components/BottomNav'
 import MemberEditView, { getAvatarColor } from '../components/MemberEditView'
+import VillageManagePageConnected from './VillageManagePageConnected'
 
 const ALL_TEAMS = ['찬양팀', '예배팀', '함기팀', '함성팀', '새가족팀', '미디어사역팀', 'LAB팀']
 const TEAM_INTROS = {
@@ -246,7 +247,7 @@ function TeamDetailView({ team, onBack }) {
 }
 
 // ─── 메인 ───
-export default function VillageManagePage() {
+function LegacyVillageManagePage() {
   const navigate = useNavigate()
   const { user, isPastorOrAbove } = useAuth()
   const { villages, villageLeaders, famLeaders, famMembers, moveFam, deleteFam, deleteVillage } = useOrg()
@@ -466,3 +467,5 @@ export default function VillageManagePage() {
     </div>
   )
 }
+
+export default VillageManagePageConnected

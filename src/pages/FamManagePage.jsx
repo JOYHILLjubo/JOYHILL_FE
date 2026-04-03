@@ -1,3 +1,4 @@
+import FamManagePageConnected from './FamManagePageConnected'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -5,7 +6,9 @@ import { useOrg } from '../context/OrgContext'
 import BottomNav from '../components/BottomNav'
 import MemberEditView, { getAvatarColor, FAM_ROLE_LABELS } from '../components/MemberEditView'
 
-export default function FamManagePage() {
+export default FamManagePageConnected
+
+function LegacyFamManagePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { villages, famMembers, famLeaders, updateFamMembers } = useOrg()

@@ -1,3 +1,4 @@
+import NoticePageConnected from './NoticePageConnected'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -73,7 +74,7 @@ const tagColors = {
   신청: { bg: 'bg-danger-light', text: 'text-danger' },
 }
 
-export default function NoticePage() {
+function LegacyNoticePage() {
   const navigate = useNavigate()
   const { canWriteNotice } = useAuth()
   const [filter, setFilter] = useState('전체')
@@ -163,3 +164,5 @@ export default function NoticePage() {
     </div>
   )
 }
+
+export default NoticePageConnected

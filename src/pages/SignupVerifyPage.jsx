@@ -23,7 +23,7 @@ const MEMBER_DB = [
   { id: 'm005', name: '정교역자', village: '2마을', fam: '소망팸', birth: '1985-05-20', role: '교역자·부장', teams: [], teamLeader: [] },
 ]
 
-export default function SignupVerifyPage() {
+function LegacySignupVerifyPage() {
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
@@ -261,3 +261,5 @@ export default function SignupVerifyPage() {
     </div>
   )
 }
+
+export default LegacySignupVerifyPage

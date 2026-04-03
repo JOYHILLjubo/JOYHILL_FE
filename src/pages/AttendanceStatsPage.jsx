@@ -1,7 +1,10 @@
+import AttendanceStatsPageConnected from './AttendanceStatsPageConnected'
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BottomNav from '../components/BottomNav'
+
+export default AttendanceStatsPageConnected
 
 // ─── 더미 데이터 ───
 const ALL_VILLAGES = {
@@ -214,7 +217,7 @@ function PeriodSelect({ value, onChange, options }) {
 }
 
 // ─── 메인 ───
-export default function AttendanceStatsPage() {
+function LegacyAttendanceStatsPage() {
   const navigate = useNavigate()
   const { user, isVillageLeaderOrAbove, isPastorOrAbove } = useAuth()
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BottomNav from '../components/BottomNav'
+import TeamManagePageConnected from './TeamManagePageConnected'
 
 const avatarColors = [
   { bg: 'bg-success-light', text: 'text-success' },
@@ -28,7 +29,7 @@ const DUMMY_TEAM_MEMBERS = {
   ],
 }
 
-export default function TeamManagePage() {
+function LegacyTeamManagePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, canManageTeam } = useAuth()
@@ -206,3 +207,5 @@ export default function TeamManagePage() {
     </div>
   )
 }
+
+export default TeamManagePageConnected

@@ -13,13 +13,17 @@ const ROLE_LABELS = {
 export default function MyPage() {
   const navigate = useNavigate()
   const {
-    user, cycleRole,
+    user, cycleRole, logout,
     isVillageLeaderOrAbove, isPastorOrAbove, isAdmin,
     isTeamLeader, isNewFamilyTeamLeader,
   } = useAuth()
 
   const isLeader = user.role === 'leader'
   const isVillageLeader = user.role === 'village_leader'
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <div className="pb-20">
@@ -56,7 +60,7 @@ export default function MyPage() {
           <MenuItem label="비밀번호 변경" onPress={() => navigate('/my/edit')} />
           <MenuItem label="알림 설정" />
           <div className="px-4 py-3.5">
-            <span className="text-sm text-danger cursor-pointer" onClick={() => navigate('/login')}>로그아웃</span>
+            <span className="text-sm text-danger cursor-pointer" onClick={handleLogout}>로그아웃</span>
           </div>
         </div>
       </div>
