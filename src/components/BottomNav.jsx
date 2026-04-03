@@ -15,13 +15,18 @@ export default function BottomNav() {
   const location = useLocation()
   const { user } = useAuth()
 
-  // 출석 탭은 리더(팸 담당)만 표시
-  // 마을장 이상은 출석 탭 없음 (통계만 MY에서 확인)
   const isLeader = user.role === 'leader'
+  const isAdmin = user.role === 'admin'
 
-  const tabs = isLeader
-    ? [baseTabs[0], baseTabs[1], leaderTab, baseTabs[2], baseTabs[3]]
+  // 관리자: 기도 탭 제거
+  const filteredBase = isAdmin
+    ? baseTabs.filter((tab) => tab.path !== '/prayer')
     : baseTabs
+
+  // 리더: 출석 탭 추가
+  const tabs = isLeader
+    ? [filteredBase[0], filteredBase[1], leaderTab, filteredBase[2], filteredBase[3]]
+    : filteredBase
 
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-gray-300 flex justify-around py-2 pb-3 z-50">
