@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { SermonProvider } from './context/SermonContext'
-import { OrgProvider } from './context/OrgContext'
 import App from './App'
 import './index.css'
 
@@ -12,9 +11,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <SermonProvider>
-          <OrgProvider>
-            <App />
-          </OrgProvider>
+          <App />
         </SermonProvider>
       </AuthProvider>
     </BrowserRouter>

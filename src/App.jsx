@@ -1,26 +1,24 @@
 import { Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
-import SignupVerifyPage from './pages/SignupVerifyPage'
-import SignupAccountPage from './pages/SignupAccountPage'
-import HomePage from './pages/HomePage'
-import NoticePage from './pages/NoticePage'
-import NoticeWritePage from './pages/NoticeWritePage'
-import NoticeDetailPage from './pages/NoticeDetailPage'
+import HomePageConnected from './pages/HomePageConnected'
+import NoticePageConnected from './pages/NoticePageConnected'
+import NoticeWritePageConnected from './pages/NoticeWritePageConnected'
+import NoticeDetailPageConnected from './pages/NoticeDetailPageConnected'
 import AttendancePage from './pages/AttendancePage'
 import AttendanceHistoryPage from './pages/AttendanceHistoryPage'
-import AttendanceStatsPage from './pages/AttendanceStatsPage'
-import PrayerPage from './pages/PrayerPage'
-import PrayerWritePage from './pages/PrayerWritePage'
+import AttendanceStatsPageConnected from './pages/AttendanceStatsPageConnected'
+import PrayerPageConnected from './pages/PrayerPageConnected'
+import PrayerWritePageConnected from './pages/PrayerWritePageConnected'
 import CommonPrayerWritePage from './pages/CommonPrayerWritePage'
 import MyPage from './pages/MyPage'
 import MyEditPage from './pages/MyEditPage'
-import NewcomerPage from './pages/NewcomerPage'
-import TeamManagePage from './pages/TeamManagePage'
-import FamManagePage from './pages/FamManagePage'
-import VillageManagePage from './pages/VillageManagePage'
-import SermonUploadPage from './pages/SermonUploadPage'
-import AccountManagePage from './pages/AccountManagePage'
+import NewcomerPageConnected from './pages/NewcomerPageConnected'
+import TeamManagePageConnected from './pages/TeamManagePageConnected'
+import FamManagePageConnected from './pages/FamManagePageConnected'
+import VillageManagePageConnected from './pages/VillageManagePageConnected'
+import SermonUploadPageConnected from './pages/SermonUploadPageConnected'
+import AccountManagePageConnected from './pages/AccountManagePageConnected'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useAuth()
@@ -56,29 +54,27 @@ export default function App() {
 
         <Route element={<PublicOnlyRoute />}>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup/verify" element={<SignupVerifyPage />} />
-          <Route path="/signup/account" element={<SignupAccountPage />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/notice" element={<NoticePage />} />
-          <Route path="/notice/write" element={<NoticeWritePage />} />
-          <Route path="/notice/:id" element={<NoticeDetailPage />} />
+          <Route path="/home" element={<HomePageConnected />} />
+          <Route path="/notice" element={<NoticePageConnected />} />
+          <Route path="/notice/write" element={<NoticeWritePageConnected />} />
+          <Route path="/notice/:id" element={<NoticeDetailPageConnected />} />
           <Route path="/attendance" element={<AttendancePage />} />
           <Route path="/attendance/history" element={<AttendanceHistoryPage />} />
-          <Route path="/attendance/stats" element={<AttendanceStatsPage />} />
-          <Route path="/prayer" element={<PrayerPage />} />
-          <Route path="/prayer/write" element={<PrayerWritePage />} />
+          <Route path="/attendance/stats" element={<AttendanceStatsPageConnected />} />
+          <Route path="/prayer" element={<PrayerPageConnected />} />
+          <Route path="/prayer/write" element={<PrayerWritePageConnected />} />
           <Route path="/prayer/common/write" element={<CommonPrayerWritePage />} />
           <Route path="/my" element={<MyPage />} />
           <Route path="/my/edit" element={<MyEditPage />} />
-          <Route path="/newcomer" element={<NewcomerPage />} />
-          <Route path="/team/manage" element={<TeamManagePage />} />
-          <Route path="/fam/manage" element={<FamManagePage />} />
-          <Route path="/village/manage" element={<VillageManagePage />} />
-          <Route path="/sermon/upload" element={<SermonUploadPage />} />
-          <Route path="/account/manage" element={<AccountManagePage />} />
+          <Route path="/newcomer" element={<NewcomerPageConnected />} />
+          <Route path="/team/manage" element={<TeamManagePageConnected />} />
+          <Route path="/fam/manage" element={<FamManagePageConnected />} />
+          <Route path="/village/manage" element={<VillageManagePageConnected />} />
+          <Route path="/sermon/upload" element={<SermonUploadPageConnected />} />
+          <Route path="/account/manage" element={<AccountManagePageConnected />} />
         </Route>
 
         <Route

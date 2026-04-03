@@ -13,7 +13,7 @@ const ROLE_LABELS = {
 export default function MyPage() {
   const navigate = useNavigate()
   const {
-    user, cycleRole, logout,
+    user, logout,
     isVillageLeaderOrAbove, isPastorOrAbove, isAdmin,
     isTeamLeader, isNewFamilyTeamLeader,
   } = useAuth()
@@ -46,12 +46,10 @@ export default function MyPage() {
               )}
             </p>
           </div>
-          <button onClick={cycleRole}
-            className="text-[10px] text-primary bg-primary-light px-2 py-1 rounded-full border-none cursor-pointer shrink-0">
+          <span className="text-[11px] text-primary bg-primary-light px-2 py-1 rounded-full shrink-0">
             {ROLE_LABELS[user.role]}
-          </button>
+          </span>
         </div>
-        <p className="text-[10px] text-gray-500 mt-1 text-center">* 위 역할 뱃지를 탭하면 역할 전환 (개발용)</p>
       </div>
 
       {/* 기본 메뉴 */}
@@ -101,9 +99,7 @@ export default function MyPage() {
             <SectionHeader label={`${user.village} 관리`} color="success" />
             <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
             <MenuItem label="내 마을 관리" onPress={() => navigate('/village/manage')} />
-            <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
-            {/* <MenuItem label="공지사항 관리" /> */}
-            <MenuItem label="전체 통계 리포트" last />
+            <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} last />
           </div>
         </div>
       )}
@@ -116,9 +112,7 @@ export default function MyPage() {
             <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
             <MenuItem label="청년부 전체 관리" onPress={() => navigate('/village/manage')} />
             <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
-            <MenuItem label="설교 업로드" onPress={() => navigate('/sermon/upload')} />
-            {/* <MenuItem label="공지사항 관리" /> */}
-            <MenuItem label="전체 통계 리포트" last />
+            <MenuItem label="설교 업로드" onPress={() => navigate('/sermon/upload')} last />
           </div>
         </div>
       )}
@@ -132,9 +126,7 @@ export default function MyPage() {
               <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
               <MenuItem label="청년부 전체 관리" onPress={() => navigate('/village/manage')} />
               <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
-              <MenuItem label="설교 업로드" onPress={() => navigate('/sermon/upload')} />
-              {/* <MenuItem label="공지사항 관리" /> */}
-              <MenuItem label="전체 통계 리포트" last />
+              <MenuItem label="설교 업로드" onPress={() => navigate('/sermon/upload')} last />
             </div>
           </div>
           <div className="px-5 mb-3">

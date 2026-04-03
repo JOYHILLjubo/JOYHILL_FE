@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { requestLogin } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
@@ -112,14 +112,6 @@ export default function LoginPage() {
       <p className="text-center text-[12px] text-gray-400 mt-4">
         초기 비밀번호는 생년월일 6자리입니다.
       </p>
-
-      <button
-        type="button"
-        onClick={() => navigate('/signup/verify')}
-        className="mt-4 text-sm text-primary bg-transparent border-none cursor-pointer"
-      >
-        처음 사용하시나요? 회원가입하기
-      </button>
     </div>
   )
 }
