@@ -93,11 +93,7 @@ async function requestTokenRefresh() {
 
 function RateChip({ rate, type }) {
   return (
-    <span style={{
-      fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 9,
-      background: type === 'worship' ? '#E8F0FE' : '#FEF7E0',
-      color: type === 'worship' ? '#4285F4' : '#F9AB00',
-    }}>
+    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 9, background: type === 'worship' ? '#E8F0FE' : '#FEF7E0', color: type === 'worship' ? '#4285F4' : '#F9AB00' }}>
       {Math.round(Number(rate) || 0)}%
     </span>
   )
@@ -118,10 +114,7 @@ function FamMoveSheet({ fam, currentVillage, villageNames, onClose, onSave, isSu
   return (
     <BottomSheet onClose={onClose}>
       <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
-        <div>
-          <p className="text-base font-medium">{fam} 이동</p>
-          <p className="text-xs text-gray-500">현재: {currentVillage}</p>
-        </div>
+        <div><p className="text-base font-medium">{fam} 이동</p><p className="text-xs text-gray-500">현재: {currentVillage}</p></div>
         <button onClick={onClose} className="text-gray-500 text-lg bg-transparent border-none cursor-pointer">✕</button>
       </div>
       <div className="px-5 flex-1 overflow-y-auto pb-3">
@@ -132,8 +125,7 @@ function FamMoveSheet({ fam, currentVillage, villageNames, onClose, onSave, isSu
         </select>
       </div>
       <div className="px-5 py-4 border-t border-gray-300 shrink-0">
-        <button onClick={() => { if (targetVillage === currentVillage) { onClose(); return } onSave(targetVillage) }}
-          disabled={isSubmitting}
+        <button onClick={() => { if (targetVillage === currentVillage) { onClose(); return } onSave(targetVillage) }} disabled={isSubmitting}
           className="w-full py-3 bg-primary text-white rounded-lg text-sm font-medium border-none cursor-pointer disabled:opacity-60">
           {isSubmitting ? '수정 중...' : '수정하기'}
         </button>
@@ -156,7 +148,6 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
 
   const handleSave = async () => {
     if (!form.name.trim()) { setError('이름을 입력해주세요.'); return }
-    if (!form.fam) { setError('소속 팸을 선택해주세요.'); return }
     setIsSubmitting(true); setError('')
     try { await onSave({ ...form, name: form.name.trim(), phone: form.phone.trim(), note: form.note.trim() }) }
     catch (err) { setError(err instanceof Error ? err.message : '저장에 실패했습니다.') }
@@ -207,8 +198,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
           <p className="text-xs text-gray-500 mb-1.5">역할</p>
           <div className="flex gap-2 flex-wrap">
             {FAM_ROLES.map((role) => (
-              <button key={role} type="button"
-                onClick={() => canChangeRole && setForm((p) => ({ ...p, role }))}
+              <button key={role} type="button" onClick={() => canChangeRole && setForm((p) => ({ ...p, role }))}
                 disabled={isSubmitting || (!canChangeRole && !isNew)}
                 className={`text-xs px-3 py-1.5 rounded-full border transition-all ${form.role === role ? 'bg-primary-light text-primary border-primary' : 'bg-white text-gray-500 border-gray-300'} ${isSubmitting || (!canChangeRole && !isNew) ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                 {FAM_ROLE_LABELS[role]}
@@ -244,10 +234,16 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, callA
   const [pageError, setPageError] = useState('')
   const [editTarget, setEditTarget] = useState(null)
 
+  const currentYear = new Date().getFullYear()
+
   const loadMembers = async () => {
     setIsLoading(true); setPageError('')
     try {
-      const data = await callAuthedApi(`/api/fams/${encodeURIComponent(fam)}/members?period=1month`, '팸원 정보를 불러오지 못했습니다.')
+      // year 파라미터: 올해 1월 첫째주~오늘 기준 출석률
+      const data = await callAuthedApi(
+        `/api/fams/${encodeURIComponent(fam)}/members?year=${currentYear}`,
+        '팸원 정보를 불러오지 못했습니다.'
+      )
       setMembers(sortMembers((Array.isArray(data) ? data : []).map((item) => mapMember(item, fam))))
     } catch (err) {
       setPageError(err instanceof Error ? err.message : '팸원 정보를 불러오지 못했습니다.')
@@ -316,7 +312,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, callA
 
       {!isLoading && members.length > 0 && (
         <div className="px-5 py-3 bg-gray-100/50 border-b border-gray-300">
-          <p className="text-xs text-gray-500 mb-2">팸 평균 출석률</p>
+          <p className="text-xs text-gray-500 mb-2">팸 평균 출석률 ({currentYear}년)</p>
           <div className="flex gap-3">
             <div className="flex items-center gap-1.5"><span className="text-[11px] text-primary">예배</span><span className="text-sm font-bold text-primary">{avgWorship}%</span></div>
             <span className="text-gray-300">|</span>
@@ -379,19 +375,15 @@ export default function VillageManagePageConnected() {
   const [reloadKey, setReloadKey] = useState(0)
   const [isMovingFam, setIsMovingFam] = useState(false)
 
+  const currentYear = new Date().getFullYear()
   const accessibleVillageNames = useMemo(() => Object.keys(villages), [villages])
   const title = isPastorOrAbove ? '청년부 전체 관리' : `${user?.village || '마을'} 관리`
 
-  // 전체 재적 인원 수 계산
-  const totalHeadcount = useMemo(() => {
-    return Object.values(famMembersMap).reduce((sum, members) => sum + members.length, 0)
-  }, [famMembersMap])
-
-  // 마을별 재적 인원 수
+  const totalHeadcount = useMemo(() => Object.values(famMembersMap).reduce((sum, members) => sum + members.length, 0), [famMembersMap])
   const villageHeadcount = useMemo(() => {
     const result = {}
-    Object.entries(villages).forEach(([villageName, famNames]) => {
-      result[villageName] = famNames.reduce((sum, famName) => sum + (famMembersMap[famName]?.length ?? 0), 0)
+    Object.entries(villages).forEach(([vn, famNames]) => {
+      result[vn] = famNames.reduce((sum, fn) => sum + (famMembersMap[fn]?.length ?? 0), 0)
     })
     return result
   }, [villages, famMembersMap])
@@ -435,7 +427,6 @@ export default function VillageManagePageConnected() {
         const visibleFams = allFams.filter((f) => visibleVillageSet.has(f.villageName))
 
         const nextVillages = {}, nextVillageLeaders = {}, nextFamInfoMap = {}
-
         visibleVillages.forEach((v) => { nextVillages[v.name] = []; nextVillageLeaders[v.name] = v.leaderName })
         visibleFams.forEach((f) => {
           if (!nextVillages[f.villageName]) nextVillages[f.villageName] = []
@@ -444,9 +435,13 @@ export default function VillageManagePageConnected() {
         })
         Object.keys(nextVillages).forEach((vn) => { nextVillages[vn] = sortNames(nextVillages[vn]) })
 
+        // 팸원 목록: year 기준 출석률
         const memberEntries = await Promise.all(
           visibleFams.map(async (fam) => {
-            const data = await callAuthedApi(`/api/fams/${encodeURIComponent(fam.name)}/members?period=1month`, `${fam.name} 팸원 정보를 불러오지 못했습니다.`)
+            const data = await callAuthedApi(
+              `/api/fams/${encodeURIComponent(fam.name)}/members?year=${currentYear}`,
+              `${fam.name} 팸원 정보를 불러오지 못했습니다.`
+            )
             return [fam.name, sortMembers((Array.isArray(data) ? data : []).map((item) => mapMember(item, fam.name)))]
           })
         )
@@ -560,7 +555,6 @@ export default function VillageManagePageConnected() {
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <div className="flex-1">
           <p className="text-base font-medium">{title}</p>
-          {/* 전체 재적 인원 수 */}
           {!isLoadingVillageData && totalHeadcount > 0 && (
             <p className="text-xs text-gray-500 mt-0.5">청년부 전체 재적 <span className="font-medium text-primary">{totalHeadcount}명</span></p>
           )}
@@ -650,9 +644,7 @@ export default function VillageManagePageConnected() {
                           <span className="text-sm font-medium text-success">{villageName}</span>
                           {villageLeaders[villageName] && <span className="text-[11px] text-success ml-2 opacity-70">마을장 {villageLeaders[villageName]}</span>}
                         </div>
-                        <span className="text-xs text-success shrink-0">
-                          {famNames.length}개 팸 · 재적 {vCount}명 {expandedVillage === villageName ? '▲' : '▼'}
-                        </span>
+                        <span className="text-xs text-success shrink-0">{famNames.length}개 팸 · 재적 {vCount}명 {expandedVillage === villageName ? '▲' : '▼'}</span>
                       </button>
                       {isPastorOrAbove && (
                         <button onClick={() => void handleDeleteVillage(villageName)} className="text-xs text-danger bg-danger-light px-2 py-1.5 rounded-lg border-none cursor-pointer shrink-0">삭제</button>

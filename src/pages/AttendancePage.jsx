@@ -60,7 +60,6 @@ function mapMembers(items) {
 function buildAttendanceMap(records) {
   const next = {}
   records.forEach((record) => {
-    // 백엔드가 userId와 famMemberId 둘 다 내려줌 (호환성)
     const id = record.userId ?? record.famMemberId
     if (!id) return
     next[id] = {
@@ -78,11 +77,8 @@ async function requestApi(path, { method = 'GET', headers = {}, body } = {}) {
     requestOptions.headers['Content-Type'] = 'application/json'
   }
   let response
-  try {
-    response = await fetch(buildApiUrl(path), requestOptions)
-  } catch {
-    throw new Error('백엔드 서버에 연결할 수 없습니다.')
-  }
+  try { response = await fetch(buildApiUrl(path), requestOptions) }
+  catch { throw new Error('백엔드 서버에 연결할 수 없습니다.') }
   const payload = await response.json().catch(() => null)
   return { response, payload }
 }
@@ -115,6 +111,7 @@ export default function AttendancePage() {
   const [saveError, setSaveError] = useState('')
 
   const famName = user?.fam ?? ''
+  const currentYear = new Date().getFullYear()
 
   const handleExpiredSession = () => { logout(); navigate('/login', { replace: true }) }
 
@@ -140,30 +137,22 @@ export default function AttendancePage() {
   const loadData = async () => {
     if (!famName) {
       setPageError('소속 팸 정보가 없어 출석을 불러올 수 없습니다.')
-      setMembers([])
-      setAttendanceMap({})
-      setIsLoading(false)
-      return
+      setMembers([]); setAttendanceMap({}); setIsLoading(false); return
     }
-    setIsLoading(true)
-    setPageError('')
-    setSaveError('')
-    setSaved(false)
+    setIsLoading(true); setPageError(''); setSaveError(''); setSaved(false)
     try {
       const params = new URLSearchParams({ famName, date: sundayKey })
       const [membersData, attendanceData] = await Promise.all([
-        callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?period=1month`),
+        // 출석률 분모: 올해 첫째주~오늘 기준 (year 파라미터)
+        callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?year=${currentYear}`),
         callAuthedApi(`/api/attendance?${params.toString()}`),
       ])
       setMembers(Array.isArray(membersData) ? mapMembers(membersData) : [])
       setAttendanceMap(Array.isArray(attendanceData) ? buildAttendanceMap(attendanceData) : {})
     } catch (err) {
       setPageError(err instanceof Error ? err.message : '출석 정보를 불러오지 못했습니다.')
-      setMembers([])
-      setAttendanceMap({})
-    } finally {
-      setIsLoading(false)
-    }
+      setMembers([]); setAttendanceMap({})
+    } finally { setIsLoading(false) }
   }
 
   useEffect(() => { void loadData() }, [famName, sundayKey])
@@ -177,14 +166,10 @@ export default function AttendancePage() {
   const getChecked = (memberId, type) => attendanceMap[memberId]?.[type] ?? null
 
   const toggleCheck = (memberId, type) => {
-    setSaved(false)
-    setSaveError('')
+    setSaved(false); setSaveError('')
     setAttendanceMap((prev) => ({
       ...prev,
-      [memberId]: {
-        ...prev[memberId],
-        [type]: prev[memberId]?.[type] === true ? null : true,
-      },
+      [memberId]: { ...prev[memberId], [type]: prev[memberId]?.[type] === true ? null : true },
     }))
   }
 
@@ -194,9 +179,7 @@ export default function AttendancePage() {
   const handleSave = async () => {
     if (!famName) { setSaveError('소속 팸 정보가 없어 저장할 수 없습니다.'); return }
     if (members.length === 0) { setSaveError('저장할 팸원이 없습니다.'); return }
-    setIsSaving(true)
-    setSaveError('')
-    setSaved(false)
+    setIsSaving(true); setSaveError(''); setSaved(false)
     try {
       await callAuthedApi('/api/attendance', {
         method: 'POST',
@@ -204,7 +187,7 @@ export default function AttendancePage() {
           famName,
           date: sundayKey,
           records: members.map((member) => ({
-            userId: member.id,           // famMemberId → userId
+            userId: member.id,
             worshipPresent: getChecked(member.id, 'worship') === true,
             famPresent: getChecked(member.id, 'fam') === true,
           })),
@@ -213,9 +196,7 @@ export default function AttendancePage() {
       setSaved(true)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : '출석 저장에 실패했습니다.')
-    } finally {
-      setIsSaving(false)
-    }
+    } finally { setIsSaving(false) }
   }
 
   return (
@@ -264,27 +245,21 @@ export default function AttendancePage() {
             return (
               <div key={member.id} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
                 <div className="flex-1 flex items-center gap-2.5">
-                  <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text}`}>
-                    {member.name[0]}
-                  </div>
+                  <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text}`}>{member.name[0]}</div>
                   <div>
                     <p className="text-sm">{member.name}</p>
                     <p className="text-[11px] text-gray-500">{FAM_ROLE_LABELS[member.role] ?? member.role}</p>
                   </div>
                 </div>
                 <div className="w-[52px] flex justify-center">
-                  <button
-                    onClick={() => toggleCheck(member.id, 'worship')}
+                  <button onClick={() => toggleCheck(member.id, 'worship')}
                     className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${worshipChecked ? 'bg-primary-light text-primary' : 'bg-transparent text-transparent'}`}
-                    style={!worshipChecked ? { border: '1.5px solid #CCCCCC' } : {}}
-                  >✓</button>
+                    style={!worshipChecked ? { border: '1.5px solid #CCCCCC' } : {}}>✓</button>
                 </div>
                 <div className="w-[52px] flex justify-center">
-                  <button
-                    onClick={() => toggleCheck(member.id, 'fam')}
+                  <button onClick={() => toggleCheck(member.id, 'fam')}
                     className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${famChecked ? 'bg-warning-light text-warning' : 'bg-transparent text-transparent'}`}
-                    style={!famChecked ? { border: '1.5px solid #CCCCCC' } : {}}
-                  >✓</button>
+                    style={!famChecked ? { border: '1.5px solid #CCCCCC' } : {}}>✓</button>
                 </div>
               </div>
             )
@@ -300,11 +275,8 @@ export default function AttendancePage() {
 
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
         {saveError && <p className="text-xs text-danger mb-2">{saveError}</p>}
-        <button
-          onClick={handleSave}
-          disabled={isLoading || isSaving || members.length === 0}
-          className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'} ${isLoading || isSaving || members.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-        >
+        <button onClick={handleSave} disabled={isLoading || isSaving || members.length === 0}
+          className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'} ${isLoading || isSaving || members.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
           {isSaving ? '저장 중...' : saved ? '✓ 저장되었습니다' : '출석 저장하기'}
         </button>
       </div>

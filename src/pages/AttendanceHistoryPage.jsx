@@ -37,26 +37,27 @@ function normalizeDateKey(value) {
   return String(value ?? '').slice(0, 10)
 }
 
+// ─── 핵심: userId를 키로 사용 ───
 function buildAttendanceMap(records) {
   const next = {}
   records.forEach((record) => {
-    // 백엔드가 userId와 famMemberId 둘 다 내려줌 (호환성)
     const memberId = record.userId ?? record.famMemberId
     const dateKey = normalizeDateKey(record.date)
     if (!memberId || !dateKey) return
     next[memberId] = {
       ...next[memberId],
-      [dateKey]: {
-        worship: record.worshipPresent === true,
-        fam: record.famPresent === true,
-      },
+      [dateKey]: { worship: record.worshipPresent === true, fam: record.famPresent === true },
     }
   })
   return next
 }
 
 function mapFamMembers(items) {
-  return items.map((item) => ({ id: item.id, name: item.name ?? '', role: item.role ?? 'member' }))
+  return items.map((item) => ({
+    id: item.id,      // userId (users 테이블 PK)
+    name: item.name ?? '',
+    role: item.role ?? 'member',
+  }))
 }
 
 const btnStyle = (checked, type) => ({
@@ -149,7 +150,8 @@ export default function AttendanceHistoryPage() {
     try {
       const historyParams = new URLSearchParams({ famName, year: String(selectedYear), month: String(selectedMonth) })
       const [membersData, historyData] = await Promise.all([
-        callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?period=1month`),
+        // 멤버 목록: 출석률은 year 기준으로 계산
+        callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?year=${selectedYear}`),
         callAuthedApi(`/api/attendance/history?${historyParams.toString()}`),
       ])
       setFamMembers(Array.isArray(membersData) ? mapFamMembers(membersData) : [])
@@ -161,6 +163,7 @@ export default function AttendanceHistoryPage() {
   }
 
   useEffect(() => { void loadData() }, [famName, selectedYear, selectedMonth])
+
   useEffect(() => {
     if (!saved) return undefined
     const id = window.setTimeout(() => setSaved(false), 2000)
@@ -195,7 +198,7 @@ export default function AttendanceHistoryPage() {
               records: famMembers.map((member) => {
                 const record = getRecord(member.id, dateKey)
                 return {
-                  userId: member.id,        // famMemberId → userId
+                  userId: member.id,  // userId 기준으로 저장
                   worshipPresent: record.worship === true,
                   famPresent: record.fam === true,
                 }
@@ -221,11 +224,9 @@ export default function AttendanceHistoryPage() {
 
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-300 shrink-0">
         <p className="text-sm font-medium">{famName || '소속 팸 없음'}</p>
-        <select
-          value={`${selectedYear}-${selectedMonth}`}
+        <select value={`${selectedYear}-${selectedMonth}`}
           onChange={(e) => { const [y, m] = e.target.value.split('-').map(Number); setSelectedYear(y); setSelectedMonth(m) }}
-          className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none"
-        >
+          className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none">
           {monthOptions.map(({ year, month }) => (
             <option key={`${year}-${month}`} value={`${year}-${month}`}>{year}년 {month}월</option>
           ))}
@@ -322,11 +323,8 @@ export default function AttendanceHistoryPage() {
 
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
         {saveError && <p className="text-xs text-danger mb-2">{saveError}</p>}
-        <button
-          onClick={handleSave}
-          disabled={isLoading || isSaving || famMembers.length === 0}
-          className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'} ${isLoading || isSaving || famMembers.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-        >
+        <button onClick={handleSave} disabled={isLoading || isSaving || famMembers.length === 0}
+          className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'} ${isLoading || isSaving || famMembers.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
           {isSaving ? '저장 중...' : saved ? '✓ 저장되었습니다' : '출석 저장하기'}
         </button>
       </div>
