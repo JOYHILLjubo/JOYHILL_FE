@@ -26,7 +26,14 @@ function getSundaysOfMonth(year, month) {
   return sundays
 }
 
-function toKey(date) { return date.toISOString().slice(0, 10) }
+// ── 로컬 날짜 기준으로 키 생성 (toISOString은 UTC 변환으로 날짜가 밀림)
+function toKey(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function formatDate(date) { return `${date.getMonth() + 1}/${date.getDate()}` }
 
 function normalizeDateKey(value) {
@@ -37,7 +44,6 @@ function normalizeDateKey(value) {
   return String(value ?? '').slice(0, 10)
 }
 
-// ─── 핵심: userId를 키로 사용 ───
 function buildAttendanceMap(records) {
   const next = {}
   records.forEach((record) => {
@@ -54,7 +60,7 @@ function buildAttendanceMap(records) {
 
 function mapFamMembers(items) {
   return items.map((item) => ({
-    id: item.id,      // userId (users 테이블 PK)
+    id: item.id,
     name: item.name ?? '',
     role: item.role ?? 'member',
   }))
@@ -150,7 +156,6 @@ export default function AttendanceHistoryPage() {
     try {
       const historyParams = new URLSearchParams({ famName, year: String(selectedYear), month: String(selectedMonth) })
       const [membersData, historyData] = await Promise.all([
-        // 멤버 목록: 출석률은 year 기준으로 계산
         callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?year=${selectedYear}`),
         callAuthedApi(`/api/attendance/history?${historyParams.toString()}`),
       ])
@@ -198,7 +203,7 @@ export default function AttendanceHistoryPage() {
               records: famMembers.map((member) => {
                 const record = getRecord(member.id, dateKey)
                 return {
-                  userId: member.id,  // userId 기준으로 저장
+                  userId: member.id,
                   worshipPresent: record.worship === true,
                   famPresent: record.fam === true,
                 }
