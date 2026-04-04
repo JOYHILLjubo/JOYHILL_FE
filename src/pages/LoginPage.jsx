@@ -43,7 +43,12 @@ export default function LoginPage() {
         accessToken: data.accessToken,
       })
 
-      navigate(redirectTo, { replace: true })
+      // 최초 로그인 (비밀번호 미변경) → 비밀번호 변경 페이지 강제 이동
+      if (!data.user?.passwordChanged) {
+        navigate('/my/edit', { replace: true })
+      } else {
+        navigate(redirectTo, { replace: true })
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)

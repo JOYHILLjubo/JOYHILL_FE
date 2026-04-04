@@ -20,22 +20,25 @@ import VillageManagePageConnected from './pages/VillageManagePageConnected'
 import SermonUploadPageConnected from './pages/SermonUploadPageConnected'
 import AccountManagePageConnected from './pages/AccountManagePageConnected'
 
-function ProtectedRoute() {
+// 비로그인 상태에서만 접근 가능
+function PublicOnlyRoute() {
   const { isAuthenticated } = useAuth()
+  if (isAuthenticated) return <Navigate to="/home" replace />
+  return <Outlet />
+}
+
+// 로그인 필요 + 비밀번호 최초 변경 강제
+function ProtectedRoute() {
+  const { isAuthenticated, user } = useAuth()
   const location = useLocation()
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 
-  return <Outlet />
-}
-
-function PublicOnlyRoute() {
-  const { isAuthenticated } = useAuth()
-
-  if (isAuthenticated) {
-    return <Navigate to="/home" replace />
+  // 최초 로그인: 비밀번호 변경 페이지 외 모든 접근 차단
+  if (!user?.passwordChanged && location.pathname !== '/my/edit') {
+    return <Navigate to="/my/edit" replace />
   }
 
   return <Outlet />
