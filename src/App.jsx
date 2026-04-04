@@ -20,14 +20,24 @@ import VillageManagePageConnected from './pages/VillageManagePageConnected'
 import SermonUploadPageConnected from './pages/SermonUploadPageConnected'
 import AccountManagePageConnected from './pages/AccountManagePageConnected'
 
-// 비로그인 상태에서만 접근 가능
+// 로그인 안 된 사람만 접근 가능
+// 로그인됐는데 비밀번호 미변경 → /my/edit 강제
+// 로그인됐고 비밀번호 변경 완료 → /home
 function PublicOnlyRoute() {
-  const { isAuthenticated } = useAuth()
-  if (isAuthenticated) return <Navigate to="/home" replace />
+  const { isAuthenticated, user } = useAuth()
+
+  if (isAuthenticated) {
+    if (!user?.passwordChanged) {
+      return <Navigate to="/my/edit" replace />
+    }
+    return <Navigate to="/home" replace />
+  }
+
   return <Outlet />
 }
 
-// 로그인 필요 + 비밀번호 최초 변경 강제
+// 로그인 필요
+// 로그인됐는데 비밀번호 미변경 → /my/edit 이외 페이지 접근 차단
 function ProtectedRoute() {
   const { isAuthenticated, user } = useAuth()
   const location = useLocation()
@@ -36,7 +46,7 @@ function ProtectedRoute() {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 
-  // 최초 로그인: 비밀번호 변경 페이지 외 모든 접근 차단
+  // 비밀번호 미변경 유저는 /my/edit만 허용
   if (!user?.passwordChanged && location.pathname !== '/my/edit') {
     return <Navigate to="/my/edit" replace />
   }
