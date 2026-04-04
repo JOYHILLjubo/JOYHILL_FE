@@ -48,8 +48,8 @@ export default function LoginPage() {
         <div className="w-16 h-16 rounded-full bg-primary-light mx-auto mb-3 flex items-center justify-center">
           <span className="text-2xl text-primary font-bold">J</span>
         </div>
-        <h1 className="text-xl font-medium">JOY 교회</h1>
-        <p className="text-[13px] text-gray-500 mt-1">교회 주보 · 출석 관리 · 기도제목</p>
+        <h1 className="text-xl font-medium">JOY HILL</h1>
+        <p className="text-[13px] text-gray-500 mt-1">기쁨의 동산교회 청년부</p>
       </div>
 
       <form onSubmit={handleLogin} className="space-y-3">
