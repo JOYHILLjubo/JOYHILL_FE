@@ -5,8 +5,6 @@ import BottomNav from '../components/BottomNav'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
-const PERIOD_LABELS = { '1month': '최근 1개월', '3month': '최근 3개월', '6month': '최근 6개월' }
-
 const avatarColors = [
   { bg: 'bg-success-light', text: 'text-success' },
   { bg: 'bg-primary-light', text: 'text-primary' },
@@ -18,7 +16,14 @@ function getColor(id) { return avatarColors[Math.abs(Number(id) || 0) % avatarCo
 function buildApiUrl(path) { return `${API_BASE_URL}${path}` }
 function toRate(value) { return Number.isFinite(Number(value)) ? Math.round(Number(value)) : 0 }
 
-// 이번 주 일요일 날짜 계산
+function getCurrentYear() { return new Date().getFullYear() }
+
+// 선택 가능한 연도 목록 (현재 연도 포함 최근 3년)
+function getYearOptions() {
+  const current = getCurrentYear()
+  return [current, current - 1, current - 2]
+}
+
 function getThisSundayKey() {
   const today = new Date()
   const sunday = new Date(today)
@@ -26,7 +31,6 @@ function getThisSundayKey() {
   return sunday.toISOString().slice(0, 10)
 }
 
-// 최근 N주 일요일 목록
 function getRecentSundays(n = 8) {
   const result = []
   const today = new Date()
@@ -37,7 +41,12 @@ function getRecentSundays(n = 8) {
     d.setDate(thisSunday.getDate() - i * 7)
     const key = d.toISOString().slice(0, 10)
     const [, month, day] = key.split('-')
-    result.push({ key, label: i === 0 ? `이번 주 (${parseInt(month)}/${parseInt(day)})` : i === 1 ? `저번 주 (${parseInt(month)}/${parseInt(day)})` : `${parseInt(month)}/${parseInt(day)}` })
+    result.push({
+      key,
+      label: i === 0 ? `이번 주 (${parseInt(month)}/${parseInt(day)})`
+           : i === 1 ? `저번 주 (${parseInt(month)}/${parseInt(day)})`
+           : `${parseInt(month)}/${parseInt(day)}`,
+    })
   }
   return result
 }
@@ -51,7 +60,6 @@ function mapMemberStats(items) {
   }))
 }
 
-// 출석 레코드 → userId 기준 맵
 function buildAttendanceMap(records) {
   const map = {}
   ;(records || []).forEach((r) => {
@@ -85,7 +93,8 @@ async function requestTokenRefresh() {
   return result.payload.data.accessToken
 }
 
-// 출석 O/X 뱃지
+// ── 공통 컴포넌트 ──
+
 function AttendBadge({ present, label }) {
   return (
     <span style={{
@@ -110,10 +119,12 @@ function RateBar({ rate, type }) {
   )
 }
 
-function AvgCard({ label, worship, fam }) {
+function AvgCard({ label, worship, fam, year }) {
   return (
     <div className="border border-gray-300 rounded-xl p-4 mb-4">
-      <p className="text-xs text-gray-500 font-medium mb-3">{label} 평균</p>
+      <p className="text-xs text-gray-500 font-medium mb-3">
+        {label} 평균 <span className="text-gray-400">({year}년)</span>
+      </p>
       <div className="flex gap-3">
         <div className="flex-1 bg-primary-light rounded-lg p-3 text-center">
           <p className="text-[11px] text-primary mb-1">예배 출석률</p>
@@ -128,7 +139,6 @@ function AvgCard({ label, worship, fam }) {
   )
 }
 
-// 팸원 목록 (누적 출석률 + 주차별 O/X)
 function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '표시할 팸원이 없습니다.' }) {
   if (isLoading) return <p className="text-sm text-gray-500 text-center mt-8">통계를 불러오는 중입니다.</p>
   if (members.length === 0) return <p className="text-sm text-gray-500 text-center mt-8">{emptyLabel}</p>
@@ -144,7 +154,6 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
               <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
               <div className="flex-1">
                 <p className="text-sm font-medium">{member.name}</p>
-                {/* 이번 주 출석 O/X */}
                 {weekRecord !== undefined && (
                   <div className="flex gap-1 mt-0.5">
                     <AttendBadge present={weekRecord.worship} label="예배" />
@@ -153,7 +162,6 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
                 )}
               </div>
             </div>
-            {/* 누적 출석률 */}
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-primary w-10 shrink-0">예배</span>
@@ -171,14 +179,23 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
   )
 }
 
-function PeriodSelect({ value, onChange }) {
+// 연도 드롭다운
+function YearSelect({ value, onChange }) {
+  const years = useMemo(() => getYearOptions(), [])
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none">
-      {Object.entries(PERIOD_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+    <select
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none"
+    >
+      {years.map((y) => (
+        <option key={y} value={y}>{y}년</option>
+      ))}
     </select>
   )
 }
 
+// 주차 드롭다운
 function WeekSelect({ value, onChange }) {
   const sundays = useMemo(() => getRecentSundays(8), [])
   return (
@@ -188,7 +205,7 @@ function WeekSelect({ value, onChange }) {
   )
 }
 
-// 주차별 현황 - 팸 하나의 인원 O/X
+// ── 주차별 팸 상세 ──
 function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
   const [members, setMembers] = useState([])
   const [attendMap, setAttendMap] = useState({})
@@ -201,8 +218,8 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
       setIsLoading(true); setError('')
       try {
         const [membersData, attendData] = await Promise.all([
-          callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?period=1month`, '팸원 조회 실패'),
-          callAuthedApi(`/api/attendance?famName=${encodeURIComponent(famName)}&date=${weekDate}`, '출석 조회 실패'),
+          callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members`),
+          callAuthedApi(`/api/attendance?famName=${encodeURIComponent(famName)}&date=${weekDate}`),
         ])
         if (cancelled) return
         setMembers(Array.isArray(membersData) ? membersData : [])
@@ -235,7 +252,6 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
         <p className="text-sm text-gray-500 text-center py-8">팸원이 없습니다.</p>
       ) : (
         <div className="border border-gray-300 rounded-xl overflow-hidden">
-          {/* 헤더 */}
           <div className="flex px-4 py-2 bg-gray-50 border-b border-gray-300">
             <div className="flex-1 text-xs text-gray-500">이름</div>
             <div className="w-16 text-center text-xs text-primary font-medium">예배</div>
@@ -249,12 +265,8 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
                   <p className="text-sm">{member.name}</p>
                   <p className="text-[11px] text-gray-500">{member.role === 'leader' ? '리더' : '팸원'}</p>
                 </div>
-                <div className="w-16 flex justify-center">
-                  <span style={{ fontSize: 18 }}>{record?.worship ? '✅' : '⬜'}</span>
-                </div>
-                <div className="w-16 flex justify-center">
-                  <span style={{ fontSize: 18 }}>{record?.fam ? '✅' : '⬜'}</span>
-                </div>
+                <div className="w-16 flex justify-center"><span style={{ fontSize: 18 }}>{record?.worship ? '✅' : '⬜'}</span></div>
+                <div className="w-16 flex justify-center"><span style={{ fontSize: 18 }}>{record?.fam ? '✅' : '⬜'}</span></div>
               </div>
             )
           })}
@@ -264,8 +276,8 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
   )
 }
 
-// 주차별 현황 탭 - 마을/팸 선택
-function WeeklyView({ villages, famStatsMap, callAuthedApi, isPastorOrAbove, summaryStats, weekDate, setWeekDate }) {
+// ── 주차별 현황 탭 ──
+function WeeklyView({ villages, famStatsMap, callAuthedApi, summaryStats, weekDate, setWeekDate, selectedYear }) {
   const [selectedFam, setSelectedFam] = useState(null)
   const [expandedVillage, setExpandedVillage] = useState(Object.keys(villages)[0] ?? null)
 
@@ -276,16 +288,15 @@ function WeeklyView({ villages, famStatsMap, callAuthedApi, isPastorOrAbove, sum
         <WeekSelect value={weekDate} onChange={setWeekDate} />
       </div>
 
-      {/* 전체 요약 */}
       {summaryStats && (
         <div className="border border-gray-300 rounded-xl p-3 mb-4 flex gap-3">
           <div className="flex-1 text-center">
-            <p className="text-[11px] text-gray-500">전체 예배 출석률</p>
+            <p className="text-[11px] text-gray-500">전체 예배 출석률 ({selectedYear}년)</p>
             <p className="text-lg font-bold text-primary">{toRate(summaryStats.worshipRate)}%</p>
           </div>
           <div className="w-px bg-gray-200" />
           <div className="flex-1 text-center">
-            <p className="text-[11px] text-gray-500">전체 팸모임 출석률</p>
+            <p className="text-[11px] text-gray-500">전체 팸모임 출석률 ({selectedYear}년)</p>
             <p className="text-lg font-bold text-warning">{toRate(summaryStats.famRate)}%</p>
           </div>
         </div>
@@ -293,59 +304,58 @@ function WeeklyView({ villages, famStatsMap, callAuthedApi, isPastorOrAbove, sum
 
       {selectedFam ? (
         <WeeklyFamView famName={selectedFam} weekDate={weekDate} callAuthedApi={callAuthedApi} onBack={() => setSelectedFam(null)} />
+      ) : Object.entries(villages).length === 0 ? (
+        <p className="text-sm text-gray-500 text-center mt-8">표시할 팸이 없습니다.</p>
       ) : (
-        Object.entries(villages).length === 0 ? (
-          <p className="text-sm text-gray-500 text-center mt-8">표시할 팸이 없습니다.</p>
-        ) : (
-          Object.entries(villages).map(([village, fams]) => (
-            <div key={village} className="mb-3">
-              <button
-                onClick={() => setExpandedVillage(expandedVillage === village ? null : village)}
-                className="w-full flex items-center justify-between py-2.5 px-3 bg-success-light rounded-xl border-none cursor-pointer mb-2">
-                <span className="text-sm font-medium text-success">{village}</span>
-                <span className="text-xs text-success">{fams.length}개 팸 {expandedVillage === village ? '▲' : '▼'}</span>
-              </button>
-              {expandedVillage === village && (
-                <div className="border border-gray-300 rounded-xl overflow-hidden">
-                  {fams.map((fam, index) => (
-                    <div key={fam} onClick={() => setSelectedFam(fam)}
-                      className={`flex items-center justify-between px-4 py-3.5 cursor-pointer hover:bg-gray-100 transition-colors ${index < fams.length - 1 ? 'border-b border-gray-300' : ''}`}>
-                      <p className="text-sm font-medium">{fam}</p>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-semibold text-primary bg-primary-light px-2 py-0.5 rounded-full">예배 {toRate(famStatsMap[fam]?.worshipRate)}%</span>
-                        <span className="text-[11px] font-semibold text-warning bg-warning-light px-2 py-0.5 rounded-full">팸 {toRate(famStatsMap[fam]?.famRate)}%</span>
-                        <span className="text-gray-500 text-xs">→</span>
-                      </div>
+        Object.entries(villages).map(([village, fams]) => (
+          <div key={village} className="mb-3">
+            <button onClick={() => setExpandedVillage(expandedVillage === village ? null : village)}
+              className="w-full flex items-center justify-between py-2.5 px-3 bg-success-light rounded-xl border-none cursor-pointer mb-2">
+              <span className="text-sm font-medium text-success">{village}</span>
+              <span className="text-xs text-success">{fams.length}개 팸 {expandedVillage === village ? '▲' : '▼'}</span>
+            </button>
+            {expandedVillage === village && (
+              <div className="border border-gray-300 rounded-xl overflow-hidden">
+                {fams.map((fam, index) => (
+                  <div key={fam} onClick={() => setSelectedFam(fam)}
+                    className={`flex items-center justify-between px-4 py-3.5 cursor-pointer hover:bg-gray-100 transition-colors ${index < fams.length - 1 ? 'border-b border-gray-300' : ''}`}>
+                    <p className="text-sm font-medium">{fam}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-semibold text-primary bg-primary-light px-2 py-0.5 rounded-full">예배 {toRate(famStatsMap[fam]?.worshipRate)}%</span>
+                      <span className="text-[11px] font-semibold text-warning bg-warning-light px-2 py-0.5 rounded-full">팸 {toRate(famStatsMap[fam]?.famRate)}%</span>
+                      <span className="text-gray-500 text-xs">→</span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))
-        )
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
       )}
     </div>
   )
 }
 
-function LeaderStatsView({ famName, period, setPeriod, stats, members, isLoading, weekAttendMap }) {
+// ── 누적 통계 - 리더 뷰 ──
+function LeaderStatsView({ famName, selectedYear, setSelectedYear, stats, members, isLoading, weekAttendMap }) {
   return (
     <div className="px-5">
       <div className="flex items-center justify-between py-3">
         <p className="text-sm font-medium">{famName || '소속 팸 없음'}</p>
-        <PeriodSelect value={period} onChange={setPeriod} />
+        <YearSelect value={selectedYear} onChange={setSelectedYear} />
       </div>
-      <AvgCard label="팸 전체" worship={stats?.worshipRate ?? 0} fam={stats?.famRate ?? 0} />
+      <AvgCard label="팸 전체" worship={stats?.worshipRate ?? 0} fam={stats?.famRate ?? 0} year={selectedYear} />
       <p className="text-xs text-gray-500 mb-2">팸원별 출석률 · 이번 주 출석</p>
       <MemberStatList members={members} isLoading={isLoading} weekAttendMap={weekAttendMap} />
     </div>
   )
 }
 
+// ── 누적 통계 - 마을장/교역자 뷰 ──
 function VillageStatsView({
   isPastorOrAbove, summaryLabel, summaryStats, villages, famStatsMap,
-  period, setPeriod, selectedFam, setSelectedFam, selectedFamMembers,
-  detailLoading, expandedVillage, setExpandedVillage, weekAttendMap,
+  selectedYear, setSelectedYear, selectedFam, setSelectedFam,
+  selectedFamMembers, detailLoading, expandedVillage, setExpandedVillage, weekAttendMap,
 }) {
   const selectedFamStats = selectedFam ? famStatsMap[selectedFam] : null
 
@@ -354,9 +364,9 @@ function VillageStatsView({
       <div className="px-5">
         <div className="flex items-center justify-between py-3">
           <button onClick={() => setSelectedFam(null)} className="flex items-center gap-1.5 text-sm text-primary bg-transparent border-none cursor-pointer">← {selectedFam}</button>
-          <PeriodSelect value={period} onChange={setPeriod} />
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
         </div>
-        <AvgCard label={selectedFam} worship={selectedFamStats?.worshipRate ?? 0} fam={selectedFamStats?.famRate ?? 0} />
+        <AvgCard label={selectedFam} worship={selectedFamStats?.worshipRate ?? 0} fam={selectedFamStats?.famRate ?? 0} year={selectedYear} />
         <p className="text-xs text-gray-500 mb-2">팸원별 출석률 · 이번 주 출석</p>
         <MemberStatList members={selectedFamMembers} isLoading={detailLoading} weekAttendMap={weekAttendMap} />
       </div>
@@ -367,9 +377,9 @@ function VillageStatsView({
     <div className="px-5">
       <div className="flex items-center justify-between py-3">
         <p className="text-sm font-medium">팸 선택</p>
-        <PeriodSelect value={period} onChange={setPeriod} />
+        <YearSelect value={selectedYear} onChange={setSelectedYear} />
       </div>
-      <AvgCard label={isPastorOrAbove ? '전체' : summaryLabel} worship={summaryStats?.worshipRate ?? 0} fam={summaryStats?.famRate ?? 0} />
+      <AvgCard label={isPastorOrAbove ? '전체' : summaryLabel} worship={summaryStats?.worshipRate ?? 0} fam={summaryStats?.famRate ?? 0} year={selectedYear} />
 
       {Object.entries(villages).length === 0 ? (
         <p className="text-sm text-gray-500 text-center mt-8">표시할 팸이 없습니다.</p>
@@ -406,13 +416,13 @@ function VillageStatsView({
   )
 }
 
+// ── 메인 페이지 ──
 export default function AttendanceStatsPageConnected() {
   const navigate = useNavigate()
   const { user, accessToken, setAccessToken, logout, isVillageLeaderOrAbove, isPastorOrAbove } = useAuth()
 
-  // 탭: 'cumulative'(누적통계) / 'weekly'(주차별현황)
   const [activeTab, setActiveTab] = useState('cumulative')
-  const [period, setPeriod] = useState('1month')
+  const [selectedYear, setSelectedYear] = useState(getCurrentYear)
   const [weekDate, setWeekDate] = useState(getThisSundayKey)
   const [pageError, setPageError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -425,7 +435,6 @@ export default function AttendanceStatsPageConnected() {
   const [selectedFam, setSelectedFam] = useState(null)
   const [selectedFamMembers, setSelectedFamMembers] = useState([])
   const [expandedVillage, setExpandedVillage] = useState(null)
-  // 이번 주 출석 맵 (팸 상세 진입 시 로드)
   const [weekAttendMap, setWeekAttendMap] = useState({})
 
   const handleExpiredSession = () => { logout(); navigate('/login', { replace: true }) }
@@ -447,30 +456,28 @@ export default function AttendanceStatsPageConnected() {
     }
   }
 
+  // 누적 통계 로드 (연도 변경 시 재조회)
   useEffect(() => {
     const load = async () => {
       setIsLoading(true); setPageError('')
       try {
         if (!isVillageLeaderOrAbove) {
           if (!user?.fam) { setPageError('소속 팸 정보가 없어 통계를 불러올 수 없습니다.'); return }
-          const [statsData, membersData] = await Promise.all([
-            callAuthedApi(`/api/attendance/stats?scope=fam&period=${period}`),
-            callAuthedApi(`/api/fams/${encodeURIComponent(user.fam)}/members?period=${period}`),
+          const [statsData, membersData, attendData] = await Promise.all([
+            callAuthedApi(`/api/attendance/stats?scope=fam&year=${selectedYear}`),
+            callAuthedApi(`/api/fams/${encodeURIComponent(user.fam)}/members?year=${selectedYear}`),
+            callAuthedApi(`/api/attendance?famName=${encodeURIComponent(user.fam)}&date=${getThisSundayKey()}`).catch(() => []),
           ])
           setLeaderStats(statsData)
           setLeaderMembers(Array.isArray(membersData) ? mapMemberStats(membersData) : [])
-          // 이번 주 출석 데이터
-          try {
-            const attendData = await callAuthedApi(`/api/attendance?famName=${encodeURIComponent(user.fam)}&date=${getThisSundayKey()}`)
-            setWeekAttendMap(buildAttendanceMap(attendData))
-          } catch { setWeekAttendMap({}) }
+          setWeekAttendMap(buildAttendanceMap(attendData))
           return
         }
 
         const [villagesData, famsData, summaryData] = await Promise.all([
           callAuthedApi('/api/villages'),
           callAuthedApi('/api/fams'),
-          callAuthedApi(`/api/attendance/stats?scope=${isPastorOrAbove ? 'all' : 'village'}&period=${period}`),
+          callAuthedApi(`/api/attendance/stats?scope=${isPastorOrAbove ? 'all' : 'village'}&year=${selectedYear}`),
         ])
 
         const accessibleVillageNames = isPastorOrAbove
@@ -490,7 +497,10 @@ export default function AttendanceStatsPageConnected() {
 
         const accessibleFams = Object.values(nextVillages).flat()
         const famStatsEntries = await Promise.all(
-          accessibleFams.map(async (famName) => [famName, await callAuthedApi(`/api/attendance/stats?scope=fam&famName=${encodeURIComponent(famName)}&period=${period}`)])
+          accessibleFams.map(async (famName) => [
+            famName,
+            await callAuthedApi(`/api/attendance/stats?scope=fam&famName=${encodeURIComponent(famName)}&year=${selectedYear}`),
+          ])
         )
 
         setSummaryStats(summaryData)
@@ -505,19 +515,18 @@ export default function AttendanceStatsPageConnected() {
       } finally { setIsLoading(false) }
     }
     void load()
-  }, [period, isVillageLeaderOrAbove, isPastorOrAbove, user?.fam, user?.village])
+  }, [selectedYear, isVillageLeaderOrAbove, isPastorOrAbove, user?.fam, user?.village])
 
-  // 팸 상세 진입 시 팸원 + 이번 주 출석 로드
+  // 팸 상세 진입 시 팸원 + 이번 주 출석
   useEffect(() => {
     if (!isVillageLeaderOrAbove || !selectedFam) { setSelectedFamMembers([]); setDetailLoading(false); return }
     let cancelled = false
     const load = async () => {
       setDetailLoading(true); setPageError('')
       try {
-        const thisSunday = getThisSundayKey()
         const [membersData, attendData] = await Promise.all([
-          callAuthedApi(`/api/fams/${encodeURIComponent(selectedFam)}/members?period=${period}`),
-          callAuthedApi(`/api/attendance?famName=${encodeURIComponent(selectedFam)}&date=${thisSunday}`),
+          callAuthedApi(`/api/fams/${encodeURIComponent(selectedFam)}/members?year=${selectedYear}`),
+          callAuthedApi(`/api/attendance?famName=${encodeURIComponent(selectedFam)}&date=${getThisSundayKey()}`).catch(() => []),
         ])
         if (!cancelled) {
           setSelectedFamMembers(Array.isArray(membersData) ? mapMemberStats(membersData) : [])
@@ -529,7 +538,7 @@ export default function AttendanceStatsPageConnected() {
     }
     void load()
     return () => { cancelled = true }
-  }, [selectedFam, period, isVillageLeaderOrAbove])
+  }, [selectedFam, selectedYear, isVillageLeaderOrAbove])
 
   return (
     <div className="pb-20">
@@ -538,7 +547,6 @@ export default function AttendanceStatsPageConnected() {
         <p className="text-base font-medium flex-1">출석 통계</p>
       </div>
 
-      {/* 탭 (마을장 이상만) */}
       {isVillageLeaderOrAbove && (
         <div className="flex border-b border-gray-300">
           {[['cumulative', '누적 통계'], ['weekly', '주차별 현황']].map(([key, label]) => (
@@ -567,15 +575,18 @@ export default function AttendanceStatsPageConnected() {
             <VillageStatsView
               isPastorOrAbove={isPastorOrAbove} summaryLabel={user?.village || '마을'}
               summaryStats={summaryStats} villages={villages} famStatsMap={famStatsMap}
-              period={period} setPeriod={setPeriod} selectedFam={selectedFam} setSelectedFam={setSelectedFam}
+              selectedYear={selectedYear} setSelectedYear={setSelectedYear}
+              selectedFam={selectedFam} setSelectedFam={setSelectedFam}
               selectedFamMembers={selectedFamMembers} detailLoading={detailLoading}
               expandedVillage={expandedVillage} setExpandedVillage={setExpandedVillage}
               weekAttendMap={weekAttendMap}
             />
           )
         ) : (
-          <LeaderStatsView famName={user?.fam} period={period} setPeriod={setPeriod}
-            stats={leaderStats} members={leaderMembers} isLoading={isLoading} weekAttendMap={weekAttendMap} />
+          <LeaderStatsView
+            famName={user?.fam} selectedYear={selectedYear} setSelectedYear={setSelectedYear}
+            stats={leaderStats} members={leaderMembers} isLoading={isLoading} weekAttendMap={weekAttendMap}
+          />
         )
       )}
 
@@ -586,8 +597,8 @@ export default function AttendanceStatsPageConnected() {
         ) : (
           <WeeklyView
             villages={villages} famStatsMap={famStatsMap} callAuthedApi={callAuthedApi}
-            isPastorOrAbove={isPastorOrAbove} summaryStats={summaryStats}
-            weekDate={weekDate} setWeekDate={setWeekDate}
+            summaryStats={summaryStats} weekDate={weekDate} setWeekDate={setWeekDate}
+            selectedYear={selectedYear}
           />
         )
       )}
