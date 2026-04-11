@@ -515,12 +515,25 @@ export default function HomePageConnected() {
             href="https://joyhillvision.dothome.co.kr/ThisweekJubo"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3.5 no-underline hover:bg-gray-100/60 transition-colors"
+            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
           >
             <span className="text-xl shrink-0">📖</span>
             <div className="flex-1">
               <p className="text-[13px] font-medium text-gray-800">청년부 온라인 주보</p>
               <p className="text-[11px] text-gray-500 mt-0.5">이번 주 주보를 온라인으로 보기</p>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </a>
+          <a
+            href="https://www.joyds.net/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3.5 no-underline hover:bg-gray-100/60 transition-colors"
+          >
+            <span className="text-xl shrink-0">⛪</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-medium text-gray-800">교회 홈페이지</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">JOY DS 교회 공식 홈페이지</p>
             </div>
             <span className="text-gray-400 text-xs">→</span>
           </a>
