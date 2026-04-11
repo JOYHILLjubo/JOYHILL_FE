@@ -10,14 +10,14 @@ const TAG_FILTERS = [
   { label: '행사', value: '행사' },
   { label: '안내', value: '안내' },
   { label: '소식', value: '소식' },
-  { label: '요청', value: '요청' },
+  { label: '모집', value: '모집' },
 ]
 
 const TAG_COLORS = {
   행사: { bg: 'bg-primary-light', text: 'text-primary' },
   안내: { bg: 'bg-warning-light', text: 'text-warning' },
   소식: { bg: 'bg-success-light', text: 'text-success' },
-  요청: { bg: 'bg-danger-light', text: 'text-danger' },
+  모집: { bg: 'bg-danger-light', text: 'text-danger' },
 }
 
 function buildApiUrl(path) {
