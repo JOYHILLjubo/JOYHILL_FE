@@ -139,6 +139,7 @@ function UserEditViewConnected({
   onBack,
   onSave,
   onDelete,
+  onResetPassword,
 }) {
   const [form, setForm] = useState({ ...initial })
   const [error, setError] = useState('')
@@ -219,13 +220,22 @@ function UserEditViewConnected({
         <button onClick={onBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-medium flex-1">{isNew ? '계정 추가' : '계정 수정'}</p>
         {!isNew && (
-          <button
-            onClick={onDelete}
-            disabled={isSubmitting}
-            className="text-xs text-danger bg-danger-light px-3 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-60"
-          >
-            삭제
-          </button>
+          <>
+            <button
+              onClick={onResetPassword}
+              disabled={isSubmitting}
+              className="text-xs text-warning bg-warning-light px-3 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-60"
+            >
+              PW 초기화
+            </button>
+            <button
+              onClick={onDelete}
+              disabled={isSubmitting}
+              className="text-xs text-danger bg-danger-light px-3 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-60"
+            >
+              삭제
+            </button>
+          </>
         )}
       </div>
 
@@ -544,6 +554,15 @@ export default function AccountManagePageConnected() {
         famOptions={fams}
         teamOptions={teams}
         onBack={() => setEditTarget(null)}
+        onResetPassword={async () => {
+          if (!window.confirm(`'${editTarget.name}'의 비밀번호를 123456789로 초기화하시겠습니까?`)) return
+          try {
+            await callAuthedApi(`/api/users/${editTarget.id}/reset-password`, '비밀번호 초기화에 실패했습니다.', { method: 'PATCH' })
+            alert('비밀번호가 123456789로 초기화되었습니다.')
+          } catch (err) {
+            alert(err instanceof Error ? err.message : '비밀번호 초기화에 실패했습니다.')
+          }
+        }}
         onSave={async (form) => {
           if (isNew) {
             await callAuthedApi('/api/users', '계정 추가에 실패했습니다.', {
