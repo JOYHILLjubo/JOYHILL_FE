@@ -555,10 +555,10 @@ export default function AccountManagePageConnected() {
         teamOptions={teams}
         onBack={() => setEditTarget(null)}
         onResetPassword={async () => {
-          if (!window.confirm(`'${editTarget.name}'의 비밀번호를 123456789로 초기화하시겠습니까?`)) return
+          if (!window.confirm(`'${editTarget.name}'의 비밀번호를 생년월일로 초기화하시겠습니까?`)) return
           try {
             await callAuthedApi(`/api/users/${editTarget.id}/reset-password`, '비밀번호 초기화에 실패했습니다.', { method: 'PATCH' })
-            alert('비밀번호가 123456789로 초기화되었습니다.')
+            alert('비밀번호가 생년월일로 초기화되었습니다.')
           } catch (err) {
             alert(err instanceof Error ? err.message : '비밀번호 초기화에 실패했습니다.')
           }
