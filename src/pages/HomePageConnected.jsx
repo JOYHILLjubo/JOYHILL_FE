@@ -533,7 +533,7 @@ export default function HomePageConnected() {
             <span className="text-xl shrink-0">⛪</span>
             <div className="flex-1">
               <p className="text-[13px] font-medium text-gray-800">교회 홈페이지</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">JOY DS 교회 공식 홈페이지</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">기쁨의 동산교회 공식 홈페이지</p>
             </div>
             <span className="text-gray-400 text-xs">→</span>
           </a>
