@@ -27,6 +27,11 @@ const DUMMY_TEAM_MEMBERS = {
     { id: 7, name: '조예배', fam: '인내팸', role: '팀장' },
     { id: 8, name: '송은총', fam: '온유팸', role: '팀원' },
   ],
+  큐티팀: [
+    { id: 9, name: '이말씀', fam: '사랑팸', role: '팀장' },
+    { id: 10, name: '박묵상', fam: '믿음팸', role: '팀원' },
+    { id: 11, name: '최새벽', fam: '소망팸', role: '팀원' },
+  ],
 }
 
 function LegacyTeamManagePage() {
