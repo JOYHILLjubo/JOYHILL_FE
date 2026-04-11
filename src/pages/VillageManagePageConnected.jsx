@@ -638,36 +638,6 @@ export default function VillageManagePageConnected() {
                   </div>
                 )
               })}
-
-              {/* 미배정 섹션 — 교역자/관리자만 */}
-              {isPastorOrAbove && unassignedMembers.length > 0 && (
-                <div className="mb-3">
-                  <button
-                    onClick={() => setExpandedUnassigned((p) => !p)}
-                    className="w-full flex items-center justify-between py-2.5 px-3 bg-gray-100 rounded-xl border-none cursor-pointer">
-                    <span className="text-sm font-medium text-gray-600">미배정</span>
-                    <span className="text-xs text-gray-500">{unassignedMembers.length}명 {expandedUnassigned ? '▲' : '▼'}</span>
-                  </button>
-                  {expandedUnassigned && (
-                    <div className="border border-gray-300 rounded-xl overflow-hidden mt-2">
-                      {unassignedMembers.map((member, index) => {
-                        const color = getAvatarColor(member.id)
-                        return (
-                          <div key={member.id} className={`flex items-center gap-3 px-4 py-3 ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
-                            <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                              {member.name[0]}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{member.name}</p>
-                              <p className="text-[11px] text-gray-500">{member.phone || '연락처 없음'}</p>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           ) : accessibleVillageNames.length === 0 ? (
             <div className="px-5 py-10"><p className="text-sm text-gray-500 text-center">표시할 마을이 없습니다.</p></div>
@@ -721,6 +691,36 @@ export default function VillageManagePageConnected() {
                   </div>
                 )
               })}
+
+              {/* 미배정 섹션 — 교역자/관리자만 */}
+              {isPastorOrAbove && unassignedMembers.length > 0 && (
+                <div className="mb-3">
+                  <button
+                    onClick={() => setExpandedUnassigned((p) => !p)}
+                    className="w-full flex items-center justify-between py-2.5 px-3 bg-gray-100 rounded-xl border-none cursor-pointer">
+                    <span className="text-sm font-medium text-gray-600">미배정</span>
+                    <span className="text-xs text-gray-500">{unassignedMembers.length}명 {expandedUnassigned ? '▲' : '▼'}</span>
+                  </button>
+                  {expandedUnassigned && (
+                    <div className="border border-gray-300 rounded-xl overflow-hidden mt-2">
+                      {unassignedMembers.map((member, index) => {
+                        const color = getAvatarColor(member.id)
+                        return (
+                          <div key={member.id} className={`flex items-center gap-3 px-4 py-3 ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
+                            <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
+                              {member.name[0]}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{member.name}</p>
+                              <p className="text-[11px] text-gray-500">{member.phone || '연락처 없음'}</p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </>
