@@ -367,7 +367,7 @@ export default function VillageManagePageConnected() {
   const [activeTab, setActiveTab] = useState('village')
   const [expandedVillage, setExpandedVillage] = useState(null)
   const [expandedUnassigned, setExpandedUnassigned] = useState(false)
-  const [selectedUnassigned, setSelectedUnassigned] = useState(null)
+  const [editingMember, setEditingMember] = useState(null) // { member, famName }
   const [selectedFam, setSelectedFam] = useState(null)
   const [moveSheet, setMoveSheet] = useState(null)
 
@@ -550,26 +550,32 @@ export default function VillageManagePageConnected() {
     )
   }
 
-  if (selectedUnassigned) {
+  if (editingMember) {
+    const { member, famName } = editingMember
     return (
       <VillageMemberEditViewConnected
-        member={selectedUnassigned}
-        currentFam={null}
+        member={member}
+        currentFam={famName}
         isNew={false}
-        canChangeRole={isPastorOrAbove}
-        onBack={() => setSelectedUnassigned(null)}
+        canChangeRole={isVillageLeaderOrAbove}
+        onBack={() => setEditingMember(null)}
         onSave={async (form) => {
-          await callAuthedApi(`/api/fam-members/${selectedUnassigned.id}`, '정보 수정에 실패했습니다.', {
+          await callAuthedApi(`/api/fam-members/${member.id}`, '수정에 실패했습니다.', {
             method: 'PUT',
             body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note) },
           })
+          if (isVillageLeaderOrAbove && form.role !== member.role) {
+            await callAuthedApi(`/api/fam-members/${member.id}/role`, '역할 변경에 실패했습니다.', {
+              method: 'PATCH', body: { role: form.role },
+            })
+          }
           setReloadKey((p) => p + 1)
-          setSelectedUnassigned(null)
+          setEditingMember(null)
         }}
         onDelete={async () => {
-          await callAuthedApi(`/api/fam-members/${selectedUnassigned.id}`, '삭제에 실패했습니다.', { method: 'DELETE' })
+          await callAuthedApi(`/api/fam-members/${member.id}`, '삭제에 실패했습니다.', { method: 'DELETE' })
           setReloadKey((p) => p + 1)
-          setSelectedUnassigned(null)
+          setEditingMember(null)
         }}
       />
     )
@@ -732,7 +738,7 @@ export default function VillageManagePageConnected() {
                       {unassignedMembers.map((member, index) => {
                         const color = getAvatarColor(member.id)
                         return (
-                          <div key={member.id} onClick={() => setSelectedUnassigned(member)} className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
+                          <div key={member.id} onClick={() => setEditingMember({ member, famName: null })} className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
                             <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
                               {member.name[0]}
                             </div>
