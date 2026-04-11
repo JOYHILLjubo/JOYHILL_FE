@@ -142,7 +142,7 @@ function FamMoveSheet({ fam, currentVillage, villageNames, onClose, onSave, isSu
   )
 }
 
-function VillageMemberEditViewConnected({ member, currentFam, isNew = false, canChangeRole, onBack, onSave, onDelete }) {
+function VillageMemberEditViewConnected({ member, currentFam, isNew = false, canChangeRole, famOptions = [], onBack, onSave, onDelete }) {
   const [form, setForm] = useState({ name: '', phone: '', birth: '', role: 'member', fam: currentFam || '', note: '', ...member })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -217,7 +217,21 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1.5">소속 팸</p>
-          <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-gray-100 text-gray-700">{form.fam || currentFam || '소속 팸 없음'}</div>
+          {famOptions.length > 0 ? (
+            <select
+              value={form.fam || ''}
+              onChange={(e) => setForm((p) => ({ ...p, fam: e.target.value }))}
+              disabled={isSubmitting}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white disabled:bg-gray-100"
+            >
+              <option value="">소속 팸 없음</option>
+              {famOptions.map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
+          ) : (
+            <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-gray-100 text-gray-700">{form.fam || '소속 팸 없음'}</div>
+          )}
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1.5">메모</p>
@@ -553,17 +567,19 @@ export default function VillageManagePageConnected() {
 
   if (editingMember) {
     const { member, famName } = editingMember
+    const allFamNames = Object.keys(famInfoMap)
     return (
       <VillageMemberEditViewConnected
         member={member}
         currentFam={famName}
         isNew={false}
         canChangeRole={isVillageLeaderOrAbove}
+        famOptions={allFamNames}
         onBack={() => setEditingMember(null)}
         onSave={async (form) => {
           await callAuthedApi(`/api/fam-members/${member.id}`, '수정에 실패했습니다.', {
             method: 'PUT',
-            body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note) },
+            body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note), famName: form.fam || null },
           })
           if (isVillageLeaderOrAbove && form.role !== member.role) {
             await callAuthedApi(`/api/fam-members/${member.id}/role`, '역할 변경에 실패했습니다.', {
