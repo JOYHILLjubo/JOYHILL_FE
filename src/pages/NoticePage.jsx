@@ -71,7 +71,7 @@ const tagColors = {
   행사: { bg: 'bg-primary-light', text: 'text-primary' },
   안내: { bg: 'bg-warning-light', text: 'text-warning' },
   소식: { bg: 'bg-success-light', text: 'text-success' },
-  신청: { bg: 'bg-danger-light', text: 'text-danger' },
+  모집: { bg: 'bg-danger-light', text: 'text-danger' },
 }
 
 function LegacyNoticePage() {
@@ -79,7 +79,7 @@ function LegacyNoticePage() {
   const { canWriteNotice } = useAuth()
   const [filter, setFilter] = useState('전체')
   const [searchQuery, setSearchQuery] = useState('')
-  const filters = ['전체', '행사', '안내', '소식', '신청']
+  const filters = ['전체', '행사', '안내', '소식', '모집']
 
   const filtered = notices.filter((n) => {
     const matchFilter = filter === '전체' || n.tag === filter

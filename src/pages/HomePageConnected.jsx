@@ -18,7 +18,7 @@ const NOTICE_TAG_COLORS = {
   행사: { bg: 'bg-primary-light', text: 'text-primary' },
   안내: { bg: 'bg-warning-light', text: 'text-warning' },
   소식: { bg: 'bg-success-light', text: 'text-success' },
-  요청: { bg: 'bg-danger-light', text: 'text-danger' },
+  모집: { bg: 'bg-danger-light', text: 'text-danger' },
 }
 
 const WORSHIP_INFOS = [
@@ -464,7 +464,7 @@ export default function HomePageConnected() {
                     index < notices.length - 1 ? 'border-b border-gray-100' : ''
                   }`}
                 >
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap mb-1">
                     {notice.pinned && (
                       <span className="text-[11px] text-danger bg-danger-light px-1.5 py-0.5 rounded">
                         고정
@@ -483,13 +483,11 @@ export default function HomePageConnected() {
                       </span>
                     )}
                   </div>
-                  <p className="text-[13px] font-medium mt-1">{notice.title}</p>
-                  <div className="flex gap-2 mt-1">
-                    <span className="text-[11px] text-gray-500">{notice.author || 'JOYHILL'}</span>
-                    <span className="text-[11px] text-gray-500">·</span>
-                    <span className="text-[11px] text-gray-500">
-                      {formatNoticeDate(notice.createdAt)}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[13px] font-medium flex-1 truncate">{notice.title}</p>
+                    <span className="text-[11px] text-gray-500 shrink-0">{notice.author || 'JOYHILL'}</span>
+                    <span className="text-[11px] text-gray-500 shrink-0">·</span>
+                    <span className="text-[11px] text-gray-500 shrink-0">{formatNoticeDate(notice.createdAt)}</span>
                   </div>
                 </button>
               )
@@ -499,38 +497,33 @@ export default function HomePageConnected() {
       </div>
 
       <div className="px-5 mb-3">
-        <div className="border border-gray-300 rounded-xl p-4">
-          <p className="text-[13px] font-medium mb-2.5">이번 주 일정</p>
-
-          {isLoading ? (
-            <p className="text-[13px] text-gray-500 py-1.5">일정을 불러오는 중입니다.</p>
-          ) : schedules.length === 0 ? (
-            <p className="text-[13px] text-gray-500 py-1.5">예정된 일정이 없습니다.</p>
-          ) : (
-            schedules.map((schedule, index) => {
-              const { dateLabel, weekdayLabel } = getScheduleDateParts(schedule.date)
-
-              return (
-                <div
-                  key={schedule.id ?? `${schedule.date}-${index}`}
-                  className={`flex gap-2.5 items-start py-2 ${
-                    index < schedules.length - 1 ? 'border-b border-gray-100' : ''
-                  }`}
-                >
-                  <div className="w-10 text-center shrink-0">
-                    <p className="text-[11px] text-gray-500 leading-tight">{dateLabel}</p>
-                    <p className="text-[11px] text-gray-500 leading-tight">{weekdayLabel}</p>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[13px] leading-relaxed">{schedule.content}</p>
-                    {schedule.showDDay && schedule.dDay && (
-                      <p className="text-[11px] text-primary mt-0.5">{schedule.dDay}</p>
-                    )}
-                  </div>
-                </div>
-              )
-            })
-          )}
+        <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <a
+            href="https://pf.kakao.com/_CxmDrxb"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
+          >
+            <span className="text-xl shrink-0">💬</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-medium text-gray-800">청년부 카카오톡 채널</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">공지·소식을 카카오톡으로 받아보세요</p>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </a>
+          <a
+            href="https://joyhillvision.dothome.co.kr/ThisweekJubo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3.5 no-underline hover:bg-gray-100/60 transition-colors"
+          >
+            <span className="text-xl shrink-0">📖</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-medium text-gray-800">청년부 온라인 주보</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">이번 주 주보를 온라인으로 보기</p>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </a>
         </div>
       </div>
 

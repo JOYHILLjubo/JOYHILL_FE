@@ -4,13 +4,13 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { notices } from './NoticePage'
 
-const TAG_OPTIONS = ['행사', '안내', '소식', '신청']
+const TAG_OPTIONS = ['행사', '안내', '소식', '모집']
 
 const tagStyle = {
   행사: { active: 'bg-primary-light text-primary border-primary' },
   안내: { active: 'bg-warning-light text-warning border-warning' },
   소식: { active: 'bg-success-light text-success border-success' },
-  신청: { active: 'bg-danger-light text-danger border-danger' },
+  모집: { active: 'bg-danger-light text-danger border-danger' },
 }
 
 function formatNoticeDate(date = new Date()) {
@@ -53,7 +53,7 @@ function LegacyNoticeWritePage() {
   }
 
   const toggleTag = (tag) => {
-    setTags((prev) => prev.includes(tag) ? [] : [tag])
+    setTags((prev) => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
   }
 
   const handleSubmit = () => {
