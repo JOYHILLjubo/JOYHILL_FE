@@ -367,6 +367,7 @@ export default function VillageManagePageConnected() {
   const [activeTab, setActiveTab] = useState('village')
   const [expandedVillage, setExpandedVillage] = useState(null)
   const [expandedUnassigned, setExpandedUnassigned] = useState(false)
+  const [selectedUnassigned, setSelectedUnassigned] = useState(null)
   const [selectedFam, setSelectedFam] = useState(null)
   const [moveSheet, setMoveSheet] = useState(null)
 
@@ -388,7 +389,7 @@ export default function VillageManagePageConnected() {
   const accessibleVillageNames = useMemo(() => Object.keys(villages), [villages])
   const title = isPastorOrAbove ? '청년부 전체 관리' : `${user?.village || '마을'} 관리`
 
-  const totalHeadcount = useMemo(() => Object.values(famMembersMap).reduce((sum, members) => sum + members.length, 0), [famMembersMap])
+  const totalHeadcount = useMemo(() => Object.values(famMembersMap).reduce((sum, members) => sum + members.length, 0) + unassignedMembers.length, [famMembersMap, unassignedMembers])
   const villageHeadcount = useMemo(() => {
     const result = {}
     Object.entries(villages).forEach(([vn, famNames]) => {
@@ -549,6 +550,31 @@ export default function VillageManagePageConnected() {
     )
   }
 
+  if (selectedUnassigned) {
+    return (
+      <VillageMemberEditViewConnected
+        member={selectedUnassigned}
+        currentFam={null}
+        isNew={false}
+        canChangeRole={isPastorOrAbove}
+        onBack={() => setSelectedUnassigned(null)}
+        onSave={async (form) => {
+          await callAuthedApi(`/api/fam-members/${selectedUnassigned.id}`, '정보 수정에 실패했습니다.', {
+            method: 'PUT',
+            body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note) },
+          })
+          setReloadKey((p) => p + 1)
+          setSelectedUnassigned(null)
+        }}
+        onDelete={async () => {
+          await callAuthedApi(`/api/fam-members/${selectedUnassigned.id}`, '삭제에 실패했습니다.', { method: 'DELETE' })
+          setReloadKey((p) => p + 1)
+          setSelectedUnassigned(null)
+        }}
+      />
+    )
+  }
+
   if (selectedFam) {
     return (
       <FamDetailViewConnected
@@ -706,7 +732,7 @@ export default function VillageManagePageConnected() {
                       {unassignedMembers.map((member, index) => {
                         const color = getAvatarColor(member.id)
                         return (
-                          <div key={member.id} className={`flex items-center gap-3 px-4 py-3 ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
+                          <div key={member.id} onClick={() => setSelectedUnassigned(member)} className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
                             <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
                               {member.name[0]}
                             </div>
