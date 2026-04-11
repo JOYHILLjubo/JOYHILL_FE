@@ -379,7 +379,7 @@ export default function HomePageConnected() {
       <div className="flex justify-between items-center px-5 pt-4 pb-3">
         <div>
           <p className="text-[11px] text-gray-500">{todayLabel}</p>
-          <p className="text-lg font-medium mt-0.5">JOY 교회 주보</p>
+          <p className="text-lg font-medium mt-0.5">JOY HILL</p>
           <p className="text-[12px] text-gray-500 mt-1">{headerDescription}</p>
         </div>
         <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
