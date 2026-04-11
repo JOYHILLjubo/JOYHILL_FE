@@ -4,13 +4,13 @@ import { useAuth } from '../context/AuthContext'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
-const TAG_OPTIONS = ['행사', '안내', '소식', '요청']
+const TAG_OPTIONS = ['행사', '안내', '소식', '모집']
 
 const TAG_STYLE = {
   행사: { active: 'bg-primary-light text-primary border-primary' },
   안내: { active: 'bg-warning-light text-warning border-warning' },
   소식: { active: 'bg-success-light text-success border-success' },
-  요청: { active: 'bg-danger-light text-danger border-danger' },
+  모집: { active: 'bg-danger-light text-danger border-danger' },
 }
 
 function buildApiUrl(path) {
@@ -154,7 +154,7 @@ export default function NoticeWritePageConnected() {
 
   const [title, setTitle] = useState(editingNotice?.title ?? '')
   const [content, setContent] = useState(editingNotice?.content ?? '')
-  const [tag, setTag] = useState(editingNotice?.tag ?? '')
+  const [tags, setTags] = useState(editingNotice?.tag ? [editingNotice.tag] : [])
   const [fileUrl, setFileUrl] = useState(editingNotice?.fileUrl ?? '')
   const [deadline, setDeadline] = useState(editingNotice?.deadline ?? '')
   const [pinned, setPinned] = useState(editingNotice?.pinned ?? false)
@@ -228,8 +228,8 @@ export default function NoticeWritePageConnected() {
       return
     }
 
-    if (!tag) {
-      setSubmitError('태그를 하나 선택해주세요.')
+    if (!tags.length) {
+      setSubmitError('태그를 하나 이상 선택해주세요.')
       return
     }
 
@@ -239,7 +239,7 @@ export default function NoticeWritePageConnected() {
     const requestBody = {
       title: title.trim(),
       content: content.trim(),
-      tag,
+      tag: tags[0] ?? '',
       teamTag: editingNotice?.teamTag ?? (user?.teamRoles?.[0] ?? null),
       pinned,
       deadline: nullIfBlank(deadline),
@@ -358,13 +358,13 @@ export default function NoticeWritePageConnected() {
           </p>
           <div className="flex gap-2 flex-wrap">
             {TAG_OPTIONS.map((option) => {
-              const selected = tag === option
+              const selected = tags.includes(option)
 
               return (
                 <button
                   key={option}
                   onClick={() => {
-                    setTag((prev) => (prev === option ? '' : option))
+                    setTags((prev) => prev.includes(option) ? prev.filter(t => t !== option) : [...prev, option])
                     setSubmitError('')
                   }}
                   className={`text-sm px-3.5 py-1.5 rounded-full border cursor-pointer transition-all ${
