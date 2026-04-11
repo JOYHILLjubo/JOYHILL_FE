@@ -18,7 +18,8 @@ const avatarColors = [
 
 function buildApiUrl(path) { return `${API_BASE_URL}${path}` }
 function getAvatarColor(seed) {
-  const index = typeof seed === 'number' ? seed : (seed?.charCodeAt?.(0) ?? 0)
+  const raw = typeof seed === 'number' ? seed : (seed?.charCodeAt?.(0) ?? 0)
+  const index = (typeof raw === 'number' && !isNaN(raw)) ? raw : 0
   return avatarColors[Math.abs(index) % avatarColors.length]
 }
 function normalizeDateInput(value) {
