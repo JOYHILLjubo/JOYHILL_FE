@@ -27,7 +27,14 @@ function normalizeDateInput(value) {
     const [year, month, day] = value
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
-  return String(value).slice(0, 10)
+  const str = String(value).trim()
+  // YYMMDD (6자리) → YYYY-MM-DD
+  if (/^\d{6}$/.test(str)) {
+    const yy = parseInt(str.slice(0, 2), 10)
+    const fullYear = yy <= 29 ? 2000 + yy : 1900 + yy
+    return `${fullYear}-${str.slice(2, 4)}-${str.slice(4, 6)}`
+  }
+  return str.slice(0, 10)
 }
 function formatPhone(phone) {
   const digits = String(phone ?? '').replace(/\D/g, '')
@@ -149,7 +156,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
   const handleSave = async () => {
     if (!form.name.trim()) { setError('이름을 입력해주세요.'); return }
     setIsSubmitting(true); setError('')
-    try { await onSave({ ...form, name: form.name.trim(), phone: form.phone.trim(), note: form.note.trim() }) }
+    try { await onSave({ ...form, name: form.name.trim(), phone: formatPhone(form.phone.trim()), note: form.note.trim() }) }
     catch (err) { setError(err instanceof Error ? err.message : '저장에 실패했습니다.') }
     finally { setIsSubmitting(false) }
   }
@@ -359,6 +366,7 @@ export default function VillageManagePageConnected() {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('village')
   const [expandedVillage, setExpandedVillage] = useState(null)
+  const [expandedUnassigned, setExpandedUnassigned] = useState(false)
   const [selectedFam, setSelectedFam] = useState(null)
   const [moveSheet, setMoveSheet] = useState(null)
 
@@ -367,6 +375,7 @@ export default function VillageManagePageConnected() {
   const [famInfoMap, setFamInfoMap] = useState({})
   const [famMembersMap, setFamMembersMap] = useState({})
   const [teams, setTeams] = useState([])
+  const [unassignedMembers, setUnassignedMembers] = useState([])
 
   const [isLoadingVillageData, setIsLoadingVillageData] = useState(true)
   const [isLoadingTeams, setIsLoadingTeams] = useState(false)
@@ -414,9 +423,10 @@ export default function VillageManagePageConnected() {
     async function loadVillageData() {
       setIsLoadingVillageData(true); setPageError('')
       try {
-        const [villageData, famData] = await Promise.all([
+        const [villageData, famData, unassignedData] = await Promise.all([
           callAuthedApi('/api/villages', '마을 정보를 불러오지 못했습니다.'),
           callAuthedApi('/api/fams', '팸 정보를 불러오지 못했습니다.'),
+          isPastorOrAbove ? callAuthedApi('/api/users/unassigned', '미배정 인원을 불러오지 못했습니다.').catch(() => []) : Promise.resolve([]),
         ])
 
         const allVillages = (Array.isArray(villageData) ? villageData : []).map(mapVillage).sort((a, b) => a.name.localeCompare(b.name, 'ko'))
@@ -449,6 +459,7 @@ export default function VillageManagePageConnected() {
         if (cancelled) return
         setVillages(nextVillages); setVillageLeaders(nextVillageLeaders); setFamInfoMap(nextFamInfoMap)
         setFamMembersMap(Object.fromEntries(memberEntries))
+        setUnassignedMembers(Array.isArray(unassignedData) ? unassignedData.map((item) => mapMember(item, null)) : [])
         setExpandedVillage((prev) => {
           if (prev && nextVillages[prev]) return prev
           if (!isPastorOrAbove && user?.village && nextVillages[user.village]) return user.village
@@ -627,6 +638,36 @@ export default function VillageManagePageConnected() {
                   </div>
                 )
               })}
+
+              {/* 미배정 섹션 — 교역자/관리자만 */}
+              {isPastorOrAbove && unassignedMembers.length > 0 && (
+                <div className="mb-3">
+                  <button
+                    onClick={() => setExpandedUnassigned((p) => !p)}
+                    className="w-full flex items-center justify-between py-2.5 px-3 bg-gray-100 rounded-xl border-none cursor-pointer">
+                    <span className="text-sm font-medium text-gray-600">미배정</span>
+                    <span className="text-xs text-gray-500">{unassignedMembers.length}명 {expandedUnassigned ? '▲' : '▼'}</span>
+                  </button>
+                  {expandedUnassigned && (
+                    <div className="border border-gray-300 rounded-xl overflow-hidden mt-2">
+                      {unassignedMembers.map((member, index) => {
+                        const color = getAvatarColor(member.id)
+                        return (
+                          <div key={member.id} className={`flex items-center gap-3 px-4 py-3 ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
+                            <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
+                              {member.name[0]}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{member.name}</p>
+                              <p className="text-[11px] text-gray-500">{member.phone || '연락처 없음'}</p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : accessibleVillageNames.length === 0 ? (
             <div className="px-5 py-10"><p className="text-sm text-gray-500 text-center">표시할 마을이 없습니다.</p></div>
