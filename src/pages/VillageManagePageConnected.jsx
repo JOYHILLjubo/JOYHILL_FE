@@ -63,7 +63,7 @@ function mapMember(item, currentFam) {
     id: item?.id ?? null,
     name: item?.name ?? '',
     phone: formatPhone(item?.phone ?? ''),
-    birth: normalizeDateInput(item?.birth),
+    birth: String(item?.birth ?? '').slice(0, 6),
     role: item?.role ?? 'member',
     fam: item?.famName ?? currentFam ?? '',
     note: item?.note ?? '',
@@ -199,8 +199,16 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
-          <input type="date" value={form.birth} onChange={(e) => setForm((p) => ({ ...p, birth: e.target.value }))} disabled={isSubmitting}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary disabled:bg-gray-100" />
+          <input
+            type="text"
+            value={form.birth}
+            onChange={(e) => setForm((p) => ({ ...p, birth: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
+            disabled={isSubmitting}
+            placeholder="950315"
+            maxLength={6}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary disabled:bg-gray-100"
+          />
+          <p className="text-[11px] text-gray-500 mt-1 ml-1">6자리 숫자 (YY년MM월DD일)</p>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1.5">역할</p>
