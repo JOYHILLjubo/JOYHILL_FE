@@ -144,12 +144,12 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
   if (members.length === 0) return <p className="text-sm text-gray-500 text-center mt-8">{emptyLabel}</p>
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {members.map((member) => {
         const color = getColor(member.id)
         const weekRecord = weekAttendMap[member.id]
         return (
-          <div key={member.id} className="border border-gray-300 rounded-xl px-4 py-3 flex items-center gap-3">
+          <div key={member.id} className="border border-gray-300 rounded-xl px-5 py-3 flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{member.name}</p>
