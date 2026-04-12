@@ -160,7 +160,7 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
                 </div>
               )}
             </div>
-            <div className="flex flex-col gap-1 shrink-0 min-w-[90px]">
+            <div className="flex flex-col gap-1 shrink-0 min-w-[130px]">
               <div className="flex items-center gap-1.5 justify-end">
                 <span className="text-[10px] text-primary">예배</span>
                 <RateBar rate={member.worshipRate} type="worship" />
