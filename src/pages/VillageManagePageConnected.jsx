@@ -22,20 +22,16 @@ function getAvatarColor(seed) {
   const index = (typeof raw === 'number' && !isNaN(raw)) ? raw : 0
   return avatarColors[Math.abs(index) % avatarColors.length]
 }
-function normalizeDateInput(value) {
-  if (!value) return ''
-  if (Array.isArray(value) && value.length >= 3) {
-    const [year, month, day] = value
-    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-  }
-  const str = String(value).trim()
-  // YYMMDD (6자리) → YYYY-MM-DD
-  if (/^\d{6}$/.test(str)) {
-    const yy = parseInt(str.slice(0, 2), 10)
-    const fullYear = yy <= 29 ? 2000 + yy : 1900 + yy
-    return `${fullYear}-${str.slice(2, 4)}-${str.slice(4, 6)}`
-  }
-  return str.slice(0, 10)
+function birthToDateInput(yymmdd) {
+  if (!yymmdd || yymmdd.length < 6) return ''
+  const yy = parseInt(yymmdd.slice(0, 2), 10)
+  const fullYear = yy <= 29 ? 2000 + yy : 1900 + yy
+  return `${fullYear}-${yymmdd.slice(2, 4)}-${yymmdd.slice(4, 6)}`
+}
+
+function dateInputToBirth(isoDate) {
+  if (!isoDate) return ''
+  return isoDate.replace(/-/g, '').slice(2, 8)
 }
 function formatPhone(phone) {
   const digits = String(phone ?? '').replace(/\D/g, '')
@@ -200,15 +196,12 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
           <input
-            type="text"
-            value={form.birth}
-            onChange={(e) => setForm((p) => ({ ...p, birth: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
+            type="date"
+            value={birthToDateInput(form.birth)}
+            onChange={(e) => setForm((p) => ({ ...p, birth: dateInputToBirth(e.target.value) }))}
             disabled={isSubmitting}
-            placeholder="950315"
-            maxLength={6}
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary disabled:bg-gray-100"
           />
-          <p className="text-[11px] text-gray-500 mt-1 ml-1">6자리 숫자 (YY년MM월DD일)</p>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1.5">역할</p>
