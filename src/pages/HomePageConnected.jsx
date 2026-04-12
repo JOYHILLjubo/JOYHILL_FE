@@ -36,8 +36,9 @@ function getYoutubeVideoId(url) {
 
   const matchWatch = url.match(/youtube\.com\/watch\?v=([^&]+)/)
   const matchShort = url.match(/youtu\.be\/([^?]+)/)
+  const matchLive = url.match(/youtube\.com\/live\/([^?]+)/)
 
-  return matchWatch?.[1] || matchShort?.[1] || null
+  return matchWatch?.[1] || matchShort?.[1] || matchLive?.[1] || null
 }
 
 function toDate(value) {
@@ -499,15 +500,28 @@ export default function HomePageConnected() {
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl overflow-hidden">
           <a
-            href="https://pf.kakao.com/_CxmDrxb"
+            href="https://www.youtube.com/@tv-wo6zb/videos"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
           >
-            <span className="text-xl shrink-0">💬</span>
+            <span className="text-xl shrink-0">🎥</span>
             <div className="flex-1">
-              <p className="text-[13px] font-medium text-gray-800">청년부 카카오톡 채널</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">공지·소식을 카카오톡으로 받아보세요</p>
+              <p className="text-[13px] font-medium text-gray-800">청바지TV</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">청년부 공식 유튜브 채널</p>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </a>
+          <a
+            href="https://www.instagram.com/joyhillgram/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
+          >
+            <span className="text-xl shrink-0">📸</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-medium text-gray-800">Joyhillgram</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">청년부 공식 인스타그램</p>
             </div>
             <span className="text-gray-400 text-xs">→</span>
           </a>
@@ -525,6 +539,19 @@ export default function HomePageConnected() {
             <span className="text-gray-400 text-xs">→</span>
           </a>
           <a
+            href="https://pf.kakao.com/_CxmDrxb"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
+          >
+            <span className="text-xl shrink-0">💬</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-medium text-gray-800">청년부 카카오톡 채널</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">공지·소식을 카카오톡으로 받아보세요</p>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </a>
+          <a
             href="https://www.joyds.net/"
             target="_blank"
             rel="noopener noreferrer"
@@ -537,25 +564,6 @@ export default function HomePageConnected() {
             </div>
             <span className="text-gray-400 text-xs">→</span>
           </a>
-        </div>
-      </div>
-
-      <div className="px-5 mb-3">
-        <div className="border border-gray-300 rounded-xl p-4">
-          <p className="text-[13px] font-medium mb-2.5">예배 안내</p>
-          {WORSHIP_INFOS.map((item, index) => (
-            <div
-              key={item.name}
-              className={`flex justify-between py-1.5 ${
-                index < WORSHIP_INFOS.length - 1 ? 'border-b border-gray-100' : ''
-              }`}
-            >
-              <span className="text-[13px]">{item.name}</span>
-              <span className="text-[13px] text-gray-500">
-                {item.time} · {item.place}
-              </span>
-            </div>
-          ))}
         </div>
       </div>
 
