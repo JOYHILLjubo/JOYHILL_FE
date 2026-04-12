@@ -144,31 +144,29 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
   if (members.length === 0) return <p className="text-sm text-gray-500 text-center mt-8">{emptyLabel}</p>
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {members.map((member) => {
         const color = getColor(member.id)
         const weekRecord = weekAttendMap[member.id]
         return (
-          <div key={member.id} className="border border-gray-300 rounded-xl p-4">
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">{member.name}</p>
-                {weekRecord !== undefined && (
-                  <div className="flex gap-1 mt-0.5">
-                    <AttendBadge present={weekRecord.worship} label="예배" />
-                    <AttendBadge present={weekRecord.fam} label="팸" />
-                  </div>
-                )}
-              </div>
+          <div key={member.id} className="border border-gray-300 rounded-xl px-4 py-3 flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{member.name}</p>
+              {weekRecord !== undefined && (
+                <div className="flex gap-1 mt-0.5">
+                  <AttendBadge present={weekRecord.worship} label="예배" />
+                  <AttendBadge present={weekRecord.fam} label="팸" />
+                </div>
+              )}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-primary w-10 shrink-0">예배</span>
+            <div className="flex flex-col gap-1 shrink-0 min-w-[90px]">
+              <div className="flex items-center gap-1.5 justify-end">
+                <span className="text-[10px] text-primary">예배</span>
                 <RateBar rate={member.worshipRate} type="worship" />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-warning w-10 shrink-0">팸모임</span>
+              <div className="flex items-center gap-1.5 justify-end">
+                <span className="text-[10px] text-warning">팸</span>
                 <RateBar rate={member.famRate} type="fam" />
               </div>
             </div>
