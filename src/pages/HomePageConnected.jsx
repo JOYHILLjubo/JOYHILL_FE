@@ -208,6 +208,10 @@ export default function HomePageConnected() {
   const [loadError, setLoadError] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
 
+  const [communityPrayers, setCommunityPrayers] = useState([])
+  const [prayerInput, setPrayerInput] = useState('')
+  const [prayerSubmitting, setPrayerSubmitting] = useState(false)
+
   const accessTokenRef = useRef(accessToken)
 
   useEffect(() => {
@@ -346,6 +350,36 @@ export default function HomePageConnected() {
 
   const handleRetry = () => {
     setReloadKey((prev) => prev + 1)
+  }
+
+  useEffect(() => {
+    requestApi('/api/community-prayers')
+      .then(({ payload }) => {
+        if (payload?.success && Array.isArray(payload.data)) {
+          setCommunityPrayers(payload.data)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const handlePrayerSubmit = async () => {
+    const trimmed = prayerInput.trim()
+    if (!trimmed || prayerSubmitting) return
+    setPrayerSubmitting(true)
+    try {
+      const { response, payload } = await requestApi('/api/community-prayers', {
+        method: 'POST',
+        body: { content: trimmed },
+      })
+      if (response.ok && payload?.success && payload.data) {
+        setCommunityPrayers((prev) => [payload.data, ...prev])
+        setPrayerInput('')
+      }
+    } catch {
+      // 조용히 실패
+    } finally {
+      setPrayerSubmitting(false)
+    }
   }
 
   const handleSermonClick = () => {
@@ -567,6 +601,45 @@ export default function HomePageConnected() {
             </div>
             <span className="text-gray-400 text-xs">→</span>
           </a>
+        </div>
+      </div>
+
+      {/* 청년부 기도제목 */}
+      <div className="px-5 mb-3">
+        <div className="border border-gray-300 rounded-xl p-4">
+          <p className="text-[13px] font-medium mb-3">청년부 기도제목</p>
+
+          {communityPrayers.length === 0 ? (
+            <p className="text-[13px] text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
+          ) : (
+            <div className="flex flex-col gap-2 mb-3 max-h-60 overflow-y-auto">
+              {communityPrayers.map((p) => (
+                <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5">
+                  <p className="text-[13px] text-gray-800 leading-relaxed">{p.content}</p>
+                  <p className="text-[11px] text-gray-400 mt-1">{p.createdAt}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+            <input
+              type="text"
+              value={prayerInput}
+              onChange={(e) => setPrayerInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handlePrayerSubmit() }}
+              placeholder="기도제목을 남겨주세요... (익명)"
+              maxLength={200}
+              className="flex-1 text-[13px] bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 outline-none focus:border-primary"
+            />
+            <button
+              onClick={handlePrayerSubmit}
+              disabled={prayerSubmitting || prayerInput.trim() === ''}
+              className="shrink-0 text-[13px] font-medium text-white bg-primary rounded-lg px-4 py-2 border-none cursor-pointer disabled:opacity-40"
+            >
+              올리기
+            </button>
+          </div>
         </div>
       </div>
 

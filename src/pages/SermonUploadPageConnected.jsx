@@ -25,14 +25,15 @@ function buildApiUrl(path) {
 }
 
 function isValidYoutubeUrl(url) {
-  return !url || url.includes('youtube.com/watch') || url.includes('youtu.be/')
+  return !url || url.includes('youtube.com/watch') || url.includes('youtu.be/') || url.includes('youtube.com/live/')
 }
 
 function getYoutubeThumbnail(url) {
   if (!url) return null
   const matchWatch = url.match(/(?:youtube\.com\/watch\?v=)([^&]+)/)
   const matchShort = url.match(/(?:youtu\.be\/)([^?]+)/)
-  const id = matchWatch?.[1] || matchShort?.[1]
+  const matchLive = url.match(/(?:youtube\.com\/live\/)([^?]+)/)
+  const id = matchWatch?.[1] || matchShort?.[1] || matchLive?.[1]
   return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null
 }
 
