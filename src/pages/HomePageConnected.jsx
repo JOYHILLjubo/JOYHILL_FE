@@ -353,11 +353,9 @@ export default function HomePageConnected() {
   }
 
   useEffect(() => {
-    requestApi('/api/community-prayers')
-      .then(({ payload }) => {
-        if (payload?.success && Array.isArray(payload.data)) {
-          setCommunityPrayers(payload.data)
-        }
+    callAuthedApi('/api/community-prayers')
+      .then((data) => {
+        if (Array.isArray(data)) setCommunityPrayers(data)
       })
       .catch(() => {})
   }, [])
@@ -367,12 +365,12 @@ export default function HomePageConnected() {
     if (!trimmed || prayerSubmitting) return
     setPrayerSubmitting(true)
     try {
-      const { response, payload } = await requestApi('/api/community-prayers', {
+      const data = await callAuthedApi('/api/community-prayers', {
         method: 'POST',
         body: { content: trimmed },
       })
-      if (response.ok && payload?.success && payload.data) {
-        setCommunityPrayers((prev) => [payload.data, ...prev])
+      if (data) {
+        setCommunityPrayers((prev) => [data, ...prev])
         setPrayerInput('')
       }
     } catch {
