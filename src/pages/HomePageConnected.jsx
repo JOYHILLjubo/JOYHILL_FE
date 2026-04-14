@@ -380,6 +380,21 @@ export default function HomePageConnected() {
     }
   }
 
+  const canDelete = (prayer) => {
+    if (!user) return false
+    if (prayer.userId === user.id) return true
+    return ['village_leader', 'pastor', 'admin'].includes(user.role)
+  }
+
+  const handlePrayerDelete = async (id) => {
+    try {
+      await callAuthedApi(`/api/community-prayers/${id}`, { method: 'DELETE' })
+      setCommunityPrayers((prev) => prev.filter((p) => p.id !== id))
+    } catch {
+      // 조용히 실패
+    }
+  }
+
   const handleSermonClick = () => {
     if (videoId) {
       window.open(sermon.youtubeUrl, '_blank', 'noopener,noreferrer')
@@ -612,9 +627,19 @@ export default function HomePageConnected() {
           ) : (
             <div className="flex flex-col gap-2 mb-3 max-h-60 overflow-y-auto">
               {communityPrayers.map((p) => (
-                <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5">
-                  <p className="text-[13px] text-gray-800 leading-relaxed">{p.content}</p>
-                  <p className="text-[11px] text-gray-400 mt-1">{p.createdAt}</p>
+                <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5 flex items-start gap-2">
+                  <div className="flex-1">
+                    <p className="text-[13px] text-gray-800 leading-relaxed">{p.content}</p>
+                    <p className="text-[11px] text-gray-400 mt-1">{p.createdAt}</p>
+                  </div>
+                  {canDelete(p) && (
+                    <button
+                      onClick={() => handlePrayerDelete(p.id)}
+                      className="shrink-0 text-gray-300 hover:text-danger bg-transparent border-none cursor-pointer text-[13px] leading-none pt-0.5"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
