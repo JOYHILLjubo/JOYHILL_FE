@@ -162,6 +162,7 @@ export default function TeamManagePageConnected() {
   const [addAsLeader, setAddAsLeader] = useState(false)
   const [addingUserId, setAddingUserId] = useState(null)
   const [removingUserId, setRemovingUserId] = useState(null)
+  const [delegatingUserId, setDelegatingUserId] = useState(null)
 
   const canManagePage = canManageTeam || isPastorOrAbove
 
@@ -391,6 +392,27 @@ export default function TeamManagePageConnected() {
     }
   }
 
+  const handleDelegateLeader = async (member) => {
+    if (!selectedTeam || !member?.userId) return
+    if (!window.confirm(`${member.name}님을 팀장으로 위임할까요?\n기존 팀장은 팀원으로 변경됩니다.`)) return
+
+    setDelegatingUserId(member.userId)
+    setPageError('')
+
+    try {
+      await callAuthedApi(
+        `/api/teams/${encodeURIComponent(selectedTeam)}/delegate/${member.userId}`,
+        '팀장 위임에 실패했습니다.',
+        { method: 'PUT' },
+      )
+      setReloadKey((prev) => prev + 1)
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : '팀장 위임에 실패했습니다.')
+    } finally {
+      setDelegatingUserId(null)
+    }
+  }
+
   const handleSaveIntro = async () => {
     if (!selectedTeam) return
 
@@ -581,6 +603,15 @@ export default function TeamManagePageConnected() {
                       }`}>
                         {member.isLeader ? '팀장' : '팀원'}
                       </span>
+                      {!member.isLeader && (
+                        <button
+                          onClick={() => handleDelegateLeader(member)}
+                          disabled={delegatingUserId === member.userId}
+                          className="text-[11px] text-warning bg-warning-light px-2 py-0.5 rounded-full border-none cursor-pointer disabled:opacity-60 mr-1"
+                        >
+                          {delegatingUserId === member.userId ? '위임 중...' : '위임'}
+                        </button>
+                      )}
                       <button
                         onClick={() => handleRemoveMember(member)}
                         disabled={removingUserId === member.userId}
