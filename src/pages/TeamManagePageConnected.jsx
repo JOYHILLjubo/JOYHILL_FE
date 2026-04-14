@@ -59,12 +59,22 @@ function mapTeam(item) {
   }
 }
 
+function formatBirth(birth) {
+  if (!birth || birth.length !== 6) return ''
+  const yy = parseInt(birth.slice(0, 2), 10)
+  const mm = birth.slice(2, 4)
+  const dd = birth.slice(4, 6)
+  const yyyy = yy <= 30 ? 2000 + yy : 1900 + yy
+  return `${yyyy}.${mm}.${dd}`
+}
+
 function mapMember(item) {
   return {
     userId: item?.userId ?? null,
     name: item?.name ?? '',
     famName: item?.famName ?? '',
     phone: formatPhone(item?.phone ?? ''),
+    birth: formatBirth(item?.birth ?? ''),
     role: item?.role ?? 'member',
     isLeader: Boolean(item?.isLeader),
   }
@@ -596,7 +606,7 @@ export default function TeamManagePageConnected() {
                       </div>
                       <div className="flex-1 ml-3">
                         <p className="text-sm">{member.name}</p>
-                        <p className="text-[11px] text-gray-500">{[member.famName, member.phone].filter(Boolean).join(' · ')}</p>
+                        <p className="text-[11px] text-gray-500">{[member.famName, member.phone, member.birth].filter(Boolean).join(' · ')}</p>
                       </div>
                       <span className={`text-[11px] px-2 py-0.5 rounded-full mr-2 ${
                         member.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'

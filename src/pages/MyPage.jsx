@@ -20,6 +20,8 @@ export default function MyPage() {
 
   const isLeader = user.role === 'leader'
   const isVillageLeader = user.role === 'village_leader'
+  const myTeams = user.teams ?? []
+  const isTeamMemberOnly = myTeams.length > 0 && user.teamRoles.length === 0
   const handleLogout = () => {
     logout()
     navigate('/login', { replace: true })
@@ -44,6 +46,9 @@ export default function MyPage() {
               {user.teamRoles.length > 0 && (
                 <span className="text-primary"> · {user.teamRoles.join(', ')} 팀장</span>
               )}
+              {isTeamMemberOnly && (
+                <span className="text-success"> · {myTeams.join(', ')}</span>
+              )}
             </p>
           </div>
           <span className="text-[11px] text-primary bg-primary-light px-2 py-1 rounded-full shrink-0">
@@ -62,6 +67,16 @@ export default function MyPage() {
           </div>
         </div>
       </div>
+
+      {/* 내 사역팀 보기 — 팀장 아닌 팀 소속 팀원 */}
+      {isTeamMemberOnly && (
+        <div className="px-5 mb-3">
+          <div className="border border-gray-300 rounded-xl overflow-hidden">
+            <SectionHeader label="내 사역팀" color="success" />
+            <MenuItem label="내 사역팀 보기" onPress={() => navigate('/my/team')} last />
+          </div>
+        </div>
+      )}
 
       {/* 사역팀 관리 — 사역팀장 */}
       {isTeamLeader && (
