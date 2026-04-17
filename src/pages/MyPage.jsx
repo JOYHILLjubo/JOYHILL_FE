@@ -114,7 +114,10 @@ export default function MyPage() {
             <SectionHeader label={`${user.village} 관리`} color="success" />
             <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
             <MenuItem label="내 마을 관리" onPress={() => navigate('/village/manage')} />
-            <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} last />
+            <MenuItem label="출석 관리" onPress={() => navigate('/attendance')} />
+            <MenuItem label="출석 이력" onPress={() => navigate('/attendance/history')} />
+            <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
+            <MenuItem label="내 팸 관리" onPress={() => navigate('/fam/manage')} last />
           </div>
         </div>
       )}

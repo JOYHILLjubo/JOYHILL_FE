@@ -10,7 +10,7 @@ const FAM_ROLE_LABELS = {
 
 const CHECK_COL_W = 40
 const MEMBER_NAME_COL_W = 72
-const DATE_GROUP_W = CHECK_COL_W * 2
+const DATE_GROUP_W = CHECK_COL_W * 3
 const BTN_SIZE = 22
 
 function buildApiUrl(path) { return `${API_BASE_URL}${path}` }
@@ -52,7 +52,7 @@ function buildAttendanceMap(records) {
     if (!memberId || !dateKey) return
     next[memberId] = {
       ...next[memberId],
-      [dateKey]: { worship: record.worshipPresent === true, fam: record.famPresent === true },
+      [dateKey]: { worship: record.worshipPresent === true, online: record.onlinePresent === true, fam: record.famPresent === true },
     }
   })
   return next
@@ -71,8 +71,12 @@ const btnStyle = (checked, type) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
   fontSize: 10, cursor: 'pointer',
   border: checked ? 'none' : '1.5px solid #CCCCCC',
-  background: checked ? (type === 'worship' ? '#E8F0FE' : '#FEF7E0') : 'transparent',
-  color: checked ? (type === 'worship' ? '#4285F4' : '#F9AB00') : 'transparent',
+  background: checked
+    ? (type === 'worship' ? '#E8F0FE' : type === 'online' ? '#E6F4EA' : '#FEF7E0')
+    : 'transparent',
+  color: checked
+    ? (type === 'worship' ? '#4285F4' : type === 'online' ? '#34A853' : '#F9AB00')
+    : 'transparent',
   transition: 'all 0.15s',
 })
 
@@ -205,6 +209,7 @@ export default function AttendanceHistoryPage() {
                 return {
                   userId: member.id,
                   worshipPresent: record.worship === true,
+                  onlinePresent: record.online === true,
                   famPresent: record.fam === true,
                 }
               }),
@@ -255,6 +260,7 @@ export default function AttendanceHistoryPage() {
               <Fragment key={toKey(s)}>
                 <col style={{ width: CHECK_COL_W }} />
                 <col style={{ width: CHECK_COL_W }} />
+                <col style={{ width: CHECK_COL_W }} />
               </Fragment>
             ))}
           </colgroup>
@@ -262,15 +268,16 @@ export default function AttendanceHistoryPage() {
             <tr style={{ borderBottom: '1px solid #E0E0E0', background: '#fff' }}>
               <th rowSpan={2} style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 2, textAlign: 'left', fontSize: 11, color: '#888', fontWeight: 500, padding: '8px 0 8px 12px', borderRight: '1px solid #E0E0E0' }}>이름</th>
               {sundays.map((s) => (
-                <th key={toKey(s)} colSpan={2} style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#333', padding: '8px 0', borderLeft: '1px solid #E0E0E0' }}>{formatDate(s)}</th>
+                <th key={toKey(s)} colSpan={3} style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#333', padding: '8px 0', borderLeft: '1px solid #E0E0E0' }}>{formatDate(s)}</th>
               ))}
             </tr>
             <tr style={{ borderBottom: '1px solid #E0E0E0', background: '#FAFAFA' }}>
-              {sundays.map((s) => (
-                <Fragment key={toKey(s)}>
-                  <th style={{ textAlign: 'center', fontSize: 10, color: '#4285F4', fontWeight: 500, padding: '5px 0', borderLeft: '1px solid #E0E0E0' }}>예배</th>
-                  <th style={{ textAlign: 'center', fontSize: 10, color: '#F9AB00', fontWeight: 500, padding: '5px 0' }}>팸</th>
-                </Fragment>
+            {sundays.map((s) => (
+            <Fragment key={toKey(s)}>
+            <th style={{ textAlign: 'center', fontSize: 10, color: '#4285F4', fontWeight: 500, padding: '5px 0', borderLeft: '1px solid #E0E0E0' }}>예배</th>
+            <th style={{ textAlign: 'center', fontSize: 10, color: '#34A853', fontWeight: 500, padding: '5px 0' }}>온라인</th>
+              <th style={{ textAlign: 'center', fontSize: 10, color: '#F9AB00', fontWeight: 500, padding: '5px 0' }}>팸</th>
+              </Fragment>
               ))}
             </tr>
           </thead>
@@ -297,6 +304,9 @@ export default function AttendanceHistoryPage() {
                             <button onClick={() => toggle(member.id, dateKey, 'worship')} style={btnStyle(record.worship === true, 'worship')}>✓</button>
                           </td>
                           <td style={{ textAlign: 'center', padding: '10px 0', verticalAlign: 'middle' }}>
+                            <button onClick={() => toggle(member.id, dateKey, 'online')} style={btnStyle(record.online === true, 'online')}>✓</button>
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '10px 0', verticalAlign: 'middle' }}>
                             <button onClick={() => toggle(member.id, dateKey, 'fam')} style={btnStyle(record.fam === true, 'fam')}>✓</button>
                           </td>
                         </Fragment>
@@ -318,6 +328,10 @@ export default function AttendanceHistoryPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FEF7E0', border: '1.5px solid #F9AB00' }} />
           <span style={{ fontSize: 11, color: '#888' }}>팸모임 출석</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E6F4EA', border: '1.5px solid #34A853' }} />
+          <span style={{ fontSize: 11, color: '#888' }}>온라인 출석</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid #CCCCCC' }} />

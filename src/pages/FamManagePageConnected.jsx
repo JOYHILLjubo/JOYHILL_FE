@@ -32,12 +32,26 @@ function buildApiUrl(path) {
 function normalizeDateInput(value) {
   if (!value) return ''
 
+  // 배열 형태 [year, month, day]
   if (Array.isArray(value) && value.length >= 3) {
     const [year, month, day] = value
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
 
-  return String(value).slice(0, 10)
+  const str = String(value).trim()
+
+  // YYMMDD 6자리 형태 (DB 저장 형식) → YYYY-MM-DD
+  if (/^\d{6}$/.test(str)) {
+    const yy = parseInt(str.substring(0, 2), 10)
+    const mm = str.substring(2, 4)
+    const dd = str.substring(4, 6)
+    // 00~30 → 2000s, 31~99 → 1900s
+    const fullYear = yy <= 30 ? 2000 + yy : 1900 + yy
+    return `${fullYear}-${mm}-${dd}`
+  }
+
+  // 이미 YYYY-MM-DD 형태
+  return str.slice(0, 10)
 }
 
 function nullIfBlank(value) {

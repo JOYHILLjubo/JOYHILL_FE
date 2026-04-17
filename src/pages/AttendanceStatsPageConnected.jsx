@@ -119,16 +119,20 @@ function RateBar({ rate, type }) {
   )
 }
 
-function AvgCard({ label, worship, fam, year }) {
+function AvgCard({ label, worship, online, fam, year }) {
   return (
     <div className="border border-gray-300 rounded-xl p-4 mb-4">
       <p className="text-xs text-gray-500 font-medium mb-3">
         {label} 평균 <span className="text-gray-400">({year}년)</span>
       </p>
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <div className="flex-1 bg-primary-light rounded-lg p-3 text-center">
           <p className="text-[11px] text-primary mb-1">예배 출석률</p>
           <p className="text-xl font-bold text-primary">{toRate(worship)}%</p>
+        </div>
+        <div className="flex-1 rounded-lg p-3 text-center" style={{background:'#E6F4EA'}}>
+          <p className="text-[11px] mb-1" style={{color:'#34A853'}}>온라인 출석률</p>
+          <p className="text-xl font-bold" style={{color:'#34A853'}}>{toRate(online)}%</p>
         </div>
         <div className="flex-1 bg-warning-light rounded-lg p-3 text-center">
           <p className="text-[11px] text-warning mb-1">팸모임 출석률</p>
@@ -342,7 +346,7 @@ function LeaderStatsView({ famName, selectedYear, setSelectedYear, stats, member
         <p className="text-sm font-medium">{famName || '소속 팸 없음'}</p>
         <YearSelect value={selectedYear} onChange={setSelectedYear} />
       </div>
-      <AvgCard label="팸 전체" worship={stats?.worshipRate ?? 0} fam={stats?.famRate ?? 0} year={selectedYear} />
+      <AvgCard label="팸 전체" worship={stats?.worshipRate ?? 0} online={stats?.onlineRate ?? 0} fam={stats?.famRate ?? 0} year={selectedYear} />
       <p className="text-xs text-gray-500 mb-2">팸원별 출석률 · 이번 주 출석</p>
       <MemberStatList members={members} isLoading={isLoading} weekAttendMap={weekAttendMap} />
     </div>
@@ -364,7 +368,7 @@ function VillageStatsView({
           <button onClick={() => setSelectedFam(null)} className="flex items-center gap-1.5 text-sm text-primary bg-transparent border-none cursor-pointer">← {selectedFam}</button>
           <YearSelect value={selectedYear} onChange={setSelectedYear} />
         </div>
-        <AvgCard label={selectedFam} worship={selectedFamStats?.worshipRate ?? 0} fam={selectedFamStats?.famRate ?? 0} year={selectedYear} />
+        <AvgCard label={selectedFam} worship={selectedFamStats?.worshipRate ?? 0} online={selectedFamStats?.onlineRate ?? 0} fam={selectedFamStats?.famRate ?? 0} year={selectedYear} />
         <p className="text-xs text-gray-500 mb-2">팸원별 출석률 · 이번 주 출석</p>
         <MemberStatList members={selectedFamMembers} isLoading={detailLoading} weekAttendMap={weekAttendMap} />
       </div>
@@ -377,7 +381,7 @@ function VillageStatsView({
         <p className="text-sm font-medium">팸 선택</p>
         <YearSelect value={selectedYear} onChange={setSelectedYear} />
       </div>
-      <AvgCard label={isPastorOrAbove ? '전체' : summaryLabel} worship={summaryStats?.worshipRate ?? 0} fam={summaryStats?.famRate ?? 0} year={selectedYear} />
+      <AvgCard label={isPastorOrAbove ? '전체' : summaryLabel} worship={summaryStats?.worshipRate ?? 0} online={summaryStats?.onlineRate ?? 0} fam={summaryStats?.famRate ?? 0} year={selectedYear} />
 
       {Object.entries(villages).length === 0 ? (
         <p className="text-sm text-gray-500 text-center mt-8">표시할 팸이 없습니다.</p>

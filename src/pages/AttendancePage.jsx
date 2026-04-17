@@ -174,6 +174,7 @@ export default function AttendancePage() {
   }
 
   const worshipCount = members.filter((m) => getChecked(m.id, 'worship') === true).length
+  const onlineCount = members.filter((m) => getChecked(m.id, 'online') === true).length
   const famCount = members.filter((m) => getChecked(m.id, 'fam') === true).length
 
   const handleSave = async () => {
@@ -189,6 +190,7 @@ export default function AttendancePage() {
           records: members.map((member) => ({
             userId: member.id,
             worshipPresent: getChecked(member.id, 'worship') === true,
+            onlinePresent: getChecked(member.id, 'online') === true,
             famPresent: getChecked(member.id, 'fam') === true,
           })),
         },
@@ -223,12 +225,14 @@ export default function AttendancePage() {
       <div className="flex gap-2 px-5 py-2 border-b border-gray-300">
         <span className="text-xs bg-primary-light text-primary px-2.5 py-1 rounded-full">전체 {members.length}</span>
         <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full bg-gray-100">예배 {worshipCount}</span>
+        <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full bg-gray-100">온라인 {onlineCount}</span>
         <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full bg-gray-100">팸모임 {famCount}</span>
       </div>
 
       <div className="flex px-5 py-2 border-b border-gray-300">
         <div className="flex-1" />
         <div className="w-[52px] text-center"><span className="text-[11px] font-medium text-primary">예배</span></div>
+        <div className="w-[52px] text-center"><span className="text-[11px] font-medium" style={{color:'#34A853'}}>온라인</span></div>
         <div className="w-[52px] text-center"><span className="text-[11px] font-medium text-warning">팸모임</span></div>
       </div>
 
@@ -241,6 +245,7 @@ export default function AttendancePage() {
           members.map((member) => {
             const color = getAvatarColor(member.id)
             const worshipChecked = getChecked(member.id, 'worship') === true
+            const onlineChecked = getChecked(member.id, 'online') === true
             const famChecked = getChecked(member.id, 'fam') === true
             return (
               <div key={member.id} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
@@ -257,6 +262,11 @@ export default function AttendancePage() {
                     style={!worshipChecked ? { border: '1.5px solid #CCCCCC' } : {}}>✓</button>
                 </div>
                 <div className="w-[52px] flex justify-center">
+                  <button onClick={() => toggleCheck(member.id, 'online')}
+                    className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all`}
+                    style={onlineChecked ? { background: '#E6F4EA', color: '#34A853' } : { border: '1.5px solid #CCCCCC', background: 'transparent', color: 'transparent' }}>✓</button>
+                </div>
+                <div className="w-[52px] flex justify-center">
                   <button onClick={() => toggleCheck(member.id, 'fam')}
                     className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${famChecked ? 'bg-warning-light text-warning' : 'bg-transparent text-transparent'}`}
                     style={!famChecked ? { border: '1.5px solid #CCCCCC' } : {}}>✓</button>
@@ -269,6 +279,7 @@ export default function AttendancePage() {
 
       <div className="flex gap-3 justify-center py-3 border-t border-gray-300">
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-primary-light" /><span className="text-[11px] text-gray-500">예배 출석</span></div>
+        <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full" style={{background:'#E6F4EA'}} /><span className="text-[11px] text-gray-500">온라인 출석</span></div>
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-warning-light" /><span className="text-[11px] text-gray-500">팸모임 출석</span></div>
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full border border-gray-300" /><span className="text-[11px] text-gray-500">결석</span></div>
       </div>
