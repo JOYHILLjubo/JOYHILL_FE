@@ -71,7 +71,7 @@ export default function MyTeamPage() {
   const [error, setError] = useState('')
 
   const [subTeams, setSubTeams] = useState([])
-  const [selectedSubTeam, setSelectedSubTeam] = useState(null)
+  const [selectedSubTeam, setSelectedSubTeam] = useState('조이힐그램')
   const [isLoadingSubTeams, setIsLoadingSubTeams] = useState(false)
 
   const isMediaTeam = selectedTeam === MEDIA_TEAM
@@ -95,7 +95,7 @@ export default function MyTeamPage() {
   useEffect(() => {
     setMembers([])
     setSubTeams([])
-    setSelectedSubTeam(null)
+    setSelectedSubTeam('조이힐그램')
     setError('')
   }, [selectedTeam])
 
@@ -119,7 +119,8 @@ export default function MyTeamPage() {
         if (cancelled) return
         const loaded = Array.isArray(data) ? data : []
         setSubTeams(loaded)
-        setSelectedSubTeam(loaded[0]?.subTeamName ?? null)
+        const DEFAULT_SUB = '조이힐그램'
+        setSelectedSubTeam(loaded.find((s) => s.subTeamName === DEFAULT_SUB) ? DEFAULT_SUB : loaded[0]?.subTeamName ?? null)
       })
       .catch((err) => { if (!cancelled) setError(err.message) })
       .finally(() => { if (!cancelled) setIsLoadingSubTeams(false) })
@@ -178,13 +179,13 @@ export default function MyTeamPage() {
             <p className="text-sm text-gray-500 text-center py-10">서브팀이 없습니다.</p>
           ) : (
             <>
-              <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+              <div className="flex border-b border-gray-300 mb-4">
                 {subTeams.map((st) => (
                   <button
                     key={st.subTeamName}
                     onClick={() => setSelectedSubTeam(st.subTeamName)}
-                    className={`text-sm px-4 py-2 rounded-full border-none cursor-pointer whitespace-nowrap font-medium transition-colors ${
-                      selectedSubTeam === st.subTeamName ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'
+                    className={`flex-1 py-2.5 text-sm border-none cursor-pointer bg-transparent transition-colors ${
+                      selectedSubTeam === st.subTeamName ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
                     }`}
                   >
                     {st.subTeamName}

@@ -179,7 +179,7 @@ export default function TeamManagePageConnected() {
 
   // 서브팀 state (미디어사역팀 전용)
   const [subTeams, setSubTeams] = useState([])
-  const [selectedSubTeam, setSelectedSubTeam] = useState(null)
+  const [selectedSubTeam, setSelectedSubTeam] = useState('조이힐그램')
   const [isLoadingSubTeams, setIsLoadingSubTeams] = useState(false)
   const [subAddPanel, setSubAddPanel] = useState(false)
   const [subCandidateQuery, setSubCandidateQuery] = useState('')
@@ -339,6 +339,8 @@ export default function TeamManagePageConnected() {
         const loaded = (Array.isArray(data) ? data : [])
         setSubTeams(loaded)
         setSelectedSubTeam((prev) => {
+          const DEFAULT_SUB = '조이힐그램'
+          if (loaded.find((s) => s.subTeamName === DEFAULT_SUB)) return DEFAULT_SUB
           if (prev && loaded.find((s) => s.subTeamName === prev)) return prev
           return loaded[0]?.subTeamName ?? null
         })
@@ -631,16 +633,17 @@ export default function TeamManagePageConnected() {
             <p className="text-base font-medium mb-1">{selectedTeamInfo.teamName}</p>
 
             {isMediaTeam ? (
-              // 미디어사역팀 서브팀 탭
+              // 미디어사역팀: 서브팀명을 탭으로 바로 노출
               <>
-                <p className="text-xs text-gray-500 mb-3">서브팀로 관리됩니다</p>
+                <p className="text-xs text-gray-500 mb-3">서브팀으로 관리됩니다</p>
                 <div className="flex border-b border-gray-300">
-                  {[['subteams', '서브팀 관리'], ['intro', '팀 소개']].map(([key, label]) => (
-                    <button key={key} onClick={() => setTab(key)}
+                  {subTeams.map((st) => (
+                    <button key={st.subTeamName}
+                      onClick={() => { setSelectedSubTeam(st.subTeamName); setSubAddPanel(false); setSubCandidateQuery('') }}
                       className={`flex-1 py-2.5 text-sm border-none cursor-pointer bg-transparent transition-colors ${
-                        tab === key ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
+                        selectedSubTeam === st.subTeamName ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
                       }`}>
-                      {label}
+                      {st.subTeamName}
                     </button>
                   ))}
                 </div>
@@ -663,25 +666,16 @@ export default function TeamManagePageConnected() {
             )}
           </div>
 
-          {/* 미디어팀: 서브팀 관리 탭 */}
-          {isMediaTeam && tab === 'subteams' && (
+          {/* 미디어팀: 선택된 서브팀 내용 */}
+          {isMediaTeam && (
             <div className="px-5 pt-3">
               {isLoadingSubTeams ? (
                 <p className="text-sm text-gray-500 text-center py-6">서브팀 정보를 불러오는 중입니다.</p>
               ) : (
                 <>
-                  <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-                    {subTeams.map((st) => (
-                      <button key={st.subTeamName}
-                        onClick={() => { setSelectedSubTeam(st.subTeamName); setSubAddPanel(false); setSubCandidateQuery('') }}
-                        className={`text-sm px-4 py-2 rounded-full border-none cursor-pointer whitespace-nowrap font-medium transition-colors ${
-                          selectedSubTeam === st.subTeamName ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'
-                        }`}>
-                        {st.subTeamName}
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-end mb-3">
                     <button onClick={() => setShowCreateSubTeam((p) => !p)}
-                      className="text-xs px-3 py-2 rounded-full bg-success-light text-success border-none cursor-pointer whitespace-nowrap">
+                      className="text-xs px-3 py-1.5 rounded-full bg-success-light text-success border-none cursor-pointer whitespace-nowrap">
                       + 서브팀 추가
                     </button>
                   </div>
@@ -777,7 +771,7 @@ export default function TeamManagePageConnected() {
                               </div>
                               <div className="flex-1 ml-3">
                                 <p className="text-sm">{member.name}</p>
-                                <p className="text-[11px] text-gray-500">{[member.famName, member.phone, member.birth].filter(Boolean).join(' · ')}</p>
+                                <p className="text-[11px] text-gray-500">{[member.famName, formatPhone(member.phone), formatBirth(member.birth)].filter(Boolean).join(' · ')}</p>
                               </div>
                               <span className={`text-[11px] px-2 py-0.5 rounded-full mr-2 ${member.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'}`}>
                                 {member.isLeader ? '리더' : '멤버'}
