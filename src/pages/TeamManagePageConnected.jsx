@@ -5,6 +5,9 @@ import { useAuth } from '../context/AuthContext'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
+/** 서브팀이 있는 사역팀 이름 */
+const MEDIA_TEAM = '미디어사역팀'
+
 const ROLE_LABELS = {
   admin: '관리자',
   pastor: '교역자·부장',
@@ -174,6 +177,20 @@ export default function TeamManagePageConnected() {
   const [removingUserId, setRemovingUserId] = useState(null)
   const [delegatingUserId, setDelegatingUserId] = useState(null)
 
+  // 서브팀 state (미디어사역팀 전용)
+  const [subTeams, setSubTeams] = useState([])
+  const [selectedSubTeam, setSelectedSubTeam] = useState(null)
+  const [isLoadingSubTeams, setIsLoadingSubTeams] = useState(false)
+  const [subAddPanel, setSubAddPanel] = useState(false)
+  const [subCandidateQuery, setSubCandidateQuery] = useState('')
+  const [subAddingUserId, setSubAddingUserId] = useState(null)
+  const [subRemovingUserId, setSubRemovingUserId] = useState(null)
+  const [subCandidateError, setSubCandidateError] = useState('')
+  const [subNewTeamName, setSubNewTeamName] = useState('')
+  const [showCreateSubTeam, setShowCreateSubTeam] = useState(false)
+  const [isCreatingSubTeam, setIsCreatingSubTeam] = useState(false)
+
+  const isMediaTeam = selectedTeam === MEDIA_TEAM
   const canManagePage = canManageTeam || isPastorOrAbove
 
   const handleExpiredSession = () => {
@@ -279,6 +296,10 @@ export default function TeamManagePageConnected() {
       setIsLoadingMembers(false)
       return
     }
+    if (isMediaTeam) {
+      setMembers([])
+      return
+    }
 
     let cancelled = false
 
@@ -304,7 +325,28 @@ export default function TeamManagePageConnected() {
     return () => {
       cancelled = true
     }
-  }, [accessToken, selectedTeam, reloadKey, setAccessToken])
+  }, [accessToken, selectedTeam, reloadKey, setAccessToken, isMediaTeam])
+
+  // 서브팀 로드 (미디어팀일 때)
+  useEffect(() => {
+    if (!isMediaTeam || !selectedTeam) return
+    let cancelled = false
+    setIsLoadingSubTeams(true)
+    setPageError('')
+    callAuthedApi(`/api/teams/${encodeURIComponent(selectedTeam)}/sub-teams`, '서브팀 정보를 불러오지 못했습니다.')
+      .then((data) => {
+        if (cancelled) return
+        const loaded = (Array.isArray(data) ? data : [])
+        setSubTeams(loaded)
+        setSelectedSubTeam((prev) => {
+          if (prev && loaded.find((s) => s.subTeamName === prev)) return prev
+          return loaded[0]?.subTeamName ?? null
+        })
+      })
+      .catch((err) => { if (!cancelled) setPageError(err instanceof Error ? err.message : '서브팀 정보를 불러오지 못했습니다.') })
+      .finally(() => { if (!cancelled) setIsLoadingSubTeams(false) })
+    return () => { cancelled = true }
+  }, [accessToken, selectedTeam, isMediaTeam, reloadKey])
 
   useEffect(() => {
     setEditingIntro(false)
@@ -317,7 +359,7 @@ export default function TeamManagePageConnected() {
 
   // 팀원 추가 패널 열릴 때 사용자 목록 로드 (팀장 이상 모두 가능)
   useEffect(() => {
-    if (!showAddPanel) return
+    if (!showAddPanel && !subAddPanel) return
 
     let cancelled = false
 
@@ -342,7 +384,7 @@ export default function TeamManagePageConnected() {
     return () => {
       cancelled = true
     }
-  }, [accessToken, setAccessToken, showAddPanel])
+  }, [accessToken, setAccessToken, showAddPanel, subAddPanel])
 
   const candidates = useMemo(() => {
     const query = candidateQuery.trim().toLowerCase()
@@ -444,6 +486,92 @@ export default function TeamManagePageConnected() {
     }
   }
 
+  // 서브팀 핸들러들
+  const handleCreateSubTeam = async () => {
+    if (!subNewTeamName.trim()) return
+    setIsCreatingSubTeam(true); setPageError('')
+    try {
+      await callAuthedApi(`/api/teams/${encodeURIComponent(selectedTeam)}/sub-teams`, '서브팀 생성에 실패했습니다.', {
+        method: 'POST', body: { subTeamName: subNewTeamName.trim() },
+      })
+      setShowCreateSubTeam(false); setSubNewTeamName('')
+      setReloadKey((p) => p + 1)
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : '서브팀 생성에 실패했습니다.')
+    } finally { setIsCreatingSubTeam(false) }
+  }
+
+  const handleDeleteSubTeam = async (subTeamName) => {
+    if (!window.confirm(`"${subTeamName}" 서브팀을 삭제할까요?\n멤버 데이터도 모두 삭제됩니다.`)) return
+    setPageError('')
+    try {
+      await callAuthedApi(
+        `/api/teams/${encodeURIComponent(selectedTeam)}/sub-teams/${encodeURIComponent(subTeamName)}`,
+        '서브팀 삭제에 실패했습니다.', { method: 'DELETE' }
+      )
+      setReloadKey((p) => p + 1)
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : '서브팀 삭제에 실패했습니다.')
+    }
+  }
+
+  const handleSubAddMember = async (candidate) => {
+    if (!selectedTeam || !selectedSubTeam || !candidate?.id) return
+    setSubAddingUserId(candidate.id); setSubCandidateError('')
+    try {
+      await callAuthedApi(
+        `/api/teams/${encodeURIComponent(selectedTeam)}/sub-teams/${encodeURIComponent(selectedSubTeam)}/members`,
+        '서브팀 멤버 추가에 실패했습니다.',
+        { method: 'POST', body: { userId: candidate.id } },
+      )
+      setSubAddPanel(false); setSubCandidateQuery('')
+      setReloadKey((p) => p + 1)
+    } catch (err) {
+      setSubCandidateError(err instanceof Error ? err.message : '서브팀 멤버 추가에 실패했습니다.')
+    } finally { setSubAddingUserId(null) }
+  }
+
+  const handleSubRemoveMember = async (member) => {
+    if (!selectedTeam || !selectedSubTeam || !member?.userId) return
+    setSubRemovingUserId(member.userId); setPageError('')
+    try {
+      await callAuthedApi(
+        `/api/teams/${encodeURIComponent(selectedTeam)}/sub-teams/${encodeURIComponent(selectedSubTeam)}/members/${member.userId}`,
+        '서브팀 멤버 제거에 실패했습니다.', { method: 'DELETE' }
+      )
+      setReloadKey((p) => p + 1)
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : '서브팀 멤버 제거에 실패했습니다.')
+    } finally { setSubRemovingUserId(null) }
+  }
+
+  const handleSetSubLeader = async (member) => {
+    if (!selectedTeam || !selectedSubTeam || !member?.userId) return
+    if (!window.confirm(`${member.name}님을 "${selectedSubTeam}" 리더로 지정할까요?`)) return
+    setPageError('')
+    try {
+      await callAuthedApi(
+        `/api/teams/${encodeURIComponent(selectedTeam)}/sub-teams/${encodeURIComponent(selectedSubTeam)}/leader`,
+        '리더 지정에 실패했습니다.',
+        { method: 'PUT', body: { userId: member.userId } },
+      )
+      setReloadKey((p) => p + 1)
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : '리더 지정에 실패했습니다.')
+    }
+  }
+
+  const currentSubTeam = subTeams.find((s) => s.subTeamName === selectedSubTeam) ?? null
+
+  const subCandidates = useMemo(() => {
+    const query = subCandidateQuery.trim().toLowerCase()
+    const currentIds = new Set((currentSubTeam?.members ?? []).map((m) => m.userId))
+    return allUsers
+      .filter((u) => !currentIds.has(u.id))
+      .filter((u) => !query || [u.name, u.phone, u.village, u.fam].some((v) => String(v ?? '').toLowerCase().includes(query)))
+      .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+  }, [allUsers, subCandidateQuery, currentSubTeam])
+
   if (!canManagePage) {
     return (
       <div className="flex flex-col items-center justify-center h-screen pb-20">
@@ -501,23 +629,182 @@ export default function TeamManagePageConnected() {
         <>
           <div className="px-5 pt-4 pb-0">
             <p className="text-base font-medium mb-1">{selectedTeamInfo.teamName}</p>
-            <p className="text-xs text-gray-500 mb-3">총 {members.length}명 · 팀장 {members.filter((member) => member.isLeader).length}명</p>
-            <div className="flex border-b border-gray-300">
-              {[['members', '팀원 관리'], ['intro', '팀 소개']].map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setTab(key)}
-                  className={`flex-1 py-2.5 text-sm border-none cursor-pointer bg-transparent transition-colors ${
-                    tab === key ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+
+            {isMediaTeam ? (
+              // 미디어사역팀 서브팀 탭
+              <>
+                <p className="text-xs text-gray-500 mb-3">서브팀로 관리됩니다</p>
+                <div className="flex border-b border-gray-300">
+                  {[['subteams', '서브팀 관리'], ['intro', '팀 소개']].map(([key, label]) => (
+                    <button key={key} onClick={() => setTab(key)}
+                      className={`flex-1 py-2.5 text-sm border-none cursor-pointer bg-transparent transition-colors ${
+                        tab === key ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
+                      }`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              // 일반 사역팀 탭
+              <>
+                <p className="text-xs text-gray-500 mb-3">총 {members.length}명 · 팀장 {members.filter((m) => m.isLeader).length}명</p>
+                <div className="flex border-b border-gray-300">
+                  {[['members', '팀원 관리'], ['intro', '팀 소개']].map(([key, label]) => (
+                    <button key={key} onClick={() => setTab(key)}
+                      className={`flex-1 py-2.5 text-sm border-none cursor-pointer bg-transparent transition-colors ${
+                        tab === key ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
+                      }`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          {tab === 'members' && (
+          {/* 미디어팀: 서브팀 관리 탭 */}
+          {isMediaTeam && tab === 'subteams' && (
+            <div className="px-5 pt-3">
+              {isLoadingSubTeams ? (
+                <p className="text-sm text-gray-500 text-center py-6">서브팀 정보를 불러오는 중입니다.</p>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+                    {subTeams.map((st) => (
+                      <button key={st.subTeamName}
+                        onClick={() => { setSelectedSubTeam(st.subTeamName); setSubAddPanel(false); setSubCandidateQuery('') }}
+                        className={`text-sm px-4 py-2 rounded-full border-none cursor-pointer whitespace-nowrap font-medium transition-colors ${
+                          selectedSubTeam === st.subTeamName ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                        {st.subTeamName}
+                      </button>
+                    ))}
+                    <button onClick={() => setShowCreateSubTeam((p) => !p)}
+                      className="text-xs px-3 py-2 rounded-full bg-success-light text-success border-none cursor-pointer whitespace-nowrap">
+                      + 서브팀 추가
+                    </button>
+                  </div>
+
+                  {showCreateSubTeam && (
+                    <div className="mb-4 rounded-xl border border-success/30 bg-white p-4 shadow-sm">
+                      <p className="text-sm font-medium mb-3">새 서브팀 이름</p>
+                      <input value={subNewTeamName} onChange={(e) => setSubNewTeamName(e.target.value)}
+                        placeholder="예: 청바지TV"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                      <div className="flex gap-2 mt-3">
+                        <button onClick={() => { setShowCreateSubTeam(false); setSubNewTeamName('') }}
+                          className="flex-1 py-2 border border-gray-300 rounded-lg text-sm text-gray-500 bg-white cursor-pointer">취소</button>
+                        <button onClick={handleCreateSubTeam} disabled={!subNewTeamName.trim() || isCreatingSubTeam}
+                          className="flex-1 py-2 bg-success text-white rounded-lg text-sm font-medium border-none cursor-pointer disabled:opacity-50">
+                          {isCreatingSubTeam ? '생성 중...' : '생성'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentSubTeam && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <span className="text-sm font-medium">{currentSubTeam.subTeamName}</span>
+                          <span className="text-xs text-gray-500 ml-2">총 {(currentSubTeam.members ?? []).length}명</span>
+                          {currentSubTeam.leaderName && (
+                            <span className="text-xs text-warning ml-2">리더: {currentSubTeam.leaderName}</span>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => { setSubAddPanel((p) => !p); setSubCandidateQuery('') }}
+                            className="text-xs text-primary bg-primary-light px-3 py-1.5 rounded-full border-none cursor-pointer">
+                            + 멤버 추가
+                          </button>
+                          <button onClick={() => handleDeleteSubTeam(currentSubTeam.subTeamName)}
+                            className="text-xs text-danger bg-danger-light px-3 py-1.5 rounded-full border-none cursor-pointer">
+                            팀 삭제
+                          </button>
+                        </div>
+                      </div>
+
+                      {subAddPanel && (
+                        <div className="mb-4 rounded-xl border border-primary/20 bg-white p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-sm font-medium">{currentSubTeam.subTeamName} 멤버 추가</p>
+                            <button onClick={() => setSubAddPanel(false)} className="text-xs text-gray-500 bg-transparent border-none cursor-pointer">닫기</button>
+                          </div>
+                          <input value={subCandidateQuery} onChange={(e) => setSubCandidateQuery(e.target.value)}
+                            placeholder="이름, 마을, 팸, 전화번호 검색"
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                          {subCandidateError && (
+                            <div className="mt-3 bg-danger-light rounded-lg px-3 py-2.5">
+                              <p className="text-xs text-danger">{subCandidateError}</p>
+                            </div>
+                          )}
+                          <div className="mt-3 rounded-lg border border-gray-300 overflow-hidden max-h-64 overflow-y-auto">
+                            {isLoadingCandidates ? (
+                              <p className="px-4 py-6 text-sm text-gray-500 text-center">불러오는 중...</p>
+                            ) : subCandidates.length === 0 ? (
+                              <p className="px-4 py-6 text-sm text-gray-500 text-center">추가 가능한 사용자가 없습니다.</p>
+                            ) : (
+                              subCandidates.map((candidate) => (
+                                <div key={candidate.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-300 last:border-b-0">
+                                  <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-[13px] font-medium text-primary shrink-0">
+                                    {getInitial(candidate.name)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm truncate">{candidate.name}</p>
+                                    <p className="text-[11px] text-gray-500 truncate">{[candidate.village, candidate.fam, candidate.phone].filter(Boolean).join(' · ')}</p>
+                                  </div>
+                                  <button onClick={() => handleSubAddMember(candidate)} disabled={subAddingUserId === candidate.id}
+                                    className="text-[11px] text-primary bg-primary-light px-2 py-1 rounded-full border-none cursor-pointer disabled:opacity-60">
+                                    {subAddingUserId === candidate.id ? '추가 중...' : '추가'}
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {(currentSubTeam.members ?? []).length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-8">등록된 멤버가 없습니다.</p>
+                      ) : (
+                        (currentSubTeam.members ?? []).map((member) => {
+                          const color = getColor(member.userId)
+                          return (
+                            <div key={member.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
+                              <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
+                                {getInitial(member.name)}
+                              </div>
+                              <div className="flex-1 ml-3">
+                                <p className="text-sm">{member.name}</p>
+                                <p className="text-[11px] text-gray-500">{[member.famName, member.phone, member.birth].filter(Boolean).join(' · ')}</p>
+                              </div>
+                              <span className={`text-[11px] px-2 py-0.5 rounded-full mr-2 ${member.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'}`}>
+                                {member.isLeader ? '리더' : '멤버'}
+                              </span>
+                              {!member.isLeader && (
+                                <button onClick={() => handleSetSubLeader(member)}
+                                  className="text-[11px] text-warning bg-warning-light px-2 py-0.5 rounded-full border-none cursor-pointer mr-1">
+                                  리더지정
+                                </button>
+                              )}
+                              <button onClick={() => handleSubRemoveMember(member)} disabled={subRemovingUserId === member.userId}
+                                className="text-[11px] text-danger bg-danger-light px-2 py-0.5 rounded-full border-none cursor-pointer disabled:opacity-60">
+                                {subRemovingUserId === member.userId ? '제거 중...' : '제거'}
+                              </button>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* 일반팀: 팀원 관리 탭 */}
+          {!isMediaTeam && tab === 'members' && (
             <div className="px-5 pt-3">
               <div className="flex justify-between items-center mb-3 gap-3">
                 <span className="text-xs text-gray-500">총 {members.length}명</span>

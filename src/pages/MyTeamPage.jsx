@@ -5,6 +5,8 @@ import BottomNav from '../components/BottomNav'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
+const MEDIA_TEAM = '미디어사역팀'
+
 const avatarColors = [
   { bg: 'bg-success-light', text: 'text-success' },
   { bg: 'bg-primary-light', text: 'text-primary' },
@@ -63,9 +65,16 @@ export default function MyTeamPage() {
 
   const myTeams = user?.teams ?? []
   const [selectedTeam, setSelectedTeam] = useState(myTeams[0] ?? '')
+
   const [members, setMembers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const [subTeams, setSubTeams] = useState([])
+  const [selectedSubTeam, setSelectedSubTeam] = useState(null)
+  const [isLoadingSubTeams, setIsLoadingSubTeams] = useState(false)
+
+  const isMediaTeam = selectedTeam === MEDIA_TEAM
 
   const callAuthedApi = async (path) => {
     let token = accessToken
@@ -84,19 +93,41 @@ export default function MyTeamPage() {
   }
 
   useEffect(() => {
-    if (!selectedTeam) return
-    let cancelled = false
-    setIsLoading(true)
+    setMembers([])
+    setSubTeams([])
+    setSelectedSubTeam(null)
     setError('')
+  }, [selectedTeam])
+
+  useEffect(() => {
+    if (!selectedTeam || isMediaTeam) return
+    let cancelled = false
+    setIsLoading(true); setError('')
     callAuthedApi(`/api/teams/${encodeURIComponent(selectedTeam)}/members`)
-      .then((data) => {
-        if (cancelled) return
-        setMembers(Array.isArray(data) ? data : [])
-      })
+      .then((data) => { if (!cancelled) setMembers(Array.isArray(data) ? data : []) })
       .catch((err) => { if (!cancelled) setError(err.message) })
       .finally(() => { if (!cancelled) setIsLoading(false) })
     return () => { cancelled = true }
-  }, [selectedTeam, accessToken])
+  }, [selectedTeam, accessToken, isMediaTeam])
+
+  useEffect(() => {
+    if (!isMediaTeam || !selectedTeam) return
+    let cancelled = false
+    setIsLoadingSubTeams(true); setError('')
+    callAuthedApi(`/api/teams/${encodeURIComponent(selectedTeam)}/sub-teams`)
+      .then((data) => {
+        if (cancelled) return
+        const loaded = Array.isArray(data) ? data : []
+        setSubTeams(loaded)
+        setSelectedSubTeam(loaded[0]?.subTeamName ?? null)
+      })
+      .catch((err) => { if (!cancelled) setError(err.message) })
+      .finally(() => { if (!cancelled) setIsLoadingSubTeams(false) })
+    return () => { cancelled = true }
+  }, [selectedTeam, accessToken, isMediaTeam])
+
+  const currentSubTeam = subTeams.find((s) => s.subTeamName === selectedSubTeam) ?? null
+  const subMembers = currentSubTeam?.members ?? []
 
   if (myTeams.length === 0) {
     return (
@@ -133,7 +164,6 @@ export default function MyTeamPage() {
 
       <div className="px-5 pt-4">
         <p className="text-base font-medium mb-1">{selectedTeam}</p>
-        <p className="text-xs text-gray-500 mb-4">총 {members.length}명</p>
 
         {error && (
           <div className="bg-danger-light rounded-xl px-4 py-3 mb-3">
@@ -141,31 +171,95 @@ export default function MyTeamPage() {
           </div>
         )}
 
-        {isLoading ? (
-          <p className="text-sm text-gray-500 text-center py-10">팀원 정보를 불러오는 중입니다.</p>
-        ) : members.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-10">등록된 팀원이 없습니다.</p>
-        ) : (
-          members.map((item) => {
-            const color = getColor(item.userId)
-            const subInfo = [item.famName, formatPhone(item.phone), formatBirth(item.birth)].filter(Boolean).join(' · ')
-            return (
-              <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                  {getInitial(item.name)}
-                </div>
-                <div className="flex-1 ml-3">
-                  <p className="text-sm">{item.name}</p>
-                  <p className="text-[11px] text-gray-500">{subInfo}</p>
-                </div>
-                <span className={`text-[11px] px-2 py-0.5 rounded-full ${
-                  item.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'
-                }`}>
-                  {item.isLeader ? '팀장' : '팀원'}
-                </span>
+        {isMediaTeam ? (
+          isLoadingSubTeams ? (
+            <p className="text-sm text-gray-500 text-center py-10">서브팀 정보를 불러오는 중입니다.</p>
+          ) : subTeams.length === 0 ? (
+            <p className="text-sm text-gray-500 text-center py-10">서브팀이 없습니다.</p>
+          ) : (
+            <>
+              <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+                {subTeams.map((st) => (
+                  <button
+                    key={st.subTeamName}
+                    onClick={() => setSelectedSubTeam(st.subTeamName)}
+                    className={`text-sm px-4 py-2 rounded-full border-none cursor-pointer whitespace-nowrap font-medium transition-colors ${
+                      selectedSubTeam === st.subTeamName ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {st.subTeamName}
+                  </button>
+                ))}
               </div>
-            )
-          })
+
+              {currentSubTeam && (
+                <>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-xs text-gray-500">총 {subMembers.length}명</span>
+                    {currentSubTeam.leaderName && (
+                      <span className="text-xs text-warning bg-warning-light px-2 py-0.5 rounded-full">
+                        리더: {currentSubTeam.leaderName}
+                      </span>
+                    )}
+                  </div>
+                  {subMembers.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-8">등록된 멤버가 없습니다.</p>
+                  ) : (
+                    subMembers.map((item) => {
+                      const color = getColor(item.userId)
+                      const subInfo = [item.famName, formatPhone(item.phone), formatBirth(item.birth)].filter(Boolean).join(' · ')
+                      return (
+                        <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
+                          <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
+                            {getInitial(item.name)}
+                          </div>
+                          <div className="flex-1 ml-3">
+                            <p className="text-sm">{item.name}</p>
+                            <p className="text-[11px] text-gray-500">{subInfo}</p>
+                          </div>
+                          <span className={`text-[11px] px-2 py-0.5 rounded-full ${
+                            item.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'
+                          }`}>
+                            {item.isLeader ? '리더' : '멤버'}
+                          </span>
+                        </div>
+                      )
+                    })
+                  )}
+                </>
+              )}
+            </>
+          )
+        ) : (
+          <>
+            <p className="text-xs text-gray-500 mb-4">총 {members.length}명</p>
+            {isLoading ? (
+              <p className="text-sm text-gray-500 text-center py-10">팀원 정보를 불러오는 중입니다.</p>
+            ) : members.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-10">등록된 팀원이 없습니다.</p>
+            ) : (
+              members.map((item) => {
+                const color = getColor(item.userId)
+                const subInfo = [item.famName, formatPhone(item.phone), formatBirth(item.birth)].filter(Boolean).join(' · ')
+                return (
+                  <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
+                    <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
+                      {getInitial(item.name)}
+                    </div>
+                    <div className="flex-1 ml-3">
+                      <p className="text-sm">{item.name}</p>
+                      <p className="text-[11px] text-gray-500">{subInfo}</p>
+                    </div>
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${
+                      item.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {item.isLeader ? '팀장' : '팀원'}
+                    </span>
+                  </div>
+                )
+              })
+            )}
+          </>
         )}
       </div>
 
