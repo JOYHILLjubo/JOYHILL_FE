@@ -633,19 +633,25 @@ export default function TeamManagePageConnected() {
             <p className="text-base font-medium mb-1">{selectedTeamInfo.teamName}</p>
 
             {isMediaTeam ? (
-              // 미디어사역팀: 서브팀명을 탭으로 바로 노출
+              // 미디어사역팀: 서브팀명 탭 + 팀 소개 탭
               <>
                 <p className="text-xs text-gray-500 mb-3">서브팀으로 관리됩니다</p>
                 <div className="flex border-b border-gray-300">
                   {subTeams.map((st) => (
                     <button key={st.subTeamName}
-                      onClick={() => { setSelectedSubTeam(st.subTeamName); setSubAddPanel(false); setSubCandidateQuery('') }}
+                      onClick={() => { setSelectedSubTeam(st.subTeamName); setTab('subteams'); setSubAddPanel(false); setSubCandidateQuery('') }}
                       className={`flex-1 py-2.5 text-sm border-none cursor-pointer bg-transparent transition-colors ${
-                        selectedSubTeam === st.subTeamName ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
+                        tab !== 'intro' && selectedSubTeam === st.subTeamName ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
                       }`}>
                       {st.subTeamName}
                     </button>
                   ))}
+                  <button onClick={() => setTab('intro')}
+                    className={`flex-1 py-2.5 text-sm border-none cursor-pointer bg-transparent transition-colors ${
+                      tab === 'intro' ? 'text-primary font-medium border-b-2 border-primary' : 'text-gray-500'
+                    }`}>
+                    팀 소개
+                  </button>
                 </div>
               </>
             ) : (
@@ -667,7 +673,7 @@ export default function TeamManagePageConnected() {
           </div>
 
           {/* 미디어팀: 선택된 서브팀 내용 */}
-          {isMediaTeam && (
+          {isMediaTeam && tab !== 'intro' && (
             <div className="px-5 pt-3">
               {isLoadingSubTeams ? (
                 <p className="text-sm text-gray-500 text-center py-6">서브팀 정보를 불러오는 중입니다.</p>
