@@ -673,30 +673,6 @@ export default function TeamManagePageConnected() {
                 <p className="text-sm text-gray-500 text-center py-6">서브팀 정보를 불러오는 중입니다.</p>
               ) : (
                 <>
-                  <div className="flex items-center justify-end mb-3">
-                    <button onClick={() => setShowCreateSubTeam((p) => !p)}
-                      className="text-xs px-3 py-1.5 rounded-full bg-success-light text-success border-none cursor-pointer whitespace-nowrap">
-                      + 서브팀 추가
-                    </button>
-                  </div>
-
-                  {showCreateSubTeam && (
-                    <div className="mb-4 rounded-xl border border-success/30 bg-white p-4 shadow-sm">
-                      <p className="text-sm font-medium mb-3">새 서브팀 이름</p>
-                      <input value={subNewTeamName} onChange={(e) => setSubNewTeamName(e.target.value)}
-                        placeholder="예: 청바지TV"
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
-                      <div className="flex gap-2 mt-3">
-                        <button onClick={() => { setShowCreateSubTeam(false); setSubNewTeamName('') }}
-                          className="flex-1 py-2 border border-gray-300 rounded-lg text-sm text-gray-500 bg-white cursor-pointer">취소</button>
-                        <button onClick={handleCreateSubTeam} disabled={!subNewTeamName.trim() || isCreatingSubTeam}
-                          className="flex-1 py-2 bg-success text-white rounded-lg text-sm font-medium border-none cursor-pointer disabled:opacity-50">
-                          {isCreatingSubTeam ? '생성 중...' : '생성'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
                   {currentSubTeam && (
                     <div>
                       <div className="flex items-center justify-between mb-3">
@@ -707,16 +683,10 @@ export default function TeamManagePageConnected() {
                             <span className="text-xs text-warning ml-2">리더: {currentSubTeam.leaderName}</span>
                           )}
                         </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => { setSubAddPanel((p) => !p); setSubCandidateQuery('') }}
-                            className="text-xs text-primary bg-primary-light px-3 py-1.5 rounded-full border-none cursor-pointer">
-                            + 멤버 추가
-                          </button>
-                          <button onClick={() => handleDeleteSubTeam(currentSubTeam.subTeamName)}
-                            className="text-xs text-danger bg-danger-light px-3 py-1.5 rounded-full border-none cursor-pointer">
-                            팀 삭제
-                          </button>
-                        </div>
+                        <button onClick={() => { setSubAddPanel((p) => !p); setSubCandidateQuery('') }}
+                          className="text-xs text-primary bg-primary-light px-3 py-1.5 rounded-full border-none cursor-pointer">
+                          + 멤버 추가
+                        </button>
                       </div>
 
                       {subAddPanel && (
@@ -779,7 +749,7 @@ export default function TeamManagePageConnected() {
                               {!member.isLeader && (
                                 <button onClick={() => handleSetSubLeader(member)}
                                   className="text-[11px] text-warning bg-warning-light px-2 py-0.5 rounded-full border-none cursor-pointer mr-1">
-                                  리더지정
+                                  위임
                                 </button>
                               )}
                               <button onClick={() => handleSubRemoveMember(member)} disabled={subRemovingUserId === member.userId}
