@@ -26,7 +26,6 @@ function getSundaysOfMonth(year, month) {
   return sundays
 }
 
-// ── 로컬 날짜 기준으로 키 생성 (toISOString은 UTC 변환으로 날짜가 밀림)
 function toKey(date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -111,9 +110,13 @@ export default function AttendanceHistoryPage() {
   const navigate = useNavigate()
   const { user, accessToken, setAccessToken, logout } = useAuth()
 
+  const isVillageLeader = user?.role === 'village_leader'
+
   const now = new Date()
   const [selectedYear, setSelectedYear] = useState(now.getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1)
+  const [villageFams, setVillageFams] = useState([]) // 마을장용 팸 목록
+  const [selectedFam, setSelectedFam] = useState('') // 마을장용 선택된 팸
   const [famMembers, setFamMembers] = useState([])
   const [attendance, setAttendance] = useState({})
   const [saved, setSaved] = useState(false)
@@ -122,7 +125,9 @@ export default function AttendanceHistoryPage() {
   const [pageError, setPageError] = useState('')
   const [saveError, setSaveError] = useState('')
 
-  const famName = user?.fam ?? ''
+  // 리더는 본인 팸, 마을장은 선택된 팸
+  const famName = isVillageLeader ? selectedFam : (user?.fam ?? '')
+
   const sundays = useMemo(() => getSundaysOfMonth(selectedYear, selectedMonth), [selectedYear, selectedMonth])
   const monthOptions = useMemo(() => {
     const today = new Date()
@@ -151,9 +156,23 @@ export default function AttendanceHistoryPage() {
     }
   }
 
+  // 마을장: 마을 소속 팸 목록 로드
+  useEffect(() => {
+    if (!isVillageLeader || !user?.village) return
+    callAuthedApi('/api/fams').then((data) => {
+      const fams = (Array.isArray(data) ? data : [])
+        .filter((f) => f.villageName === user.village || f.village === user.village)
+        .map((f) => f.name ?? f.famName ?? '')
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, 'ko'))
+      setVillageFams(fams)
+      if (fams.length > 0 && !selectedFam) setSelectedFam(fams[0])
+    }).catch(() => {})
+  }, [isVillageLeader, user?.village])
+
   const loadData = async () => {
     if (!famName) {
-      setPageError('소속 팸 정보가 없어 출석 이력을 불러올 수 없습니다.')
+      setPageError('소속 팸 정보가 없어 출석을 불러올 수 없습니다.')
       setFamMembers([]); setAttendance({}); setIsLoading(false); return
     }
     setIsLoading(true); setPageError(''); setSaveError(''); setSaved(false)
@@ -166,7 +185,7 @@ export default function AttendanceHistoryPage() {
       setFamMembers(Array.isArray(membersData) ? mapFamMembers(membersData) : [])
       setAttendance(Array.isArray(historyData) ? buildAttendanceMap(historyData) : {})
     } catch (err) {
-      setPageError(err instanceof Error ? err.message : '출석 이력을 불러오지 못했습니다.')
+      setPageError(err instanceof Error ? err.message : '출석을 불러오지 못했습니다.')
       setFamMembers([]); setAttendance({})
     } finally { setIsLoading(false) }
   }
@@ -229,11 +248,28 @@ export default function AttendanceHistoryPage() {
     <div className="pb-24 flex flex-col" style={{ minHeight: '100dvh' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300 shrink-0">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">출석 이력표</p>
+        <p className="text-base font-medium flex-1">출석 관리</p>
       </div>
 
+      {/* 마을장: 팸 선택 탭 */}
+      {isVillageLeader && villageFams.length > 0 && (
+        <div className="flex gap-2 px-5 py-3 overflow-x-auto border-b border-gray-300 shrink-0">
+          {villageFams.map((fam) => (
+            <button
+              key={fam}
+              onClick={() => { setSelectedFam(fam); setAttendance({}); setFamMembers([]) }}
+              className={`text-xs px-3 py-1.5 rounded-full border-none cursor-pointer whitespace-nowrap transition-colors ${
+                selectedFam === fam ? 'bg-success-light text-success font-medium' : 'bg-gray-100 text-gray-500'
+              }`}
+            >
+              {fam}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-300 shrink-0">
-        <p className="text-sm font-medium">{famName || '소속 팸 없음'}</p>
+        <p className="text-sm font-medium">{famName || '팸을 선택하세요'}</p>
         <select value={`${selectedYear}-${selectedMonth}`}
           onChange={(e) => { const [y, m] = e.target.value.split('-').map(Number); setSelectedYear(y); setSelectedMonth(m) }}
           className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none">
@@ -272,20 +308,20 @@ export default function AttendanceHistoryPage() {
               ))}
             </tr>
             <tr style={{ borderBottom: '1px solid #E0E0E0', background: '#FAFAFA' }}>
-            {sundays.map((s) => (
-            <Fragment key={toKey(s)}>
-            <th style={{ textAlign: 'center', fontSize: 10, color: '#4285F4', fontWeight: 500, padding: '5px 0', borderLeft: '1px solid #E0E0E0' }}>예배</th>
-            <th style={{ textAlign: 'center', fontSize: 10, color: '#34A853', fontWeight: 500, padding: '5px 0' }}>온라인</th>
-              <th style={{ textAlign: 'center', fontSize: 10, color: '#F9AB00', fontWeight: 500, padding: '5px 0' }}>팸</th>
-              </Fragment>
+              {sundays.map((s) => (
+                <Fragment key={toKey(s)}>
+                  <th style={{ textAlign: 'center', fontSize: 10, color: '#4285F4', fontWeight: 500, padding: '5px 0', borderLeft: '1px solid #E0E0E0' }}>예배</th>
+                  <th style={{ textAlign: 'center', fontSize: 10, color: '#34A853', fontWeight: 500, padding: '5px 0' }}>온라인</th>
+                  <th style={{ textAlign: 'center', fontSize: 10, color: '#F9AB00', fontWeight: 500, padding: '5px 0' }}>팸</th>
+                </Fragment>
               ))}
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={1 + sundays.length * 2} style={{ textAlign: 'center', padding: '32px 12px', color: '#888', fontSize: 13 }}>출석 이력을 불러오는 중입니다.</td></tr>
+              <tr><td colSpan={1 + sundays.length * 3} style={{ textAlign: 'center', padding: '32px 12px', color: '#888', fontSize: 13 }}>출석 정보를 불러오는 중입니다.</td></tr>
             ) : famMembers.length === 0 ? (
-              <tr><td colSpan={1 + sundays.length * 2} style={{ textAlign: 'center', padding: '32px 12px', color: '#888', fontSize: 13 }}>등록된 팸원이 없습니다.</td></tr>
+              <tr><td colSpan={1 + sundays.length * 3} style={{ textAlign: 'center', padding: '32px 12px', color: '#888', fontSize: 13 }}>등록된 팸원이 없습니다.</td></tr>
             ) : (
               famMembers.map((member, rowIndex) => {
                 const rowBg = rowIndex % 2 === 0 ? '#fff' : '#FAFAFA'

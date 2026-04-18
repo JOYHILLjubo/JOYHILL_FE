@@ -315,8 +315,9 @@ export default function TeamManagePageConnected() {
     setAddAsLeader(false)
   }, [selectedTeamInfo?.teamName, selectedTeamInfo?.intro])
 
+  // 팀원 추가 패널 열릴 때 사용자 목록 로드 (팀장 이상 모두 가능)
   useEffect(() => {
-    if (!showAddPanel || !isAdmin) return
+    if (!showAddPanel) return
 
     let cancelled = false
 
@@ -341,7 +342,7 @@ export default function TeamManagePageConnected() {
     return () => {
       cancelled = true
     }
-  }, [accessToken, isAdmin, setAccessToken, showAddPanel])
+  }, [accessToken, setAccessToken, showAddPanel])
 
   const candidates = useMemo(() => {
     const query = candidateQuery.trim().toLowerCase()
@@ -520,19 +521,15 @@ export default function TeamManagePageConnected() {
             <div className="px-5 pt-3">
               <div className="flex justify-between items-center mb-3 gap-3">
                 <span className="text-xs text-gray-500">총 {members.length}명</span>
-                {isAdmin ? (
-                  <button
-                    onClick={() => setShowAddPanel((prev) => !prev)}
-                    className="text-xs text-primary bg-primary-light px-3 py-1.5 rounded-full border-none cursor-pointer"
-                  >
-                    + 팀원 추가
-                  </button>
-                ) : (
-                  <span className="text-[11px] text-gray-500">팀원 추가는 현재 관리자 계정에서만 가능합니다.</span>
-                )}
+                <button
+                  onClick={() => setShowAddPanel((prev) => !prev)}
+                  className="text-xs text-primary bg-primary-light px-3 py-1.5 rounded-full border-none cursor-pointer"
+                >
+                  + 팀원 추가
+                </button>
               </div>
 
-              {showAddPanel && isAdmin && (
+              {showAddPanel && (
                 <div className="mb-4 rounded-xl border border-primary/20 bg-white p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm font-medium">{selectedTeam} 팀원 추가</p>
