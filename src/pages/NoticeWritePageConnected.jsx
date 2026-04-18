@@ -160,6 +160,7 @@ export default function NoticeWritePageConnected() {
   const [imagePreview, setImagePreview] = useState(editingNotice?.fileUrl ?? '')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [linkUrl, setLinkUrl] = useState(editingNotice?.linkUrl ?? '')
   const [deadline, setDeadline] = useState(editingNotice?.deadline ?? '')
   const [pinned, setPinned] = useState(editingNotice?.pinned ?? false)
   const [submitError, setSubmitError] = useState('')
@@ -286,10 +287,11 @@ export default function NoticeWritePageConnected() {
       title: title.trim(),
       content: content.trim(),
       tag: tags[0] ?? '',
-      teamTag: editingNotice?.teamTag ?? (user?.teamRoles?.[0] ?? null),
+      teamTag: null,
       pinned,
       deadline: nullIfBlank(deadline),
       fileUrl: nullIfBlank(uploadedImageUrl),
+      linkUrl: nullIfBlank(linkUrl),
     }
 
     try {
@@ -445,6 +447,16 @@ export default function NoticeWritePageConnected() {
               <img src={imagePreview} alt="미리보기" className="w-full max-h-48 object-contain bg-gray-50" />
             </div>
           )}
+        </div>
+
+        <div>
+          <p className="text-xs text-gray-500 mb-1.5">링크</p>
+          <input
+            value={linkUrl}
+            onChange={(e) => { setLinkUrl(e.target.value); setSubmitError('') }}
+            placeholder="https://..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"
+          />
         </div>
 
         <div>

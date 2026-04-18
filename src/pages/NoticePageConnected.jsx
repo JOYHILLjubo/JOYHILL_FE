@@ -329,11 +329,7 @@ export default function NoticePageConnected() {
                       {notice.tag}
                     </span>
                   )}
-                  {notice.teamTag && (
-                    <span className="text-[11px] text-warning bg-warning-light px-1.5 py-0.5 rounded">
-                      {notice.teamTag}
-                    </span>
-                  )}
+
                 </div>
                 <p className="text-sm font-medium">{notice.title}</p>
                 <p className="text-[13px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
