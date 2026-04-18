@@ -156,6 +156,10 @@ export default function NoticeWritePageConnected() {
   const [content, setContent] = useState(editingNotice?.content ?? '')
   const [tags, setTags] = useState(editingNotice?.tag ? [editingNotice.tag] : [])
   const [fileUrl, setFileUrl] = useState(editingNotice?.fileUrl ?? '')
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(editingNotice?.fileUrl ?? '')
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const [deadline, setDeadline] = useState(editingNotice?.deadline ?? '')
   const [pinned, setPinned] = useState(editingNotice?.pinned ?? false)
   const [submitError, setSubmitError] = useState('')
@@ -179,6 +183,39 @@ export default function NoticeWritePageConnected() {
     }
 
     navigate('/notice')
+  }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setUploadError('이미지 파일만 선택할 수 있습니다.')
+      return
+    }
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+    setUploadError('')
+  }
+
+  const uploadImageIfNeeded = async () => {
+    if (!imageFile) return fileUrl // 새 이미지 없으면 기존 URL 그대로
+    setIsUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('image', imageFile)
+      const token = accessTokenRef.current
+      const res = await fetch(buildApiUrl('/api/notices/image'), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        body: formData,
+      })
+      const payload = await res.json().catch(() => null)
+      if (!res.ok || !payload?.success) throw new Error(payload?.error?.message ?? '이미지 업로드에 실패했습니다.')
+      return payload.data.imageUrl
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const callAuthedApi = async (path, options = {}) => {
@@ -236,6 +273,15 @@ export default function NoticeWritePageConnected() {
     setSubmitError('')
     setIsSubmitting(true)
 
+    let uploadedImageUrl = fileUrl
+    try {
+      uploadedImageUrl = await uploadImageIfNeeded()
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.')
+      setIsSubmitting(false)
+      return
+    }
+
     const requestBody = {
       title: title.trim(),
       content: content.trim(),
@@ -243,7 +289,7 @@ export default function NoticeWritePageConnected() {
       teamTag: editingNotice?.teamTag ?? (user?.teamRoles?.[0] ?? null),
       pinned,
       deadline: nullIfBlank(deadline),
-      fileUrl: nullIfBlank(fileUrl),
+      fileUrl: nullIfBlank(uploadedImageUrl),
     }
 
     try {
@@ -379,19 +425,26 @@ export default function NoticeWritePageConnected() {
         </div>
 
         <div>
-          <p className="text-xs text-gray-500 mb-1.5">첨부 링크</p>
-          <input
-            value={fileUrl}
-            onChange={(event) => {
-              setFileUrl(event.target.value)
-              setSubmitError('')
-            }}
-            placeholder="https://..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"
-          />
-          <p className="text-[11px] text-gray-500 mt-1 ml-1">
-            현재 백엔드는 파일 업로드 대신 링크 주소만 저장합니다.
-          </p>
+          <p className="text-xs text-gray-500 mb-1.5">이미지 첨부</p>
+          <label className="flex items-center gap-2.5 border border-dashed border-gray-300 rounded-lg px-3 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+            <span className="text-xl">🖼️</span>
+            <span className="text-sm text-gray-500 flex-1 truncate">
+              {imageFile ? imageFile.name : imagePreview ? '이미지가 첨부되어 있습니다' : '이미지를 선택하세요'}
+            </span>
+            {(imageFile || imagePreview) && (
+              <button
+                onClick={(e) => { e.preventDefault(); setImageFile(null); setImagePreview(''); setFileUrl('') }}
+                className="text-gray-400 text-xs bg-transparent border-none cursor-pointer"
+              >✕</button>
+            )}
+            <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+          </label>
+          {uploadError && <p className="text-[11px] text-danger mt-1 ml-1">{uploadError}</p>}
+          {imagePreview && (
+            <div className="mt-2 rounded-lg overflow-hidden border border-gray-200">
+              <img src={imagePreview} alt="미리보기" className="w-full max-h-48 object-contain bg-gray-50" />
+            </div>
+          )}
         </div>
 
         <div>
@@ -444,7 +497,7 @@ export default function NoticeWritePageConnected() {
               : 'bg-primary text-white cursor-pointer hover:bg-primary-hover'
           }`}
         >
-          {isSubmitting ? '저장 중...' : isEdit ? '공지 수정하기' : '공지 등록하기'}
+          {isUploading ? '이미지 업로드 중...' : isSubmitting ? '저장 중...' : isEdit ? '공지 수정하기' : '공지 등록하기'}
         </button>
       </div>
     </div>

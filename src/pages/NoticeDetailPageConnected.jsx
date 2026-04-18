@@ -400,16 +400,14 @@ export default function NoticeDetailPageConnected() {
 
         {notice.fileUrl && (
           <div className="mt-5 pt-4 border-t border-gray-300">
-            <p className="text-xs text-gray-500 mb-2">첨부 링크</p>
-            <a
-              href={notice.fileUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2.5 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-primary break-all"
-            >
-              <span className="text-base">↗</span>
-              <span>{notice.fileUrl}</span>
-            </a>
+            <p className="text-xs text-gray-500 mb-2">첨부 이미지</p>
+            <div className="rounded-lg overflow-hidden border border-gray-200">
+              <img
+                src={notice.fileUrl}
+                alt="첨부 이미지"
+                className="w-full object-contain bg-gray-50"
+              />
+            </div>
           </div>
         )}
       </div>
