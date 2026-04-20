@@ -265,7 +265,7 @@ export default function NoticePageConnected() {
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           placeholder="검색어를 입력하세요"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-primary"
         />
       </div>
 
@@ -275,7 +275,7 @@ export default function NoticePageConnected() {
             key={tag.label}
             onClick={() => setFilter(tag.value)}
             className={`text-xs px-2.5 py-1 rounded-full border-none cursor-pointer transition-colors whitespace-nowrap ${
-              filter === tag.value ? 'bg-primary-light text-primary' : 'bg-gray-100 text-gray-500'
+              filter === tag.value ? 'bg-primary-light text-primary font-semibold' : 'bg-gray-100 text-gray-500'
             }`}
           >
             {tag.label}
