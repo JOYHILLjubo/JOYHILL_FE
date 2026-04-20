@@ -364,7 +364,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canCh
                   <RateChip rate={member.worshipRate} type="worship" />
                   <RateChip rate={member.famRate} type="fam" />
                 </div>
-                <span className="text-gray-500 text-xs ml-1">→</span>
+                <span className="text-gray-500 text-[1rem] ml-1">→</span>
               </div>
             )
           })
@@ -690,7 +690,7 @@ export default function VillageManagePageConnected() {
                       <p className="text-[11px] text-gray-500">{result.villageName} · {result.famName} · {ROLE_LABELS[result.member.role] ?? result.member.role}</p>
                       {result.member.phone && <p className="text-[11px] text-gray-500">{result.member.phone}</p>}
                     </div>
-                    <span className="text-gray-500 text-xs shrink-0">→</span>
+                    <span className="text-gray-500 text-[1rem] shrink-0">→</span>
                   </div>
                 )
               })}

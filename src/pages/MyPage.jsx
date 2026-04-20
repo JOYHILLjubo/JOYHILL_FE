@@ -176,7 +176,7 @@ function MenuItem({ label, last = false, onPress }) {
     <div onClick={onPress}
       className={`flex justify-between items-center px-4 py-3.5 cursor-pointer hover:bg-gray-100 transition-colors ${!last ? 'border-b border-gray-300' : ''}`}>
       <span className="text-sm">{label}</span>
-      <span className="text-gray-700 text-xs">→</span>
+      <span className="text-gray-700 text-[1rem]">→</span>
     </div>
   )
 }

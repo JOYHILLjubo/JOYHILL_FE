@@ -601,7 +601,7 @@ export default function FamManagePageConnected() {
                 >
                   {FAM_ROLE_LABELS[member.role] ?? member.role}
                 </span>
-                <span className="text-gray-500 text-xs">→</span>
+                <span className="text-gray-500 text-[1rem]">→</span>
               </div>
             )
           })

@@ -553,12 +553,12 @@ export default function HomePageConnected() {
             href="https://www.youtube.com/@tv-wo6zb/videos"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
+            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
           >
             <span className="text-xl shrink-0">🎥</span>
             <div className="flex-1">
               <p className="text-[14px] font-medium text-gray-800">청바지TV</p>
-              <p className="text-[12px] text-gray-500 mt-[1.25rem]">청년부 공식 유튜브 채널</p>
+              <p className="text-[12px] text-gray-500 mt-1">청년부 공식 유튜브 채널</p>
             </div>
             <span className="text-gray-400 text-[1rem]">→</span>
           </a>
@@ -566,12 +566,12 @@ export default function HomePageConnected() {
             href="https://www.instagram.com/joyhillgram/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
+            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
           >
             <span className="text-xl shrink-0">📸</span>
             <div className="flex-1">
               <p className="text-[14px] font-medium text-gray-800">Joyhillgram</p>
-              <p className="text-[12px] text-gray-500 mt-[1.25rem]">청년부 공식 인스타그램</p>
+              <p className="text-[12px] text-gray-500 mt-1">청년부 공식 인스타그램</p>
             </div>
             <span className="text-gray-400 text-[1rem]">→</span>
           </a>
@@ -579,12 +579,12 @@ export default function HomePageConnected() {
             href="https://joyhillvision.dothome.co.kr/ThisweekJubo"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
+            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
           >
             <span className="text-xl shrink-0">📖</span>
             <div className="flex-1">
               <p className="text-[14px] font-medium text-gray-800">청년부 온라인 주보</p>
-              <p className="text-[12px] text-gray-500 mt-[1.25rem]">이번 주 주보를 온라인으로 보기</p>
+              <p className="text-[12px] text-gray-500 mt-1">이번 주 주보를 온라인으로 보기</p>
             </div>
             <span className="text-gray-400 text-[1rem]">→</span>
           </a>
@@ -592,12 +592,12 @@ export default function HomePageConnected() {
             href="https://pf.kakao.com/_CxmDrxb"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
+            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
           >
             <span className="text-xl shrink-0">💬</span>
             <div className="flex-1">
               <p className="text-[14px] font-medium text-gray-800">청년부 카카오톡 채널</p>
-              <p className="text-[12px] text-gray-500 mt-[1.25rem]">공지·소식을 카카오톡으로 받아보세요</p>
+              <p className="text-[12px] text-gray-500 mt-1">공지·소식을 카카오톡으로 받아보세요</p>
             </div>
             <span className="text-gray-400 text-[1rem]">→</span>
           </a>
@@ -605,12 +605,12 @@ export default function HomePageConnected() {
             href="https://www.joyds.net/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3.5 no-underline hover:bg-gray-100/60 transition-colors"
+            className="flex items-center gap-5 px-4 py-3.5 no-underline hover:bg-gray-100/60 transition-colors"
           >
             <span className="text-xl shrink-0">⛪</span>
             <div className="flex-1">
               <p className="text-[14px] font-medium text-gray-800">교회 홈페이지</p>
-              <p className="text-[12px] text-gray-500 mt-[1.25rem]">기쁨의 동산교회 공식 홈페이지</p>
+              <p className="text-[12px] text-gray-500 mt-1">기쁨의 동산교회 공식 홈페이지</p>
             </div>
             <span className="text-gray-400 text-[1rem]">→</span>
           </a>

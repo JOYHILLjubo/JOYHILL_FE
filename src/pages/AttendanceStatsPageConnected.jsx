@@ -325,7 +325,7 @@ function WeeklyView({ villages, famStatsMap, callAuthedApi, summaryStats, weekDa
                     <div className="flex items-center gap-1.5">
                       <span className="text-[11px] font-semibold text-primary bg-primary-light px-2 py-0.5 rounded-full">예배 {toRate(famStatsMap[fam]?.worshipRate)}%</span>
                       <span className="text-[11px] font-semibold text-warning bg-warning-light px-2 py-0.5 rounded-full">팸 {toRate(famStatsMap[fam]?.famRate)}%</span>
-                      <span className="text-gray-500 text-xs">→</span>
+                      <span className="text-gray-500 text-[1rem]">→</span>
                     </div>
                   </div>
                 ))}
@@ -404,7 +404,7 @@ function VillageStatsView({
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-semibold text-primary bg-primary-light px-2 py-0.5 rounded-full">예배 {toRate(stats?.worshipRate)}%</span>
                         <span className="text-[11px] font-semibold text-warning bg-warning-light px-2 py-0.5 rounded-full">팸 {toRate(stats?.famRate)}%</span>
-                        <span className="text-gray-500 text-xs">→</span>
+                        <span className="text-gray-500 text-[1rem]">→</span>
                       </div>
                     </div>
                   )

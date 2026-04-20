@@ -693,7 +693,7 @@ export default function AccountManagePageConnected() {
                   </p>
                   {user.phone && <p className="text-[11px] text-gray-500">{user.phone}</p>}
                 </div>
-                <span className="text-gray-500 text-xs shrink-0">→</span>
+                <span className="text-gray-500 text-[1rem] shrink-0">→</span>
               </div>
             )
           })
