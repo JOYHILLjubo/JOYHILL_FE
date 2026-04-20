@@ -248,8 +248,8 @@ export default function NoticePageConnected() {
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-center px-5 pt-6 pb-3">
-        <p className="text-lg font-semibold">전체 공지사항</p>
+      <div className="flex justify-between items-center px-5 pt-6" style={{ marginBottom: '40px' }}>
+        <p style={{ fontSize: '1.25rem' }} className="font-semibold">전체 공지사항</p>
         {canWriteNotice && (
           <button
             onClick={() => navigate('/notice/write')}
@@ -265,7 +265,7 @@ export default function NoticePageConnected() {
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           placeholder="검색어를 입력하세요"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-primary"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-primary" style={{ fontSize: '12px', fontWeight: 400 }}
         />
       </div>
 
