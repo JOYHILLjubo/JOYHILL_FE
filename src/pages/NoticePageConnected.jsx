@@ -265,7 +265,7 @@ export default function NoticePageConnected() {
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           placeholder="검색어를 입력하세요"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-primary" style={{ fontSize: '12px', fontWeight: 400 }}
+          className="w-full border border-gray-300 rounded-lg px-3 outline-none focus:border-primary" style={{ fontSize: '12px', fontWeight: 400, height: '56px' }}
         />
       </div>
 
@@ -305,7 +305,7 @@ export default function NoticePageConnected() {
         {isLoading ? (
           <p className="text-sm text-gray-500 text-center mt-10">공지 목록을 불러오는 중입니다.</p>
         ) : notices.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center mt-10">검색 결과가 없습니다.</p>
+          <p className="text-sm text-gray-400 text-center mt-10">검색 결과가 없습니다.</p>
         ) : (
           notices.map((notice) => {
             const color = TAG_COLORS[notice.tag] || TAG_COLORS['소식']
