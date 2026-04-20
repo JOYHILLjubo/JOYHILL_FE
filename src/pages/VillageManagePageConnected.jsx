@@ -196,10 +196,11 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
           <input
-            type="date"
-            value={birthToDateInput(form.birth)}
+            type="text"
+            value={form.birth ? birthToDateInput(form.birth) : ''}
             onChange={(e) => setForm((p) => ({ ...p, birth: dateInputToBirth(e.target.value) }))}
             disabled={isSubmitting}
+            placeholder="YYYY-MM-DD"
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary disabled:bg-gray-100"
           />
         </div>
@@ -251,7 +252,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
   )
 }
 
-function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, callAuthedApi, onBack, onChanged }) {
+function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, allFamNames = [], callAuthedApi, onBack, onChanged }) {
   const [members, setMembers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [pageError, setPageError] = useState('')
@@ -284,6 +285,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, callA
     return (
       <VillageMemberEditViewConnected
         member={currentMember} currentFam={fam} isNew={isNew} canChangeRole={canChangeRole}
+        famOptions={allFamNames}
         onBack={() => setEditTarget(null)}
         onSave={async (form) => {
           if (isNew) {
@@ -292,7 +294,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, callA
             })
           } else {
             await callAuthedApi(`/api/fam-members/${currentMember.id}`, '팸원 수정에 실패했습니다.', {
-              method: 'PUT', body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note) },
+              method: 'PUT', body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note), famName: nullIfBlank(form.fam) || null },
             })
             if (canChangeRole && form.role !== currentMember.role) {
               await callAuthedApi(`/api/fam-members/${currentMember.id}/role`, '역할 변경에 실패했습니다.', {
@@ -603,7 +605,9 @@ export default function VillageManagePageConnected() {
     return (
       <FamDetailViewConnected
         fam={selectedFam.fam} village={selectedFam.village} leaderName={selectedFam.leaderName}
-        canChangeRole={isVillageLeaderOrAbove} callAuthedApi={callAuthedApi}
+        canChangeRole={isVillageLeaderOrAbove}
+        allFamNames={isPastorOrAbove ? Object.keys(famInfoMap) : Object.values(villages).flat()}
+        callAuthedApi={callAuthedApi}
         onBack={() => setSelectedFam(null)}
         onChanged={async () => { setReloadKey((p) => p + 1) }}
       />

@@ -263,10 +263,11 @@ function MemberEditViewConnected({
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
           <input
-            type="date"
+            type="text"
             value={form.birth}
             onChange={(e) => setForm((prev) => ({ ...prev, birth: e.target.value }))}
             disabled={isSubmitting}
+            placeholder="YYYY-MM-DD"
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary disabled:bg-gray-100"
           />
         </div>
