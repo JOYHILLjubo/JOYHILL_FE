@@ -625,7 +625,7 @@ export default function HomePageConnected() {
           {communityPrayers.length === 0 ? (
             <p className="text-[13px] text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
           ) : (
-            <div className="flex flex-col gap-2 mb-5 max-h-60 overflow-y-auto">
+            <div className="flex flex-col gap-2 mb-8 max-h-60 overflow-y-auto">
               {communityPrayers.map((p) => (
                 <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5 flex items-start gap-2">
                   <div className="flex-1">
@@ -645,7 +645,7 @@ export default function HomePageConnected() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-2 pt-5 border-t border-gray-100">
             <input
               type="text"
               value={prayerInput}
