@@ -13,6 +13,8 @@ body {
   background-color: #F5F5F5;
   color: #1F1F1F;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.03em;
+  line-height: 1.5;
 }
 
 #root {

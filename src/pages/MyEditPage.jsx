@@ -202,7 +202,7 @@ export default function MyEditPage() {
         <button
           type="submit"
           disabled={isSubmitting || pwSuccess}
-          className="w-full mt-2 py-2.5 bg-primary text-white rounded-lg text-sm font-medium border-none cursor-pointer hover:bg-primary-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full mt-2 py-3 bg-primary text-white rounded-lg text-sm font-medium border-none cursor-pointer hover:bg-primary-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? '변경 중...' : '비밀번호 변경'}
         </button>
