@@ -145,7 +145,8 @@ export default function MemberEditView({
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
           <input type="date" value={form.birth} onChange={(e) => setForm({ ...form, birth: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary" />
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary box-border"
+            style={{ maxWidth: '100%', WebkitAppearance: 'none' }} />
         </div>
 
         {/* 역할 — 팸원/리더/마을장 */}
