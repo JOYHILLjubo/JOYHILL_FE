@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
+import DateSelect from '../components/DateSelect'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -195,13 +196,10 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
-          <input
-            type="text"
+          <DateSelect
             value={form.birth ? birthToDateInput(form.birth) : ''}
-            onChange={(e) => setForm((p) => ({ ...p, birth: dateInputToBirth(e.target.value) }))}
+            onChange={(val) => setForm((p) => ({ ...p, birth: dateInputToBirth(val) }))}
             disabled={isSubmitting}
-            placeholder="YYYY-MM-DD"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary disabled:bg-gray-100"
           />
         </div>
         <div>

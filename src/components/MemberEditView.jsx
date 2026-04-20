@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useOrg } from '../context/OrgContext'
+import DateSelect from './DateSelect'
 
 export const FAM_ROLE_LABELS = { member: '팸원', leader: '리더', village_leader: '마을장' }
 
@@ -144,12 +145,10 @@ export default function MemberEditView({
         {/* 생년월일 */}
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
-          <input
-            type="text"
+          <DateSelect
             value={form.birth}
-            onChange={(e) => setForm({ ...form, birth: e.target.value })}
-            placeholder="YYYY-MM-DD"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary" />
+            onChange={(val) => setForm({ ...form, birth: val })}
+          />
         </div>
 
         {/* 역할 — 팸원/리더/마을장 */}

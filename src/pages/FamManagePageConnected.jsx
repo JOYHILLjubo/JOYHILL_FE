@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BottomNav from '../components/BottomNav'
+import DateSelect from '../components/DateSelect'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -262,13 +263,10 @@ function MemberEditViewConnected({
 
         <div>
           <p className="text-xs text-gray-500 mb-1.5">생년월일</p>
-          <input
-            type="text"
+          <DateSelect
             value={form.birth}
-            onChange={(e) => setForm((prev) => ({ ...prev, birth: e.target.value }))}
+            onChange={(val) => setForm((prev) => ({ ...prev, birth: val }))}
             disabled={isSubmitting}
-            placeholder="YYYY-MM-DD"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary disabled:bg-gray-100"
           />
         </div>
 
