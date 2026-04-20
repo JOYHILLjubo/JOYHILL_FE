@@ -387,6 +387,8 @@ export default function VillageManagePageConnected() {
   const [selectedFam, setSelectedFam] = useState(null)
   const [moveSheet, setMoveSheet] = useState(null)
 
+  const canChangeFam = isPastorOrAbove
+
   const [villages, setVillages] = useState({})
   const [villageLeaders, setVillageLeaders] = useState({})
   const [famInfoMap, setFamInfoMap] = useState({})
@@ -575,7 +577,7 @@ export default function VillageManagePageConnected() {
         currentFam={famName}
         isNew={false}
         canChangeRole={isVillageLeaderOrAbove}
-        famOptions={allFamNames}
+        famOptions={canChangeFam ? allFamNames : []}
         onBack={() => setEditingMember(null)}
         onSave={async (form) => {
           await callAuthedApi(`/api/fam-members/${member.id}`, '수정에 실패했습니다.', {
@@ -678,15 +680,16 @@ export default function VillageManagePageConnected() {
                 }
                 const color = getAvatarColor(result.member.id)
                 return (
-                  <div key={`member_${result.member.id}_${index}`} className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0">
+                  <div key={`member_${result.member.id}_${index}`}
+                    onClick={() => setEditingMember({ member: result.member, famName: result.famName })}
+                    className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0 cursor-pointer hover:bg-gray-100 -mx-5 px-5 transition-colors">
                     <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{result.member.name[0]}</div>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{result.member.name}</p>
                       <p className="text-[11px] text-gray-500">{result.villageName} · {result.famName} · {ROLE_LABELS[result.member.role] ?? result.member.role}</p>
                       {result.member.phone && <p className="text-[11px] text-gray-500">{result.member.phone}</p>}
                     </div>
-                    <button onClick={() => setSelectedFam({ fam: result.famName, village: result.villageName, leaderName: famInfoMap[result.famName]?.leaderName ?? '' })}
-                      className="text-xs text-primary bg-primary-light px-2.5 py-1.5 rounded-lg border-none cursor-pointer shrink-0">상세 →</button>
+                    <span className="text-gray-500 text-xs shrink-0">→</span>
                   </div>
                 )
               })}
