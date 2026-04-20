@@ -171,7 +171,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
     <div className="pb-28">
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={onBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">{isNew ? '팸원 추가' : '팸원 정보'}</p>
+        <p className="text-base font-semibold flex-1">{isNew ? '팸원 추가' : '팸원 정보'}</p>
         {!isNew && onDelete && (
           <button onClick={handleDelete} disabled={isSubmitting} className="text-xs text-danger bg-danger-light px-3 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-60">삭제</button>
         )}
@@ -620,7 +620,7 @@ export default function VillageManagePageConnected() {
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <div className="flex-1">
-          <p className="text-base font-medium">{title}</p>
+        <p className="text-base font-semibold flex-1">{title}</p>
           {!isLoadingVillageData && totalHeadcount > 0 && (
             <p className="text-xs text-gray-500 mt-0.5">청년부 전체 재적 <span className="font-medium text-primary">{totalHeadcount}명</span></p>
           )}

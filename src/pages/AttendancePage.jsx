@@ -206,7 +206,7 @@ export default function AttendancePage() {
       <div className="flex items-center gap-3 px-5 pt-4 pb-2">
         <button onClick={() => navigate('/home')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <div>
-          <p className="text-base font-medium">출석 체크</p>
+          <p className="text-base font-semibold">출석 체크</p>
           <p className="text-xs text-gray-500 mt-0.5">
             {famName || '소속 팸 없음'} · {getSundayLabel(sundayKey)} ({formatSundayKey(sundayKey)})
           </p>

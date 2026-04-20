@@ -227,8 +227,8 @@ export default function PrayerPageConnected() {
 
   return (
     <div className="pb-20">
-      <div className="px-5 pt-4 pb-3">
-        <p className="text-lg font-medium">{pageTitle}</p>
+      <div className="px-5 pt-6 pb-3">
+        <p className="text-lg font-semibold">{pageTitle}</p>
         <p className="text-xs text-gray-500 mt-0.5">{pageSubtitle}</p>
       </div>
 
@@ -273,7 +273,7 @@ export default function PrayerPageConnected() {
         <div className="px-5 mb-4">
           <div className="bg-primary-light rounded-xl p-4">
             <div className="flex justify-between items-start mb-1">
-              <p className="text-[13px] font-medium text-primary-hover">{selectedWeek.month}월 공동 기도제목</p>
+              <p className="text-[13px] font-semibold text-primary-hover">{selectedWeek.month}월 공동 기도제목</p>
               {isLeaderOrAbove && (
                 <button
                   onClick={() => navigate(`/prayer/common/write?year=${selectedWeek.year}&month=${selectedWeek.month}${commonPrayer ? '&edit=true' : ''}`)}
@@ -296,7 +296,7 @@ export default function PrayerPageConnected() {
 
       {/* 개인 기도제목 */}
       <div className="px-5">
-        <p className="text-sm font-medium mb-2">개인 기도제목</p>
+        <p className="text-sm font-semibold mb-2">개인 기도제목</p>
         {isLoading ? (
           <div className="text-center py-10 text-gray-500 text-sm">기도제목을 불러오는 중입니다.</div>
         ) : personalPrayers.length === 0 ? (

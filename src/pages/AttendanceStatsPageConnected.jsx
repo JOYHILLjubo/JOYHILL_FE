@@ -286,7 +286,7 @@ function WeeklyView({ villages, famStatsMap, callAuthedApi, summaryStats, weekDa
   return (
     <div className="px-5">
       <div className="flex items-center justify-between py-3">
-        <p className="text-sm font-medium">주차 선택</p>
+        <p className="text-sm font-semibold">주차 선택</p>
         <WeekSelect value={weekDate} onChange={setWeekDate} />
       </div>
 
@@ -343,7 +343,7 @@ function LeaderStatsView({ famName, selectedYear, setSelectedYear, stats, member
   return (
     <div className="px-5">
       <div className="flex items-center justify-between py-3">
-        <p className="text-sm font-medium">{famName || '소속 팸 없음'}</p>
+        <p className="text-sm font-semibold">{famName || '소속 팸 없음'}</p>
         <YearSelect value={selectedYear} onChange={setSelectedYear} />
       </div>
       <AvgCard label="팸 전체" worship={stats?.worshipRate ?? 0} online={stats?.onlineRate ?? 0} fam={stats?.famRate ?? 0} year={selectedYear} />
@@ -378,7 +378,7 @@ function VillageStatsView({
   return (
     <div className="px-5">
       <div className="flex items-center justify-between py-3">
-        <p className="text-sm font-medium">팸 선택</p>
+        <p className="text-sm font-semibold">팸 선택</p>
         <YearSelect value={selectedYear} onChange={setSelectedYear} />
       </div>
       <AvgCard label={isPastorOrAbove ? '전체' : summaryLabel} worship={summaryStats?.worshipRate ?? 0} online={summaryStats?.onlineRate ?? 0} fam={summaryStats?.famRate ?? 0} year={selectedYear} />
@@ -546,7 +546,7 @@ export default function AttendanceStatsPageConnected() {
     <div className="pb-20">
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">출석 통계</p>
+        <p className="text-base font-semibold flex-1">출석 통계</p>
       </div>
 
       {isVillageLeaderOrAbove && (

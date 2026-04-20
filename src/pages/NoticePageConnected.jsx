@@ -248,8 +248,8 @@ export default function NoticePageConnected() {
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-center px-5 pt-4 pb-3">
-        <p className="text-lg font-medium">전체 공지사항</p>
+      <div className="flex justify-between items-center px-5 pt-6 pb-3">
+        <p className="text-lg font-semibold">전체 공지사항</p>
         {canWriteNotice && (
           <button
             onClick={() => navigate('/notice/write')}

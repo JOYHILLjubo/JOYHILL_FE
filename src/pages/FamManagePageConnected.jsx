@@ -214,7 +214,7 @@ function MemberEditViewConnected({
     <div className="pb-28">
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={onBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">{isNew ? '팸원 추가' : '팸원 정보'}</p>
+        <p className="text-base font-semibold flex-1">{isNew ? '팸원 추가' : '팸원 정보'}</p>
         {!isNew && onDelete && (
           <button
             onClick={handleDelete}

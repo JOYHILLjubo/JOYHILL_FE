@@ -424,9 +424,9 @@ export default function HomePageConnected() {
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-center px-5 pt-4 pb-3">
+      <div className="flex justify-between items-center px-5 pt-6 pb-3">
         <div>
-          <p className="text-lg font-medium mt-0.5">JOY HILL</p>
+          <p className="text-lg font-semibold mt-0.5">JOY HILL</p>
           <p className="text-[11px] text-gray-500">{todayLabel}</p>
           <p className="text-[12px] text-gray-500 mt-0.5">{headerDescription}</p>
         </div>
@@ -490,7 +490,7 @@ export default function HomePageConnected() {
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2.5">
-            <p className="text-[13px] font-medium">공지</p>
+            <p className="text-[13px] font-semibold">공지</p>
             <button
               onClick={() => navigate('/notice')}
               className="text-[11px] text-primary bg-transparent border-none cursor-pointer"
@@ -620,7 +620,7 @@ export default function HomePageConnected() {
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl p-4">
-          <p className="text-[13px] font-medium mb-3">청년부 기도제목</p>
+          <p className="text-[13px] font-semibold mb-3">청년부 기도제목</p>
 
           {communityPrayers.length === 0 ? (
             <p className="text-[13px] text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>

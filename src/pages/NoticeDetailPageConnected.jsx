@@ -320,7 +320,7 @@ export default function NoticeDetailPageConnected() {
         >
           ←
         </button>
-        <p className="text-base font-medium flex-1">공지사항</p>
+        <p className="text-base font-semibold flex-1">공지사항</p>
         {canModifyNotice && (
           <div className="flex gap-2">
             <button

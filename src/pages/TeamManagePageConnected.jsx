@@ -590,7 +590,7 @@ export default function TeamManagePageConnected() {
     <div className="pb-24">
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">사역팀 관리</p>
+        <p className="text-base font-semibold flex-1">사역팀 관리</p>
       </div>
 
       {manageableTeams.length > 1 && (
@@ -630,7 +630,7 @@ export default function TeamManagePageConnected() {
       ) : (
         <>
           <div className="px-5 pt-4 pb-0">
-            <p className="text-base font-medium mb-1">{selectedTeamInfo.teamName}</p>
+            <p className="text-base font-semibold mb-1">{selectedTeamInfo.teamName}</p>
 
             {isMediaTeam ? (
               // 미디어사역팀: 서브팀명 탭 + 팀 소개 탭
@@ -740,6 +740,8 @@ export default function TeamManagePageConnected() {
                       ) : (
                         (currentSubTeam.members ?? []).map((member) => {
                           const color = getColor(member.userId)
+                          // 서브팀 리더이거나, 팀 전체 팀장(teamLeaderName)인 경우 팀장 표시
+                          const showAsLeader = member.isLeader || (currentSubTeam.teamLeaderName && member.name === currentSubTeam.teamLeaderName)
                           return (
                             <div key={member.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
                               <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
@@ -749,10 +751,10 @@ export default function TeamManagePageConnected() {
                                 <p className="text-sm">{member.name}</p>
                                 <p className="text-[11px] text-gray-500">{[member.famName, formatPhone(member.phone), formatBirth(member.birth)].filter(Boolean).join(' · ')}</p>
                               </div>
-                              <span className={`text-[11px] px-2 py-0.5 rounded-full mr-2 ${member.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'}`}>
-                                {member.isLeader ? '리더' : '멤버'}
+                              <span className={`text-[11px] px-2 py-0.5 rounded-full mr-2 ${showAsLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'}`}>
+                                {showAsLeader ? '팀장' : '멤버'}
                               </span>
-                              {!member.isLeader && (
+                              {!showAsLeader && (
                                 <button onClick={() => handleSetSubLeader(member)}
                                   className="text-[11px] text-warning bg-warning-light px-2 py-0.5 rounded-full border-none cursor-pointer mr-1">
                                   위임

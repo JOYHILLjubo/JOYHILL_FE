@@ -144,7 +144,7 @@ export default function MyTeamPage() {
     <div className="pb-24">
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">내 사역팀</p>
+        <p className="text-base font-semibold flex-1">내 사역팀</p>
       </div>
 
       {myTeams.length > 1 && (
@@ -164,7 +164,7 @@ export default function MyTeamPage() {
       )}
 
       <div className="px-5 pt-4">
-        <p className="text-base font-medium mb-1">{selectedTeam}</p>
+        <p className="text-base font-semibold mb-1">{selectedTeam}</p>
 
         {error && (
           <div className="bg-danger-light rounded-xl px-4 py-3 mb-3">
@@ -209,6 +209,7 @@ export default function MyTeamPage() {
                     subMembers.map((item) => {
                       const color = getColor(item.userId)
                       const subInfo = [item.famName, formatPhone(item.phone), formatBirth(item.birth)].filter(Boolean).join(' · ')
+                      const showAsLeader = item.isLeader || (currentSubTeam.teamLeaderName && item.name === currentSubTeam.teamLeaderName)
                       return (
                         <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
                           <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
@@ -219,9 +220,9 @@ export default function MyTeamPage() {
                             <p className="text-[11px] text-gray-500">{subInfo}</p>
                           </div>
                           <span className={`text-[11px] px-2 py-0.5 rounded-full ${
-                            item.isLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'
+                            showAsLeader ? 'bg-warning-light text-warning' : 'bg-gray-100 text-gray-500'
                           }`}>
-                            {item.isLeader ? '리더' : '멤버'}
+                            {showAsLeader ? '팀장' : '멤버'}
                           </span>
                         </div>
                       )

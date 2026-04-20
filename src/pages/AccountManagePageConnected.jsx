@@ -218,7 +218,7 @@ function UserEditViewConnected({
     <div className="pb-28">
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={onBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">{isNew ? '계정 추가' : '계정 수정'}</p>
+        <p className="text-base font-semibold flex-1">{isNew ? '계정 추가' : '계정 수정'}</p>
         {!isNew && (
           <>
             <button
@@ -616,7 +616,7 @@ export default function AccountManagePageConnected() {
     <div className="pb-20">
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">계정 관리</p>
+        <p className="text-base font-semibold flex-1">계정 관리</p>
         <button
           onClick={() => setEditTarget(false)}
           className="text-xs text-white bg-primary px-3 py-1.5 rounded-full border-none cursor-pointer"

@@ -248,7 +248,7 @@ export default function AttendanceHistoryPage() {
     <div className="pb-24 flex flex-col" style={{ minHeight: '100dvh' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300 shrink-0">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-medium flex-1">출석 관리</p>
+        <p className="text-base font-semibold flex-1">출석 관리</p>
       </div>
 
       {/* 마을장: 팸 선택 탭 */}
