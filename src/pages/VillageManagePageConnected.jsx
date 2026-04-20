@@ -250,7 +250,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
   )
 }
 
-function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, allFamNames = [], callAuthedApi, onBack, onChanged }) {
+function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canChangeFam = false, allFamNames = [], callAuthedApi, onBack, onChanged }) {
   const [members, setMembers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [pageError, setPageError] = useState('')
@@ -283,7 +283,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, allFa
     return (
       <VillageMemberEditViewConnected
         member={currentMember} currentFam={fam} isNew={isNew} canChangeRole={canChangeRole}
-        famOptions={allFamNames}
+        famOptions={canChangeFam ? allFamNames : []}
         onBack={() => setEditTarget(null)}
         onSave={async (form) => {
           if (isNew) {
@@ -606,6 +606,7 @@ export default function VillageManagePageConnected() {
       <FamDetailViewConnected
         fam={selectedFam.fam} village={selectedFam.village} leaderName={selectedFam.leaderName}
         canChangeRole={isVillageLeaderOrAbove}
+        canChangeFam={isPastorOrAbove}
         allFamNames={isPastorOrAbove ? Object.keys(famInfoMap) : Object.values(villages).flat()}
         callAuthedApi={callAuthedApi}
         onBack={() => setSelectedFam(null)}
