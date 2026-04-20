@@ -248,7 +248,7 @@ export default function NoticePageConnected() {
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-center px-5 pt-6" style={{ marginBottom: '40px' }}>
+      <div className="flex justify-between items-center px-5 pt-6" style={{ marginBottom: '30px' }}>
         <p style={{ fontSize: '1.25rem' }} className="font-semibold">전체 공지사항</p>
         {canWriteNotice && (
           <button
@@ -261,12 +261,24 @@ export default function NoticePageConnected() {
       </div>
 
       <div className="px-5 mb-3">
-        <input
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="검색어를 입력하세요"
-          className="w-full border border-gray-300 rounded-lg px-3 outline-none focus:border-primary" style={{ fontSize: '12px', fontWeight: 400, height: '56px' }}
-        />
+        <div className="flex gap-2">
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) setDebouncedSearchQuery(searchQuery.trim()) }}
+            placeholder="검색어를 입력하세요"
+            className="flex-1 border border-gray-300 rounded-lg px-3 outline-none focus:border-primary" style={{ fontSize: '12px', fontWeight: 400, height: '48px' }}
+          />
+          <button
+            onClick={() => setDebouncedSearchQuery(searchQuery.trim())}
+            className="shrink-0 flex items-center justify-center w-12 h-12 bg-primary rounded-lg border-none cursor-pointer hover:bg-primary-hover transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2 px-5 mb-3 overflow-x-auto">

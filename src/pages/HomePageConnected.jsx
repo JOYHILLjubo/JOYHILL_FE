@@ -490,7 +490,7 @@ export default function HomePageConnected() {
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2.5">
-            <p className="text-[13px] font-semibold">공지</p>
+            <p className="text-[14px] font-semibold">공지</p>
             <button
               onClick={() => navigate('/notice')}
               className="text-[11px] text-primary bg-transparent border-none cursor-pointer"
@@ -557,10 +557,10 @@ export default function HomePageConnected() {
           >
             <span className="text-xl shrink-0">🎥</span>
             <div className="flex-1">
-              <p className="text-[13px] font-medium text-gray-800">청바지TV</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">청년부 공식 유튜브 채널</p>
+              <p className="text-[14px] font-medium text-gray-800">청바지TV</p>
+              <p className="text-[12px] text-gray-500 mt-[1.25rem]">청년부 공식 유튜브 채널</p>
             </div>
-            <span className="text-gray-400 text-xs">→</span>
+            <span className="text-gray-400 text-[1rem]">→</span>
           </a>
           <a
             href="https://www.instagram.com/joyhillgram/"
@@ -570,10 +570,10 @@ export default function HomePageConnected() {
           >
             <span className="text-xl shrink-0">📸</span>
             <div className="flex-1">
-              <p className="text-[13px] font-medium text-gray-800">Joyhillgram</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">청년부 공식 인스타그램</p>
+              <p className="text-[14px] font-medium text-gray-800">Joyhillgram</p>
+              <p className="text-[12px] text-gray-500 mt-[1.25rem]">청년부 공식 인스타그램</p>
             </div>
-            <span className="text-gray-400 text-xs">→</span>
+            <span className="text-gray-400 text-[1rem]">→</span>
           </a>
           <a
             href="https://joyhillvision.dothome.co.kr/ThisweekJubo"
@@ -583,10 +583,10 @@ export default function HomePageConnected() {
           >
             <span className="text-xl shrink-0">📖</span>
             <div className="flex-1">
-              <p className="text-[13px] font-medium text-gray-800">청년부 온라인 주보</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">이번 주 주보를 온라인으로 보기</p>
+              <p className="text-[14px] font-medium text-gray-800">청년부 온라인 주보</p>
+              <p className="text-[12px] text-gray-500 mt-[1.25rem]">이번 주 주보를 온라인으로 보기</p>
             </div>
-            <span className="text-gray-400 text-xs">→</span>
+            <span className="text-gray-400 text-[1rem]">→</span>
           </a>
           <a
             href="https://pf.kakao.com/_CxmDrxb"
@@ -596,10 +596,10 @@ export default function HomePageConnected() {
           >
             <span className="text-xl shrink-0">💬</span>
             <div className="flex-1">
-              <p className="text-[13px] font-medium text-gray-800">청년부 카카오톡 채널</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">공지·소식을 카카오톡으로 받아보세요</p>
+              <p className="text-[14px] font-medium text-gray-800">청년부 카카오톡 채널</p>
+              <p className="text-[12px] text-gray-500 mt-[1.25rem]">공지·소식을 카카오톡으로 받아보세요</p>
             </div>
-            <span className="text-gray-400 text-xs">→</span>
+            <span className="text-gray-400 text-[1rem]">→</span>
           </a>
           <a
             href="https://www.joyds.net/"
@@ -609,10 +609,10 @@ export default function HomePageConnected() {
           >
             <span className="text-xl shrink-0">⛪</span>
             <div className="flex-1">
-              <p className="text-[13px] font-medium text-gray-800">교회 홈페이지</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">기쁨의 동산교회 공식 홈페이지</p>
+              <p className="text-[14px] font-medium text-gray-800">교회 홈페이지</p>
+              <p className="text-[12px] text-gray-500 mt-[1.25rem]">기쁨의 동산교회 공식 홈페이지</p>
             </div>
-            <span className="text-gray-400 text-xs">→</span>
+            <span className="text-gray-400 text-[1rem]">→</span>
           </a>
         </div>
       </div>
@@ -620,7 +620,7 @@ export default function HomePageConnected() {
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl p-4">
-          <p className="text-[13px] font-semibold mb-3">청년부 기도제목</p>
+          <p className="text-[14px] font-semibold mb-3">청년부 기도제목</p>
 
           {communityPrayers.length === 0 ? (
             <p className="text-[13px] text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
@@ -653,7 +653,7 @@ export default function HomePageConnected() {
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handlePrayerSubmit() }}
               placeholder="기도제목을 남겨주세요... (익명)"
               maxLength={200}
-              className="flex-1 text-[13px] bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 outline-none focus:border-primary"
+              className="flex-1 text-[12px] bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 outline-none focus:border-primary"
             />
             <button
               onClick={handlePrayerSubmit}
