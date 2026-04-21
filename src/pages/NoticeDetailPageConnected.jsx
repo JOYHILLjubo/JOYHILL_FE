@@ -372,7 +372,7 @@ export default function NoticeDetailPageConnected() {
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 pb-4 border-b border-gray-300">
+        <div className="flex items-center justify-between gap-3 pt-2 pb-4 border-b border-gray-300">
           <h1 className="text-[17px] font-semibold leading-snug flex-1">{notice.title}</h1>
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="text-right">
