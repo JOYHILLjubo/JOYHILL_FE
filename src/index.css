@@ -10,6 +10,7 @@
 
 body {
   font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 17px;
   background-color: #F5F5F5;
   color: #1F1F1F;
   -webkit-font-smoothing: antialiased;
