@@ -526,18 +526,42 @@ export default function HomePageConnected() {
         </div>
       </div>
 
-      <div className="px-5 mb-3">
-        <div className="border border-gray-300 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2.5">
-            <p className="text-[14px] font-semibold">공지</p>
-            <button
-              onClick={() => navigate('/notice')}
-              className="text-[11px] text-primary bg-transparent border-none cursor-pointer"
+      <div className="mb-3">
+        <div
+          className="flex overflow-x-auto px-3 py-2 justify-center gap-6"
+          style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {QUICK_LINKS.map(({ label, icon: Icon, href, bg, iconColor }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-2 no-underline shrink-0 active:opacity-70 transition-opacity"
             >
-              전체보기
-            </button>
-          </div>
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center shadow-sm"
+                style={{ backgroundColor: bg }}
+              >
+                <Icon size={20} color={iconColor} strokeWidth={1.8} />
+              </div>
+              <p className="text-[11px] text-gray-600 text-center leading-tight" style={{ maxWidth: '64px' }}>{label}</p>
+            </a>
+          ))}
+        </div>
+      </div>
 
+      <div className="px-5 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[14px] font-semibold">공지</p>
+          <button
+            onClick={() => navigate('/notice')}
+            className="text-[11px] text-primary bg-transparent border-none cursor-pointer"
+          >
+            전체보기
+          </button>
+        </div>
+        <div className="border border-gray-300 rounded-xl p-4">
           {isLoading ? (
             <p className="text-[13px] text-gray-500 py-1.5">공지를 불러오는 중입니다.</p>
           ) : notices.length === 0 ? (
@@ -586,35 +610,10 @@ export default function HomePageConnected() {
         </div>
       </div>
 
-      <div className="mb-3">
-        <div
-          className="flex overflow-x-auto px-3 py-2 justify-center gap-6"
-          style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {QUICK_LINKS.map(({ label, icon: Icon, href, bg, iconColor }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 no-underline shrink-0 active:opacity-70 transition-opacity"
-            >
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center shadow-sm"
-                style={{ backgroundColor: bg }}
-              >
-                <Icon size={20} color={iconColor} strokeWidth={1.8} />
-              </div>
-              <p className="text-[11px] text-gray-600 text-center leading-tight" style={{ maxWidth: '64px' }}>{label}</p>
-            </a>
-          ))}
-        </div>
-      </div>
-
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
+        <p className="text-[14px] font-semibold mb-2">청년부 기도제목</p>
         <div className="border border-gray-300 rounded-xl p-4">
-          <p className="text-[14px] font-semibold mb-3">청년부 기도제목</p>
 
           {communityPrayers.length === 0 ? (
             <p className="text-[13px] text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
