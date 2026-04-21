@@ -530,14 +530,11 @@ export default function HomePageConnected() {
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
-              <div>
-                <p className="text-[13px] font-semibold text-gray-900 mb-0.5 leading-snug">{sermon.title}</p>
-                {sermon.verse && <p className="text-[11px] text-gray-500">{sermon.verse}</p>}
-                <div className="flex items-center gap-1.5">
-                  {sermon.preacher && <span className="text-[11px] text-gray-500">{sermon.preacher}</span>}
-                  {sermon.preacher && sermonDateLabel && <span className="text-[11px] text-gray-300">·</span>}
-                  {sermonDateLabel && <span className="text-[11px] text-gray-500">{sermonDateLabel}</span>}
-                </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[13px] font-semibold text-gray-900">{sermon.title}</span>
+                {sermon.verse && <><span className="text-[11px] text-gray-300">·</span><span className="text-[11px] text-gray-500">{sermon.verse}</span></>}
+                {sermon.preacher && <><span className="text-[11px] text-gray-300">·</span><span className="text-[11px] text-gray-500">{sermon.preacher}</span></>}
+                {sermonDateLabel && <><span className="text-[11px] text-gray-300">·</span><span className="text-[11px] text-gray-500">{sermonDateLabel}</span></>}
               </div>
             ) : (
               <>
