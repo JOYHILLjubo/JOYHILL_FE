@@ -600,10 +600,10 @@ export default function HomePageConnected() {
               className="flex flex-col items-center gap-2 no-underline shrink-0 active:opacity-70 transition-opacity"
             >
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center shadow-sm"
+                className="w-12 h-12 rounded-full flex items-center justify-center shadow-sm"
                 style={{ backgroundColor: bg }}
               >
-                <Icon size={26} color={iconColor} strokeWidth={1.8} />
+                <Icon size={20} color={iconColor} strokeWidth={1.8} />
               </div>
               <p className="text-[11px] text-gray-600 text-center leading-tight" style={{ maxWidth: '64px' }}>{label}</p>
             </a>
