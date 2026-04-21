@@ -492,16 +492,16 @@ export default function HomePageConnected() {
       )}
 
       <div className="px-5 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[14px] font-semibold">이번 주 설교</p>
+          {videoId && <span className="text-[11px] text-gray-400">YouTube</span>}
+        </div>
         <div
           onClick={handleSermonClick}
           className={`bg-gradient-to-br from-primary to-primary-hover rounded-2xl p-5 text-white ${
             videoId ? 'cursor-pointer active:opacity-90' : ''
           }`}
         >
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] opacity-80">이번 주 설교</p>
-            {videoId && <span className="text-[11px] opacity-60">YouTube</span>}
-          </div>
 
           {isLoading ? (
             <p className="text-sm mt-3 opacity-90">최신 설교를 불러오는 중입니다.</p>
