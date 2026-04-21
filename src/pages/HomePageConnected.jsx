@@ -526,7 +526,7 @@ export default function HomePageConnected() {
             )}
           </div>
           {/* 텍스트 영역 */}
-          <div className="px-4 py-3 bg-white">
+          <div className="px-3 py-2 bg-white">
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
