@@ -492,37 +492,57 @@ export default function HomePageConnected() {
       )}
 
       <div className="px-5 mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[14px] font-semibold">이번 주 설교</p>
-          {videoId && <span className="text-[11px] text-gray-400">YouTube</span>}
-        </div>
+        <p className="text-[14px] font-semibold mb-2">이번 주 설교</p>
         <div
           onClick={handleSermonClick}
-          className={`bg-gradient-to-br from-primary to-primary-hover rounded-2xl p-5 text-white ${
+          className={`rounded-2xl overflow-hidden border border-gray-200 ${
             videoId ? 'cursor-pointer active:opacity-90' : ''
           }`}
         >
-
-          {isLoading ? (
-            <p className="text-sm mt-3 opacity-90">최신 설교를 불러오는 중입니다.</p>
-          ) : sermon.title ? (
-            <>
-              <p className="text-base font-medium mt-1.5 mb-1 leading-snug">"{sermon.title}"</p>
-              <p className="text-xs opacity-70">
-                {[sermonMeta, sermonDateLabel].filter(Boolean).join(' · ')}
-              </p>
-              {sermon.summary && (
-                <div className="mt-3 pt-3 border-t border-white/20">
-                  <p className="text-xs leading-relaxed opacity-90">"{sermon.summary}"</p>
+          {/* 썸네일 영역 */}
+          <div className="relative bg-gray-900" style={{ aspectRatio: '16/9' }}>
+            {videoId ? (
+              <img
+                src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                alt="설교 썸네일"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-800" />
+            )}
+            {/* 재생 버튼 오버레이 */}
+            {videoId && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(255,255,255,0.6)' }}>
+                  <div style={{ width: 0, height: 0, borderTop: '9px solid transparent', borderBottom: '9px solid transparent', borderLeft: '16px solid white', marginLeft: '3px' }} />
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="mt-3">
-              <p className="text-sm font-medium">등록된 최신 설교가 아직 없습니다.</p>
-              <p className="text-xs opacity-80 mt-1">설교 업로드 후 이 카드에 자동으로 표시됩니다.</p>
-            </div>
-          )}
+              </div>
+            )}
+            {/* YouTube 뱃지 */}
+            {videoId && (
+              <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded text-white text-[10px] font-medium" style={{ background: '#FF0000' }}>
+                <span>YouTube</span>
+              </div>
+            )}
+          </div>
+          {/* 텍스트 영역 */}
+          <div className="px-4 py-3 bg-white">
+            {isLoading ? (
+              <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
+            ) : sermon.title ? (
+              <>
+                <p className="text-[14px] font-semibold text-gray-900 mb-1 leading-snug">"{sermon.title}"</p>
+                <p className="text-[12px] text-gray-500">
+                  {[sermonMeta, sermonDateLabel].filter(Boolean).join(' · ')}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-gray-700">등록된 최신 설교가 아직 없습니다.</p>
+                <p className="text-xs text-gray-400 mt-0.5">설교 업로드 후 이 카드에 자동으로 표시됩니다.</p>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
