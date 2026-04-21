@@ -530,16 +530,29 @@ export default function HomePageConnected() {
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center shrink-0">
-                  <span className="text-[13px] font-semibold text-primary">J</span>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-gray-400 w-10 shrink-0">제목</span>
+                  <span className="text-[13px] font-semibold text-gray-900 truncate">{sermon.title}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-gray-900 leading-snug truncate">{sermon.title}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5 truncate">
-                    {[sermonMeta, sermonDateLabel].filter(Boolean).join(' · ')}
-                  </p>
-                </div>
+                {sermon.verse && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-gray-400 w-10 shrink-0">말씀</span>
+                    <span className="text-[12px] text-gray-700 truncate">{sermon.verse}</span>
+                  </div>
+                )}
+                {sermon.preacher && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-gray-400 w-10 shrink-0">설교자</span>
+                    <span className="text-[12px] text-gray-700">{sermon.preacher}</span>
+                  </div>
+                )}
+                {sermonDateLabel && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-gray-400 w-10 shrink-0">날짜</span>
+                    <span className="text-[12px] text-gray-700">{sermonDateLabel}</span>
+                  </div>
+                )}
               </div>
             ) : (
               <>
