@@ -257,7 +257,6 @@ export default function HomePageConnected() {
     accessTokenRef.current = accessToken
   }, [accessToken])
 
-  const todayLabel = useMemo(() => formatHeaderDate(new Date()), [])
   const videoId = getYoutubeVideoId(sermon.youtubeUrl)
   const sermonMeta = [sermon.verse, sermon.preacher].filter(Boolean).join(' · ')
   const sermonDateLabel = formatSermonDate(sermon.sermonDate)
@@ -466,7 +465,6 @@ export default function HomePageConnected() {
       <div className="flex justify-between items-center px-5 pt-6 pb-3">
         <div>
           <p className="text-lg font-semibold mt-0.5">JOY HILL</p>
-          <p className="text-[11px] text-gray-500">{todayLabel}</p>
           <p className="text-[12px] text-gray-500 mt-0.5">{headerDescription}</p>
         </div>
         <button
