@@ -424,17 +424,6 @@ export default function SermonUploadPageConnected() {
           </p>
         </div>
 
-        <div>
-          <p className="text-xs text-gray-500 mb-1.5">설교 요약</p>
-          <textarea
-            value={form.summary}
-            onChange={(event) => setForm((prev) => ({ ...prev, summary: event.target.value }))}
-            placeholder="설교 핵심 내용을 짧게 정리해주세요"
-            rows={3}
-            disabled={isLoading || isSubmitting}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary resize-none"
-          />
-        </div>
       </div>
 
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
