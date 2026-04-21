@@ -492,7 +492,10 @@ export default function HomePageConnected() {
       )}
 
       <div className="px-5 mb-3">
-        <p className="text-[14px] font-semibold mb-2">이번 주 설교</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[14px] font-semibold">이번 주 설교</p>
+          {sermonDateLabel && <span className="text-[12px] text-gray-400">{sermonDateLabel}</span>}
+        </div>
         <div
           onClick={handleSermonClick}
           className={`rounded-2xl overflow-hidden border border-gray-200 ${
@@ -530,11 +533,12 @@ export default function HomePageConnected() {
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[13px] font-semibold text-gray-900">{sermon.title}</span>
-                {sermon.verse && <><span className="text-[11px] text-gray-300">·</span><span className="text-[11px] text-gray-500">{sermon.verse}</span></>}
-                {sermon.preacher && <><span className="text-[11px] text-gray-300">·</span><span className="text-[11px] text-gray-500">{sermon.preacher}</span></>}
-                {sermonDateLabel && <><span className="text-[11px] text-gray-300">·</span><span className="text-[11px] text-gray-500">{sermonDateLabel}</span></>}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <span className="text-[13px] font-semibold text-gray-900 truncate">{sermon.title}</span>
+                  {sermon.verse && <><span className="text-[11px] text-gray-900">·</span><span className="text-[11px] text-gray-900 truncate">{sermon.verse}</span></>}
+                </div>
+                {sermon.preacher && <span className="text-[11px] text-gray-900 shrink-0 ml-2">{sermon.preacher}</span>}
               </div>
             ) : (
               <>
