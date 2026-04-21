@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Youtube, Instagram, BookOpen, MessageCircle, Church } from 'lucide-react'
+import { TvMinimalPlay, Camera, BookOpen, MessageCircle, Church } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
 
 const QUICK_LINKS = [
   {
     label: '청바지TV',
-    icon: Youtube,
+    icon: TvMinimalPlay,
     href: 'https://www.youtube.com/@tv-wo6zb/videos',
     bg: '#FF0000',
     iconColor: '#fff',
   },
   {
     label: 'Joyhillgram',
-    icon: Instagram,
+    icon: Camera,
     href: 'https://www.instagram.com/joyhillgram/',
     bg: '#E1306C',
     iconColor: '#fff',
