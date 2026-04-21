@@ -59,13 +59,13 @@ function LegacyNoticeDetailPage() {
         {/* 태그 뱃지 */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {notice.pinned && (
-            <span className="text-[11px] text-danger bg-danger-light px-2 py-0.5 rounded-full">고정</span>
+            <span className="text-[11px] text-danger bg-danger-light px-1.5 py-0.5 rounded">고정</span>
           )}
-          <span className={`text-[11px] ${color.text} ${color.bg} px-2 py-0.5 rounded-full`}>
+          <span className={`text-[11px] ${color.text} ${color.bg} px-1.5 py-0.5 rounded`}>
             {notice.tag}
           </span>
           {notice.teamTag && (
-            <span className="text-[11px] text-warning bg-warning-light px-2 py-0.5 rounded-full">
+            <span className="text-[11px] text-warning bg-warning-light px-1.5 py-0.5 rounded">
               {notice.teamTag}
             </span>
           )}
@@ -84,7 +84,7 @@ function LegacyNoticeDetailPage() {
             <p className="text-[11px] text-gray-500">{notice.date}</p>
           </div>
           {notice.deadline && (
-            <span className="ml-auto text-[11px] text-warning bg-warning-light px-2 py-0.5 rounded-full">
+            <span className="ml-auto text-[11px] text-warning bg-warning-light px-1.5 py-0.5 rounded">
               ~{notice.deadline}
             </span>
           )}

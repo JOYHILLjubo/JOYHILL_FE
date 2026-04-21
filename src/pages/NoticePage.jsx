@@ -111,7 +111,7 @@ function LegacyNoticePage() {
       <div className="flex gap-2 px-5 mb-3 overflow-x-auto">
         {filters.map((f) => (
           <button key={f} onClick={() => setFilter(f)}
-            className={`text-xs px-2.5 py-1 rounded-full border-none cursor-pointer transition-colors whitespace-nowrap ${
+            className={`text-[11px] px-1.5 py-0.5 rounded border-none cursor-pointer transition-colors whitespace-nowrap ${
               filter === f ? 'bg-primary-light text-primary' : 'bg-gray-100 text-gray-500'
             }`}>
             {f}
