@@ -375,12 +375,8 @@ export default function NoticeDetailPageConnected() {
         <div className="flex items-center justify-between gap-3 pb-4 border-b border-gray-300">
           <h1 className="text-[17px] font-semibold leading-snug flex-1">{notice.title}</h1>
           <div className="flex items-center gap-1.5 shrink-0">
-            <div className="w-6 h-6 rounded-full bg-primary-light flex items-center justify-center text-[10px] font-medium text-primary">
-              {getInitial(notice.author)}
-            </div>
             <div className="text-right">
-              <p className="text-xs font-medium">{notice.author || 'JOYHILL'}</p>
-              <p className="text-[11px] text-gray-500">{notice.date}</p>
+              <p className="text-xs text-gray-500">{notice.author || 'JOYHILL'} · {notice.date}</p>
             </div>
             {notice.deadline && (
               <span className="text-[11px] text-warning bg-warning-light px-1.5 py-0.5 rounded">
