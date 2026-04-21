@@ -588,7 +588,7 @@ export default function HomePageConnected() {
 
       <div className="mb-3">
         <div
-          className="flex overflow-x-auto px-3 py-2 justify-center gap-5"
+          className="flex overflow-x-auto px-3 py-2 justify-center gap-6"
           style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {QUICK_LINKS.map(({ label, icon: Icon, href, bg, iconColor }) => (
