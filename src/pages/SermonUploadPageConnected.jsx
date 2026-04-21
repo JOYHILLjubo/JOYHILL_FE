@@ -326,36 +326,7 @@ export default function SermonUploadPageConnected() {
         </div>
       )}
 
-      <div className="px-5 pt-4 pb-2">
-        <p className="text-xs text-gray-500 mb-2">미리보기</p>
-        <div className="bg-gradient-to-br from-primary to-primary-hover rounded-2xl p-5 text-white">
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] opacity-80">이번 주 설교</p>
-            {form.youtubeUrl && isValidYoutubeUrl(form.youtubeUrl) && (
-              <span className="text-[11px] opacity-70">YouTube</span>
-            )}
-          </div>
-          <p className="text-base font-medium mt-1.5 mb-1 leading-snug">
-            "{form.title || '설교 제목'}"
-          </p>
-          <p className="text-xs opacity-70">
-            {form.verse || '본문 말씀'} · {form.preacher || '설교자'}
-          </p>
-          {form.summary && (
-            <div className="mt-3 pt-3 border-t border-white/20">
-              <p className="text-xs leading-relaxed opacity-90">"{form.summary}"</p>
-            </div>
-          )}
-        </div>
-
-        {thumbnail && (
-          <div className="mt-2 rounded-xl overflow-hidden border border-gray-300">
-            <img src={thumbnail} alt="유튜브 썸네일" className="w-full object-cover" />
-          </div>
-        )}
-      </div>
-
-      <div className="px-5 pt-2 flex flex-col gap-4">
+      <div className="px-5 pt-4 flex flex-col gap-4">
         <div>
           <p className="text-xs text-gray-500 mb-1.5">
             설교 제목 <span className="text-danger">*</span>
@@ -422,6 +393,11 @@ export default function SermonUploadPageConnected() {
           <p className="text-[11px] text-gray-500 mt-1 ml-1">
             홈 화면의 설교 카드에서 이 링크를 사용합니다.
           </p>
+          {thumbnail && (
+            <div className="mt-3 rounded-xl overflow-hidden border border-gray-300">
+              <img src={thumbnail} alt="유튜브 썸네일" className="w-full object-cover" />
+            </div>
+          )}
         </div>
 
       </div>
