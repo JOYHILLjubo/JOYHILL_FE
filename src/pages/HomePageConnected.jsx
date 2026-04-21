@@ -530,29 +530,26 @@ export default function HomePageConnected() {
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-gray-400 w-10 shrink-0">제목</span>
-                  <span className="text-[13px] font-semibold text-gray-900 truncate">{sermon.title}</span>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="text-[11px] text-gray-400 shrink-0">제목</span>
+                    <span className="text-[12px] font-semibold text-gray-900 truncate">{sermon.title}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="text-[11px] text-gray-400 shrink-0">말씀</span>
+                    <span className="text-[12px] text-gray-700 truncate">{sermon.verse || '-'}</span>
+                  </div>
                 </div>
-                {sermon.verse && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-gray-400 w-10 shrink-0">말씀</span>
-                    <span className="text-[12px] text-gray-700 truncate">{sermon.verse}</span>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="text-[11px] text-gray-400 shrink-0">설교자</span>
+                    <span className="text-[12px] text-gray-700 truncate">{sermon.preacher || '-'}</span>
                   </div>
-                )}
-                {sermon.preacher && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-gray-400 w-10 shrink-0">설교자</span>
-                    <span className="text-[12px] text-gray-700">{sermon.preacher}</span>
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="text-[12px] text-gray-500">{sermonDateLabel || '-'}</span>
                   </div>
-                )}
-                {sermonDateLabel && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-gray-400 w-10 shrink-0">날짜</span>
-                    <span className="text-[12px] text-gray-700">{sermonDateLabel}</span>
-                  </div>
-                )}
+                </div>
               </div>
             ) : (
               <>
