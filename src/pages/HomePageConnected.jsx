@@ -530,25 +530,14 @@ export default function HomePageConnected() {
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
-              <div className="flex flex-col gap-1.5">
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <span className="text-[11px] text-gray-400 shrink-0">제목</span>
-                    <span className="text-[12px] font-semibold text-gray-900 truncate">{sermon.title}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <span className="text-[11px] text-gray-400 shrink-0">말씀</span>
-                    <span className="text-[12px] text-gray-700 truncate">{sermon.verse || '-'}</span>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <span className="text-[11px] text-gray-400 shrink-0">설교자</span>
-                    <span className="text-[12px] text-gray-700 truncate">{sermon.preacher || '-'}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <span className="text-[12px] text-gray-500">{sermonDateLabel || '-'}</span>
-                  </div>
+              <div>
+                <p className="text-[13px] font-semibold text-gray-900 mb-1.5 leading-snug">{sermon.title}</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {sermon.verse && <span className="text-[11px] text-gray-500">{sermon.verse}</span>}
+                  {sermon.verse && sermon.preacher && <span className="text-[11px] text-gray-300">·</span>}
+                  {sermon.preacher && <span className="text-[11px] text-gray-500">{sermon.preacher}</span>}
+                  {sermonDateLabel && <span className="text-[11px] text-gray-300">·</span>}
+                  {sermonDateLabel && <span className="text-[11px] text-gray-500">{sermonDateLabel}</span>}
                 </div>
               </div>
             ) : (
