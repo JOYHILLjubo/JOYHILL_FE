@@ -286,7 +286,7 @@ export default function NoticePageConnected() {
           <button
             key={tag.label}
             onClick={() => setFilter(tag.value)}
-            className={`text-xs px-2.5 py-1 rounded-full border-none cursor-pointer transition-colors whitespace-nowrap ${
+            className={`text-[11px] px-1.5 py-0.5 rounded border-none cursor-pointer transition-colors whitespace-nowrap ${
               filter === tag.value ? 'bg-primary-light text-primary font-semibold' : 'bg-gray-100 text-gray-500'
             }`}
           >

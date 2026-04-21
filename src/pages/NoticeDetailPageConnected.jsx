@@ -361,12 +361,12 @@ export default function NoticeDetailPageConnected() {
       <div className="px-5 pt-5 pb-6">
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {notice.pinned && (
-            <span className="text-[11px] text-danger bg-danger-light px-2 py-0.5 rounded-full">
+            <span className="text-[11px] text-danger bg-danger-light px-1.5 py-0.5 rounded">
               고정
             </span>
           )}
           {notice.tag && (
-            <span className={`text-[11px] ${color.text} ${color.bg} px-2 py-0.5 rounded-full`}>
+            <span className={`text-[11px] ${color.text} ${color.bg} px-1.5 py-0.5 rounded`}>
               {notice.tag}
             </span>
           )}
@@ -383,7 +383,7 @@ export default function NoticeDetailPageConnected() {
             <p className="text-[11px] text-gray-500">{notice.date}</p>
           </div>
           {notice.deadline && (
-            <span className="ml-auto text-[11px] text-warning bg-warning-light px-2 py-0.5 rounded-full">
+            <span className="ml-auto text-[11px] text-warning bg-warning-light px-1.5 py-0.5 rounded">
               ~{notice.deadline}
             </span>
           )}
