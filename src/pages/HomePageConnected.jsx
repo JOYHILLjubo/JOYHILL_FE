@@ -1,7 +1,46 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Youtube, Instagram, BookOpen, MessageCircle, Church } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
+
+const QUICK_LINKS = [
+  {
+    label: '청바지TV',
+    icon: Youtube,
+    href: 'https://www.youtube.com/@tv-wo6zb/videos',
+    bg: '#FF0000',
+    iconColor: '#fff',
+  },
+  {
+    label: 'Joyhillgram',
+    icon: Instagram,
+    href: 'https://www.instagram.com/joyhillgram/',
+    bg: '#E1306C',
+    iconColor: '#fff',
+  },
+  {
+    label: '온라인 주보',
+    icon: BookOpen,
+    href: 'https://joyhillvision.dothome.co.kr/ThisweekJubo',
+    bg: '#4285F4',
+    iconColor: '#fff',
+  },
+  {
+    label: '카카오채널',
+    icon: MessageCircle,
+    href: 'https://pf.kakao.com/_CxmDrxb',
+    bg: '#FEE500',
+    iconColor: '#3C1E1E',
+  },
+  {
+    label: '교회 홈페이지',
+    icon: Church,
+    href: 'https://www.joyds.net/',
+    bg: '#34A853',
+    iconColor: '#fff',
+  },
+]
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -547,73 +586,28 @@ export default function HomePageConnected() {
         </div>
       </div>
 
-      <div className="px-5 mb-3">
-        <div className="border border-gray-300 rounded-xl overflow-hidden">
-          <a
-            href="https://www.youtube.com/@tv-wo6zb/videos"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
-          >
-            <span className="text-xl shrink-0">🎥</span>
-            <div className="flex-1">
-              <p className="text-[14px] font-medium text-gray-800">청바지TV</p>
-              <p className="text-[12px] text-gray-500 mt-1">청년부 공식 유튜브 채널</p>
-            </div>
-            <span className="text-gray-400 text-[1rem]">→</span>
-          </a>
-          <a
-            href="https://www.instagram.com/joyhillgram/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
-          >
-            <span className="text-xl shrink-0">📸</span>
-            <div className="flex-1">
-              <p className="text-[14px] font-medium text-gray-800">Joyhillgram</p>
-              <p className="text-[12px] text-gray-500 mt-1">청년부 공식 인스타그램</p>
-            </div>
-            <span className="text-gray-400 text-[1rem]">→</span>
-          </a>
-          <a
-            href="https://joyhillvision.dothome.co.kr/ThisweekJubo"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
-          >
-            <span className="text-xl shrink-0">📖</span>
-            <div className="flex-1">
-              <p className="text-[14px] font-medium text-gray-800">청년부 온라인 주보</p>
-              <p className="text-[12px] text-gray-500 mt-1">이번 주 주보를 온라인으로 보기</p>
-            </div>
-            <span className="text-gray-400 text-[1rem]">→</span>
-          </a>
-          <a
-            href="https://pf.kakao.com/_CxmDrxb"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-5 px-4 py-3.5 border-b border-gray-100 no-underline hover:bg-gray-100/60 transition-colors"
-          >
-            <span className="text-xl shrink-0">💬</span>
-            <div className="flex-1">
-              <p className="text-[14px] font-medium text-gray-800">청년부 카카오톡 채널</p>
-              <p className="text-[12px] text-gray-500 mt-1">공지·소식을 카카오톡으로 받아보세요</p>
-            </div>
-            <span className="text-gray-400 text-[1rem]">→</span>
-          </a>
-          <a
-            href="https://www.joyds.net/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-5 px-4 py-3.5 no-underline hover:bg-gray-100/60 transition-colors"
-          >
-            <span className="text-xl shrink-0">⛪</span>
-            <div className="flex-1">
-              <p className="text-[14px] font-medium text-gray-800">교회 홈페이지</p>
-              <p className="text-[12px] text-gray-500 mt-1">기쁨의 동산교회 공식 홈페이지</p>
-            </div>
-            <span className="text-gray-400 text-[1rem]">→</span>
-          </a>
+      <div className="mb-3">
+        <div
+          className="flex gap-5 overflow-x-auto px-5 py-2"
+          style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {QUICK_LINKS.map(({ label, icon: Icon, href, bg, iconColor }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-2 no-underline shrink-0 active:opacity-70 transition-opacity"
+            >
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center shadow-sm"
+                style={{ backgroundColor: bg }}
+              >
+                <Icon size={26} color={iconColor} strokeWidth={1.8} />
+              </div>
+              <p className="text-[11px] text-gray-600 text-center leading-tight" style={{ maxWidth: '64px' }}>{label}</p>
+            </a>
+          ))}
         </div>
       </div>
 
