@@ -100,6 +100,7 @@ export default function MyPage() {
         <div className="px-5 mb-3">
           <div className="border border-gray-300 rounded-xl overflow-hidden">
             <SectionHeader label="팸 관리" color="primary" />
+            <MenuItem label="새가족 확인" onPress={() => navigate('/newcomer')} />
             <MenuItem label="출석 관리" onPress={() => navigate('/attendance/history')} />
             <MenuItem label="출석 통계" onPress={() => navigate('/attendance/stats')} />
             <MenuItem label="내 팸 관리" onPress={() => navigate('/fam/manage')} last />

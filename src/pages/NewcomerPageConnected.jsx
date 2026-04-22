@@ -160,6 +160,7 @@ export default function NewcomerPageConnected() {
   const [formError, setFormError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [famDropdown, setFamDropdown] = useState(null)
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 })
   const [assigningId, setAssigningId] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
@@ -576,9 +577,19 @@ export default function NewcomerPageConnected() {
                   <div className="shrink-0 flex flex-col items-end gap-1">
                     {canAssignFam ? (
                       <>
-                        <div className="relative">
-                          <button
-                            onClick={() => setFamDropdown(dropdownOpen ? null : newcomer.id)}
+                        <button
+                            onClick={(e) => {
+                              if (dropdownOpen) {
+                                setFamDropdown(null)
+                              } else {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                setDropdownPos({
+                                  top: rect.bottom + 4,
+                                  right: window.innerWidth - rect.right,
+                                })
+                                setFamDropdown(newcomer.id)
+                              }
+                            }}
                             disabled={assigningId === newcomer.id || assignableFams.length === 0}
                             className={`text-xs px-2.5 py-1.5 rounded-lg border-none whitespace-nowrap ${
                               newcomer.fam
@@ -594,24 +605,6 @@ export default function NewcomerPageConnected() {
                               ? '배정 중...'
                               : newcomer.fam || (assignableFams.length === 0 ? '배정 불가' : '팸 배정')}
                           </button>
-
-                          {dropdownOpen && assignableFams.length > 0 && (
-                            <div className="absolute right-0 top-9 bg-white border border-gray-300 rounded-xl shadow-xl z-50 w-44 max-h-56 overflow-y-auto">
-                              {assignableFams.map((fam) => (
-                                <button
-                                  key={fam.name}
-                                  onClick={() => assignFam(newcomer.id, fam.name)}
-                                  className={`w-full text-left px-3 py-2.5 text-sm border-none cursor-pointer hover:bg-gray-100 ${
-                                    newcomer.fam === fam.name ? 'bg-primary-light text-primary font-medium' : ''
-                                  }`}
-                                >
-                                  <p>{fam.name}</p>
-                                  <p className="text-[11px] text-gray-500 mt-0.5">{fam.villageName}</p>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
 
                         {/* 리더/마을장이 아니어야만 수정/삭제 표시 */}
                         {!isAssignOnlyRole && (
@@ -667,7 +660,33 @@ export default function NewcomerPageConnected() {
         )}
       </div>
 
-      {famDropdown !== null && <div className="fixed inset-0 z-10" onClick={() => setFamDropdown(null)} />}
+      {famDropdown !== null && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setFamDropdown(null)} />
+          <div
+            className="fixed bg-white border border-gray-300 rounded-xl shadow-xl z-50 w-44 max-h-56 overflow-y-auto"
+            style={{ top: dropdownPos.top, right: dropdownPos.right }}
+          >
+            {assignableFams.map((fam) => (
+              <button
+                key={fam.name}
+                onClick={() => assignFam(
+                  newcomers.find((n) => n.id === famDropdown)?.id,
+                  fam.name
+                )}
+                className={`w-full text-left px-3 py-2.5 text-sm border-none cursor-pointer hover:bg-gray-100 ${
+                  newcomers.find((n) => n.id === famDropdown)?.fam === fam.name
+                    ? 'bg-primary-light text-primary font-medium'
+                    : ''
+                }`}
+              >
+                <p>{fam.name}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{fam.villageName}</p>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {showModal && (
         <div
