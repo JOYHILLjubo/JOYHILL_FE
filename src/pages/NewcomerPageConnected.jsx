@@ -152,6 +152,7 @@ export default function NewcomerPageConnected() {
   const [isLoading, setIsLoading] = useState(true)
   const [pageError, setPageError] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [editingNewcomer, setEditingNewcomer] = useState(null) // null이면 등록, 객체면 수정
   const [form, setForm] = useState(createEmptyForm())
   const [formError, setFormError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -284,6 +285,26 @@ export default function NewcomerPageConnected() {
     setReloadKey((prev) => prev + 1)
   }
 
+  const openCreateModal = () => {
+    setEditingNewcomer(null)
+    setFormError('')
+    setForm(createEmptyForm())
+    setShowModal(true)
+  }
+
+  const openEditModal = (newcomer) => {
+    setEditingNewcomer(newcomer)
+    setFormError('')
+    setForm({
+      name: newcomer.name,
+      phone: newcomer.phone,
+      birth: newcomer.birth ?? '',
+      registeredAt: newcomer.registeredAt ?? getTodayInputValue(),
+      note: newcomer.note ?? '',
+    })
+    setShowModal(true)
+  }
+
   const handleAdd = async () => {
     if (isSubmitting) return
 
@@ -332,6 +353,50 @@ export default function NewcomerPageConnected() {
         return
       }
 
+      setFormError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdate = async () => {
+    if (isSubmitting || !editingNewcomer) return
+
+    const nextName = form.name.trim()
+    const nextPhone = form.phone.trim()
+    const nextBirth = form.birth || null
+    const nextRegisteredAt = form.registeredAt || getTodayInputValue()
+    const nextNote = form.note.trim()
+
+    if (!nextName) {
+      setFormError('이름을 입력해주세요.')
+      return
+    }
+
+    setFormError('')
+    setPageError('')
+    setIsSubmitting(true)
+
+    try {
+      const updated = await callAuthedApi(`/api/newcomers/${editingNewcomer.id}`, {
+        method: 'PATCH',
+        body: {
+          name: nextName,
+          phone: nullIfBlank(nextPhone),
+          birth: nextBirth,
+          registeredAt: nextRegisteredAt,
+          note: nullIfBlank(nextNote),
+        },
+      })
+
+      setNewcomers((prev) =>
+        sortNewcomers(prev.map((item) => (item.id === editingNewcomer.id ? mapNewcomer(updated) : item)))
+      )
+      setShowModal(false)
+      setEditingNewcomer(null)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '수정에 실패했습니다.'
+      if (isSessionError(message)) { handleExpiredSession(); return }
       setFormError(message)
     } finally {
       setIsSubmitting(false)
@@ -426,11 +491,7 @@ export default function NewcomerPageConnected() {
         </button>
         <p className="text-base font-medium flex-1">새가족 관리</p>
         <button
-          onClick={() => {
-            setFormError('')
-            setForm(createEmptyForm())
-            setShowModal(true)
-          }}
+          onClick={openCreateModal}
           className="text-xs text-white bg-primary px-3 py-1.5 rounded-full border-none cursor-pointer"
         >
           + 등록
@@ -509,11 +570,17 @@ export default function NewcomerPageConnected() {
                             ? '배정 중...'
                             : newcomer.fam || (assignableFams.length === 0 ? '배정 불가' : '팸 배정')}
                         </button>
+                        <button
+                          onClick={() => openEditModal(newcomer)}
+                          className="block w-full mt-2 text-[11px] border-none bg-transparent text-gray-400 cursor-pointer"
+                        >
+                          수정
+                        </button>
                         {canDeleteNewcomer && (
                           <button
                             onClick={() => deleteNewcomer(newcomer.id)}
                             disabled={deletingId === newcomer.id}
-                            className={`block w-full mt-2 text-[11px] border-none bg-transparent ${
+                            className={`block w-full mt-1 text-[11px] border-none bg-transparent ${
                               deletingId === newcomer.id
                                 ? 'text-gray-400 cursor-not-allowed'
                                 : 'text-danger cursor-pointer'
@@ -541,7 +608,7 @@ export default function NewcomerPageConnected() {
                         )}
                       </>
                     ) : canDeleteNewcomer ? (
-                      <div className="flex flex-col items-end gap-2">
+                      <div className="flex flex-col items-end gap-1">
                         <div
                           className={`text-xs px-2.5 py-1.5 rounded-lg ${
                             newcomer.fam
@@ -551,6 +618,12 @@ export default function NewcomerPageConnected() {
                         >
                           {newcomer.fam || '미배정'}
                         </div>
+                        <button
+                          onClick={() => openEditModal(newcomer)}
+                          className="text-[11px] border-none bg-transparent text-gray-400 cursor-pointer"
+                        >
+                          수정
+                        </button>
                         <button
                           onClick={() => deleteNewcomer(newcomer.id)}
                           disabled={deletingId === newcomer.id}
@@ -597,7 +670,7 @@ export default function NewcomerPageConnected() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <p className="text-base font-medium">새가족 등록</p>
+              <p className="text-base font-medium">{editingNewcomer ? '새가족 수정' : '새가족 등록'}</p>
               <button
                 onClick={() => {
                   if (isSubmitting) return
@@ -672,7 +745,7 @@ export default function NewcomerPageConnected() {
             {formError && <p className="mt-3 text-[12px] text-danger">{formError}</p>}
 
             <button
-              onClick={handleAdd}
+              onClick={editingNewcomer ? handleUpdate : handleAdd}
               disabled={isSubmitting}
               className={`w-full mt-4 py-3 rounded-lg text-sm font-medium border-none ${
                 isSubmitting
@@ -680,7 +753,7 @@ export default function NewcomerPageConnected() {
                   : 'bg-primary text-white cursor-pointer'
               }`}
             >
-              {isSubmitting ? '등록 중...' : '등록하기'}
+              {isSubmitting ? (editingNewcomer ? '수정 중...' : '등록 중...') : (editingNewcomer ? '수정하기' : '등록하기')}
             </button>
           </div>
         </div>
