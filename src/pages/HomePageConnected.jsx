@@ -491,7 +491,7 @@ export default function HomePageConnected() {
 
       <div className="px-5 mb-3">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-base font-semibold">이번 주 설교</p>
+          <p className="text-lg font-semibold">이번 주 설교</p>
           {sermonDateLabel && <span className="text-[12px] text-gray-400">{sermonDateLabel}</span>}
         </div>
         <div
@@ -527,16 +527,16 @@ export default function HomePageConnected() {
             )}
           </div>
           {/* 텍스트 영역 */}
-          <div className="px-3 py-2 bg-white">
+          <div className="px-3 py-2.5 bg-white">
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <span className="text-[13px] font-semibold text-gray-900 truncate">{sermon.title}</span>
-                  {sermon.verse && <><span className="text-[11px] text-gray-900">·</span><span className="text-[11px] text-gray-900 truncate">{sermon.verse}</span></>}
+              <div className="flex flex-col gap-0.5">
+                <p className="text-[15px] font-semibold text-gray-900 leading-snug">{sermon.title}</p>
+                <div className="flex items-center justify-between mt-0.5">
+                  {sermon.verse && <span className="text-sm text-gray-600">{sermon.verse}</span>}
+                  {sermon.preacher && <span className="text-sm text-gray-700 font-medium shrink-0">설교자 : {sermon.preacher}</span>}
                 </div>
-                {sermon.preacher && <span className="text-[11px] text-gray-900 shrink-0 ml-2">{sermon.preacher}</span>}
               </div>
             ) : (
               <>
@@ -575,7 +575,7 @@ export default function HomePageConnected() {
 
       <div className="px-5 mb-3">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-base font-semibold">공지</p>
+          <p className="text-lg font-semibold">공지</p>
           <button
             onClick={() => navigate('/notice')}
             className="text-[11px] text-primary bg-transparent border-none cursor-pointer"
@@ -634,7 +634,7 @@ export default function HomePageConnected() {
 
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
-        <p className="text-base font-semibold mb-2">청년부 기도제목</p>
+        <p className="text-lg font-semibold mb-2">청년부 기도제목</p>
         <div className="border border-gray-300 rounded-xl p-4">
 
           {communityPrayers.length === 0 ? (
