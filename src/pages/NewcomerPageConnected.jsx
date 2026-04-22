@@ -530,22 +530,22 @@ export default function NewcomerPageConnected() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-sm font-medium text-primary shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-base font-semibold text-primary shrink-0">
                         {getInitial(newcomer.name)}
                       </div>
-                      <p className="text-sm font-medium">{newcomer.name}</p>
+                      <p className="text-base font-semibold">{newcomer.name}</p>
                     </div>
-                    <div className="mt-2 ml-10 flex flex-col gap-0.5">
+                    <div className="mt-2 ml-11 flex flex-col gap-1">
                       {newcomer.phone && (
-                        <p className="text-[12px] text-gray-500">{newcomer.phone}</p>
+                        <p className="text-sm text-gray-600">{newcomer.phone}</p>
                       )}
-                      <p className="text-[12px] text-gray-500">
+                      <p className="text-sm text-gray-500">
                         {[newcomer.birth, newcomer.registeredAt && `등록 ${newcomer.registeredAt}`]
                           .filter(Boolean)
                           .join(' · ')}
                       </p>
                       {newcomer.note ? (
-                        <p className="text-[12px] text-primary mt-0.5">{newcomer.note}</p>
+                        <p className="text-sm text-primary font-medium mt-0.5">{newcomer.note}</p>
                       ) : null}
                     </div>
                   </div>
