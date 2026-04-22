@@ -564,7 +564,7 @@ export default function NewcomerPageConnected() {
                         <p className="text-sm text-gray-600">{newcomer.phone}</p>
                       )}
                       <p className="text-sm text-gray-500">
-                        {[newcomer.birth, newcomer.registeredAt && `등록 ${newcomer.registeredAt}`]
+                        {[newcomer.birth && `생년월일 ${newcomer.birth}`, newcomer.registeredAt && `등록 ${newcomer.registeredAt}`]
                           .filter(Boolean)
                           .join(' · ')}
                       </p>
