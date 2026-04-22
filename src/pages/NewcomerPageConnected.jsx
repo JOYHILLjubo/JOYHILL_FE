@@ -143,11 +143,14 @@ export default function NewcomerPageConnected() {
     setAccessToken,
     logout,
     canManageNewcomer,
+    canViewNewcomer,
     isLeaderOrAbove,
+    isVillageLeaderOrAbove,
     isNewFamilyTeamLeader,
   } = useAuth()
 
   const [newcomers, setNewcomers] = useState([])
+  const [hidingIds, setHidingIds] = useState(new Set()) // fade-out 중인 id 목록
   const [famOptions, setFamOptions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [pageError, setPageError] = useState('')
@@ -163,7 +166,11 @@ export default function NewcomerPageConnected() {
 
   const accessTokenRef = useRef(accessToken)
   const canAssignFam = isLeaderOrAbove
+  const canEditOrDelete = canManageNewcomer // 리더이상 OR 새가족팀팀장
   const canDeleteNewcomer = isLeaderOrAbove || isNewFamilyTeamLeader
+  const canOnlyAssign = isLeaderOrAbove && !canManageNewcomer // 팸리더/마을장만 해당 (현재는 canManageNewcomer=isLeaderOrAbove라 미사용 - 추후 분리 대비)
+  // 실질적으로: 리더/마을장은 수정삭제 없이 팸배정만
+  const isAssignOnlyRole = ['leader', 'village_leader'].includes(user?.role ?? '')
 
   useEffect(() => {
     accessTokenRef.current = accessToken
@@ -270,7 +277,7 @@ export default function NewcomerPageConnected() {
       }
     }
 
-    if (canManageNewcomer) {
+    if (canViewNewcomer) {
       loadData()
     } else {
       setIsLoading(false)
@@ -415,10 +422,19 @@ export default function NewcomerPageConnected() {
         body: { famName },
       })
 
-      setNewcomers((prev) =>
-        sortNewcomers(prev.map((item) => (item.id === newcomerId ? mapNewcomer(updated) : item))),
-      )
+      // 팸 배정 성공 후 fade-out 효과로 지우기
       setFamDropdown(null)
+      setHidingIds((prev) => new Set([...prev, newcomerId]))
+      setTimeout(() => {
+        setNewcomers((prev) =>
+          sortNewcomers(prev.filter((item) => item.id !== newcomerId))
+        )
+        setHidingIds((prev) => {
+          const next = new Set(prev)
+          next.delete(newcomerId)
+          return next
+        })
+      }, 400)
     } catch (error) {
       const message =
         error instanceof Error ? error.message : '팸 배정에 실패했습니다.'
@@ -465,7 +481,7 @@ export default function NewcomerPageConnected() {
     }
   }
 
-  if (!canManageNewcomer) {
+  if (!canViewNewcomer) {
     return (
       <div className="flex flex-col items-center justify-center h-screen pb-20">
         <p className="text-gray-500 text-sm">새가족 관리 권한이 없습니다.</p>
@@ -490,12 +506,14 @@ export default function NewcomerPageConnected() {
           ←
         </button>
         <p className="text-base font-medium flex-1">새가족 관리</p>
-        <button
-          onClick={openCreateModal}
-          className="text-xs text-white bg-primary px-3 py-1.5 rounded-full border-none cursor-pointer"
-        >
-          + 등록
-        </button>
+        {canManageNewcomer && (
+          <button
+            onClick={openCreateModal}
+            className="text-xs text-white bg-primary px-3 py-1.5 rounded-full border-none cursor-pointer"
+          >
+            + 등록
+          </button>
+        )}
       </div>
 
       {pageError && (
@@ -526,7 +544,12 @@ export default function NewcomerPageConnected() {
             const dropdownOpen = famDropdown === newcomer.id
 
             return (
-              <div key={newcomer.id} className="border border-gray-300 rounded-xl p-4 mb-3">
+              <div
+                key={newcomer.id}
+                className={`border border-gray-300 rounded-xl p-4 mb-3 transition-all duration-400 ${
+                  hidingIds.has(newcomer.id) ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+                }`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -570,27 +593,31 @@ export default function NewcomerPageConnected() {
                             ? '배정 중...'
                             : newcomer.fam || (assignableFams.length === 0 ? '배정 불가' : '팸 배정')}
                         </button>
-                        <div className="flex gap-1 mt-2">
-                          <button
-                            onClick={() => openEditModal(newcomer)}
-                            className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
-                          >
-                            수정
-                          </button>
-                          {canDeleteNewcomer && (
+
+                        {/* 리더/마을장이 아니어야만 수정/삭제 표시 */}
+                        {!isAssignOnlyRole && (
+                          <div className="flex gap-1 mt-2">
                             <button
-                              onClick={() => deleteNewcomer(newcomer.id)}
-                              disabled={deletingId === newcomer.id}
-                              className={`flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
-                                deletingId === newcomer.id
-                                  ? 'text-gray-400 cursor-not-allowed opacity-60'
-                                  : 'text-danger cursor-pointer'
-                              }`}
+                              onClick={() => openEditModal(newcomer)}
+                              className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
                             >
-                              {deletingId === newcomer.id ? '...' : '삭제'}
+                              수정
                             </button>
-                          )}
-                        </div>
+                            {canDeleteNewcomer && (
+                              <button
+                                onClick={() => deleteNewcomer(newcomer.id)}
+                                disabled={deletingId === newcomer.id}
+                                className={`flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
+                                  deletingId === newcomer.id
+                                    ? 'text-gray-400 cursor-not-allowed opacity-60'
+                                    : 'text-danger cursor-pointer'
+                                }`}
+                              >
+                                {deletingId === newcomer.id ? '...' : '삭제'}
+                              </button>
+                            )}
+                          </div>
+                        )}
 
                         {dropdownOpen && assignableFams.length > 0 && (
                           <div className="absolute right-0 top-9 bg-white border border-gray-300 rounded-xl shadow-lg z-20 w-40 max-h-56 overflow-y-auto">

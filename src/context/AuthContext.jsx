@@ -158,6 +158,7 @@ export function AuthProvider({ children }) {
   const isTeamLeader = teamRoles.length > 0
   const canWriteNotice = isLeaderOrAbove || isTeamLeader
   const canManageNewcomer = isLeaderOrAbove || teamRoles.includes('새가족팀')
+  const canViewNewcomer = isLeaderOrAbove || teamRoles.includes('새가족팀')
   const isNewFamilyTeamLeader = teamRoles.includes('새가족팀')
   const canManageTeam = isTeamLeader
 
@@ -170,7 +171,7 @@ export function AuthProvider({ children }) {
         isLeaderOrAbove: false, isVillageLeaderOrAbove: false,
         isPastorOrAbove: false, isAdmin: false,
         isTeamLeader: false, isNewFamilyTeamLeader: false,
-        canWriteNotice: false, canManageNewcomer: false, canManageTeam: false,
+        canWriteNotice: false, canManageNewcomer: false, canViewNewcomer: false, canManageTeam: false,
       }}>
         <div style={{
           minHeight: '100dvh', display: 'flex',
@@ -195,7 +196,7 @@ export function AuthProvider({ children }) {
       user, accessToken, isAuthenticated,
       setUser, setAccessToken, login, logout,
       isLeaderOrAbove, isVillageLeaderOrAbove, isPastorOrAbove, isAdmin,
-      isTeamLeader, isNewFamilyTeamLeader, canWriteNotice, canManageNewcomer, canManageTeam,
+      isTeamLeader, isNewFamilyTeamLeader, canWriteNotice, canManageNewcomer, canViewNewcomer, canManageTeam,
     }}>
       {children}
     </AuthContext.Provider>
