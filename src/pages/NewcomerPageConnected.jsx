@@ -437,16 +437,6 @@ export default function NewcomerPageConnected() {
         </button>
       </div>
 
-      {!canAssignFam && (
-        <div className="px-5 pt-3">
-          <div className="rounded-xl bg-primary-light px-4 py-3">
-            <p className="text-[12px] text-primary">
-              팸 배정은 리더 이상 권한에서 가능합니다.
-            </p>
-          </div>
-        </div>
-      )}
-
       {pageError && (
         <div className="px-5 pt-3">
           <div className="bg-danger-light rounded-2xl p-4">
