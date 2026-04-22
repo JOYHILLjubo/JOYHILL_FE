@@ -535,7 +535,7 @@ export default function HomePageConnected() {
                 <p className="text-[15px] font-semibold text-gray-900 leading-snug">{sermon.title}</p>
                 <div className="flex items-center justify-between mt-0.5">
                   {sermon.verse && <span className="text-sm text-gray-600">{sermon.verse}</span>}
-                  {sermon.preacher && <span className="text-sm text-gray-700 font-medium shrink-0">설교자 : {sermon.preacher}</span>}
+                  {sermon.preacher && <span className="text-sm text-gray-600 font-medium shrink-0">설교자 : {sermon.preacher}</span>}
                 </div>
               </div>
             ) : (
@@ -562,12 +562,12 @@ export default function HomePageConnected() {
               className="flex flex-col items-center gap-2 no-underline shrink-0 active:opacity-70 transition-opacity"
             >
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center shadow-sm"
+                className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm"
                 style={{ backgroundColor: bg }}
               >
-                <Icon size={20} color={iconColor} strokeWidth={1.8} />
+                <Icon size={24} color={iconColor} strokeWidth={1.8} />
               </div>
-              <p className="text-[11px] text-gray-600 text-center leading-tight" style={{ maxWidth: '64px' }}>{label}</p>
+              <p className="text-[12px] text-gray-600 text-center leading-tight" style={{ maxWidth: '72px' }}>{label}</p>
             </a>
           ))}
         </div>
@@ -638,19 +638,19 @@ export default function HomePageConnected() {
         <div className="border border-gray-300 rounded-xl p-4">
 
           {communityPrayers.length === 0 ? (
-            <p className="text-[13px] text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
+            <p className="text-sm text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
           ) : (
             <div className="flex flex-col gap-2 mb-8 max-h-60 overflow-y-auto">
               {communityPrayers.map((p) => (
                 <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5 flex items-start gap-2">
                   <div className="flex-1">
-                    <p className="text-[13px] text-gray-800 leading-relaxed">{p.content}</p>
-                    <p className="text-[11px] text-gray-400 mt-1">{p.createdAt}</p>
+                    <p className="text-sm text-gray-800 leading-relaxed">{p.content}</p>
+                    <p className="text-[12px] text-gray-400 mt-1">{p.createdAt}</p>
                   </div>
                   {canDelete(p) && (
                     <button
                       onClick={() => handlePrayerDelete(p.id)}
-                      className="shrink-0 text-gray-300 hover:text-danger bg-transparent border-none cursor-pointer text-[13px] leading-none pt-0.5"
+                      className="shrink-0 text-gray-300 hover:text-danger bg-transparent border-none cursor-pointer text-sm leading-none pt-0.5"
                     >
                       ✕
                     </button>
@@ -668,12 +668,12 @@ export default function HomePageConnected() {
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handlePrayerSubmit() }}
               placeholder="기도제목을 남겨주세요... (익명)"
               maxLength={200}
-              className="flex-1 text-[12px] bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 outline-none focus:border-primary"
+              className="flex-1 text-sm bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-200 outline-none focus:border-primary"
             />
             <button
               onClick={handlePrayerSubmit}
               disabled={prayerSubmitting || prayerInput.trim() === ''}
-              className="shrink-0 text-[13px] font-medium text-white bg-primary rounded-lg px-4 py-2 border-none cursor-pointer disabled:opacity-40"
+              className="shrink-0 text-sm font-medium text-white bg-primary rounded-lg px-4 py-2.5 border-none cursor-pointer disabled:opacity-40"
             >
               올리기
             </button>

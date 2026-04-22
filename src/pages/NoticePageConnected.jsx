@@ -196,7 +196,7 @@ export default function NoticePageConnected() {
         }
 
         if (debouncedSearchQuery) {
-          params.set('search', debouncedSearchQuery)
+          params.set('search', debouncedSearchQuery.replace(/\s/g, ''))
         }
 
         const data = await callAuthedApi(`/api/notices?${params.toString()}`)
