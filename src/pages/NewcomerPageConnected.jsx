@@ -563,13 +563,14 @@ export default function NewcomerPageConnected() {
                       {newcomer.phone && (
                         <p className="text-sm text-gray-600">{newcomer.phone}</p>
                       )}
-                      <p className="text-sm text-gray-500">
-                        {[newcomer.birth && `생년월일 ${newcomer.birth}`, newcomer.registeredAt && `등록 ${newcomer.registeredAt}`]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </p>
+                      {newcomer.birth && (
+                        <p className="text-sm text-gray-500">생년월일 {newcomer.birth}</p>
+                      )}
+                      {newcomer.registeredAt && (
+                        <p className="text-sm text-gray-500">등록 {newcomer.registeredAt}</p>
+                      )}
                       {newcomer.note ? (
-                        <p className="text-sm text-primary font-medium mt-0.5">{newcomer.note}</p>
+                        <p className="text-sm text-primary font-medium mt-0.5 whitespace-pre-line">{newcomer.note}</p>
                       ) : null}
                     </div>
                   </div>
