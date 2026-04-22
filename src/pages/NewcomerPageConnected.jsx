@@ -570,25 +570,27 @@ export default function NewcomerPageConnected() {
                             ? '배정 중...'
                             : newcomer.fam || (assignableFams.length === 0 ? '배정 불가' : '팸 배정')}
                         </button>
-                        <button
-                          onClick={() => openEditModal(newcomer)}
-                          className="block w-full mt-2 text-[11px] border-none bg-transparent text-gray-400 cursor-pointer"
-                        >
-                          수정
-                        </button>
-                        {canDeleteNewcomer && (
+                        <div className="flex gap-1 mt-2">
                           <button
-                            onClick={() => deleteNewcomer(newcomer.id)}
-                            disabled={deletingId === newcomer.id}
-                            className={`block w-full mt-1 text-[11px] border-none bg-transparent ${
-                              deletingId === newcomer.id
-                                ? 'text-gray-400 cursor-not-allowed'
-                                : 'text-danger cursor-pointer'
-                            }`}
+                            onClick={() => openEditModal(newcomer)}
+                            className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
                           >
-                            {deletingId === newcomer.id ? '삭제 중...' : '삭제'}
+                            수정
                           </button>
-                        )}
+                          {canDeleteNewcomer && (
+                            <button
+                              onClick={() => deleteNewcomer(newcomer.id)}
+                              disabled={deletingId === newcomer.id}
+                              className={`flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
+                                deletingId === newcomer.id
+                                  ? 'text-gray-400 cursor-not-allowed opacity-60'
+                                  : 'text-danger cursor-pointer'
+                              }`}
+                            >
+                              {deletingId === newcomer.id ? '...' : '삭제'}
+                            </button>
+                          )}
+                        </div>
 
                         {dropdownOpen && assignableFams.length > 0 && (
                           <div className="absolute right-0 top-9 bg-white border border-gray-300 rounded-xl shadow-lg z-20 w-40 max-h-56 overflow-y-auto">
@@ -608,45 +610,26 @@ export default function NewcomerPageConnected() {
                         )}
                       </>
                     ) : canDeleteNewcomer ? (
-                      <div className="flex flex-col items-end gap-1">
-                        <div
-                          className={`text-xs px-2.5 py-1.5 rounded-lg ${
-                            newcomer.fam
-                              ? 'bg-success-light text-success'
-                              : 'bg-gray-100 text-gray-500'
-                          }`}
-                        >
-                          {newcomer.fam || '미배정'}
-                        </div>
+                      <div className="flex gap-1">
                         <button
                           onClick={() => openEditModal(newcomer)}
-                          className="text-[11px] border-none bg-transparent text-gray-400 cursor-pointer"
+                          className="text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => deleteNewcomer(newcomer.id)}
                           disabled={deletingId === newcomer.id}
-                          className={`text-[11px] border-none bg-transparent ${
+                          className={`text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
                             deletingId === newcomer.id
-                              ? 'text-gray-400 cursor-not-allowed'
+                              ? 'text-gray-400 cursor-not-allowed opacity-60'
                               : 'text-danger cursor-pointer'
                           }`}
                         >
-                          {deletingId === newcomer.id ? '삭제 중...' : '삭제'}
+                          {deletingId === newcomer.id ? '...' : '삭제'}
                         </button>
                       </div>
-                    ) : (
-                      <div
-                        className={`text-xs px-2.5 py-1.5 rounded-lg ${
-                          newcomer.fam
-                            ? 'bg-success-light text-success'
-                            : 'bg-gray-100 text-gray-500'
-                        }`}
-                      >
-                        {newcomer.fam || '미배정'}
-                      </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
