@@ -144,6 +144,7 @@ export default function NewcomerPageConnected() {
     logout,
     canManageNewcomer,
     isLeaderOrAbove,
+    isNewFamilyTeamLeader,
   } = useAuth()
 
   const [newcomers, setNewcomers] = useState([])
@@ -161,6 +162,7 @@ export default function NewcomerPageConnected() {
 
   const accessTokenRef = useRef(accessToken)
   const canAssignFam = isLeaderOrAbove
+  const canDeleteNewcomer = isLeaderOrAbove || isNewFamilyTeamLeader
 
   useEffect(() => {
     accessTokenRef.current = accessToken
@@ -368,7 +370,7 @@ export default function NewcomerPageConnected() {
   }
 
   const deleteNewcomer = async (newcomerId) => {
-    if (!canAssignFam || deletingId === newcomerId) return
+    if (!canDeleteNewcomer || deletingId === newcomerId) return
 
     const shouldDelete = window.confirm('이 새가족 정보를 삭제할까요?')
     if (!shouldDelete) return
@@ -439,7 +441,7 @@ export default function NewcomerPageConnected() {
         <div className="px-5 pt-3">
           <div className="rounded-xl bg-primary-light px-4 py-3">
             <p className="text-[12px] text-primary">
-              팸 배정과 삭제는 리더 이상 권한에서 가능합니다.
+              팸 배정은 리더 이상 권한에서 가능합니다.
             </p>
           </div>
         </div>
@@ -517,17 +519,19 @@ export default function NewcomerPageConnected() {
                             ? '배정 중...'
                             : newcomer.fam || (assignableFams.length === 0 ? '배정 불가' : '팸 배정')}
                         </button>
-                        <button
-                          onClick={() => deleteNewcomer(newcomer.id)}
-                          disabled={deletingId === newcomer.id}
-                          className={`block w-full mt-2 text-[11px] border-none bg-transparent ${
-                            deletingId === newcomer.id
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-danger cursor-pointer'
-                          }`}
-                        >
-                          {deletingId === newcomer.id ? '삭제 중...' : '삭제'}
-                        </button>
+                        {canDeleteNewcomer && (
+                          <button
+                            onClick={() => deleteNewcomer(newcomer.id)}
+                            disabled={deletingId === newcomer.id}
+                            className={`block w-full mt-2 text-[11px] border-none bg-transparent ${
+                              deletingId === newcomer.id
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-danger cursor-pointer'
+                            }`}
+                          >
+                            {deletingId === newcomer.id ? '삭제 중...' : '삭제'}
+                          </button>
+                        )}
 
                         {dropdownOpen && assignableFams.length > 0 && (
                           <div className="absolute right-0 top-9 bg-white border border-gray-300 rounded-xl shadow-lg z-20 w-40 max-h-56 overflow-y-auto">
@@ -546,6 +550,29 @@ export default function NewcomerPageConnected() {
                           </div>
                         )}
                       </>
+                    ) : canDeleteNewcomer ? (
+                      <div className="flex flex-col items-end gap-2">
+                        <div
+                          className={`text-xs px-2.5 py-1.5 rounded-lg ${
+                            newcomer.fam
+                              ? 'bg-success-light text-success'
+                              : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {newcomer.fam || '미배정'}
+                        </div>
+                        <button
+                          onClick={() => deleteNewcomer(newcomer.id)}
+                          disabled={deletingId === newcomer.id}
+                          className={`text-[11px] border-none bg-transparent ${
+                            deletingId === newcomer.id
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-danger cursor-pointer'
+                          }`}
+                        >
+                          {deletingId === newcomer.id ? '삭제 중...' : '삭제'}
+                        </button>
+                      </div>
                     ) : (
                       <div
                         className={`text-xs px-2.5 py-1.5 rounded-lg ${
