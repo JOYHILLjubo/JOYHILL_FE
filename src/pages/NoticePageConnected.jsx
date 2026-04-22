@@ -195,10 +195,6 @@ export default function NoticePageConnected() {
           params.set('tag', filter)
         }
 
-        if (debouncedSearchQuery) {
-          params.set('search', debouncedSearchQuery.replace(/\s/g, ''))
-        }
-
         const data = await callAuthedApi(`/api/notices?${params.toString()}`)
 
         if (cancelled) return
@@ -233,7 +229,7 @@ export default function NoticePageConnected() {
     return () => {
       cancelled = true
     }
-  }, [filter, debouncedSearchQuery, reloadKey])
+  }, [filter, reloadKey])
 
   const openNotice = (notice) => {
     navigate(`/notice/${notice.id}`, {
@@ -318,8 +314,17 @@ export default function NoticePageConnected() {
           <p className="text-sm text-gray-500 text-center mt-10">공지 목록을 불러오는 중입니다.</p>
         ) : notices.length === 0 ? (
           <p className="text-sm text-gray-400 text-center mt-10">검색 결과가 없습니다.</p>
-        ) : (
-          notices.map((notice) => {
+        ) : (() => {
+          const filtered = notices.filter((notice) => {
+            if (!debouncedSearchQuery) return true
+            const keyword = debouncedSearchQuery.replace(/\s/g, '')
+            const title = notice.title.replace(/\s/g, '')
+            const content = notice.content.replace(/\s/g, '')
+            return title.toLowerCase().includes(keyword.toLowerCase()) ||
+              content.toLowerCase().includes(keyword.toLowerCase())
+          })
+          if (filtered.length === 0) return <p className="text-sm text-gray-400 text-center mt-10">검색 결과가 없습니다.</p>
+          return filtered.map((notice) => {
             const color = TAG_COLORS[notice.tag] || TAG_COLORS['소식']
 
             return (
@@ -355,7 +360,7 @@ export default function NoticePageConnected() {
               </div>
             )
           })
-        )}
+        })()}
       </div>
 
       <BottomNav />
