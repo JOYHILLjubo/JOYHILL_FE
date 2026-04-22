@@ -491,7 +491,7 @@ export default function HomePageConnected() {
 
       <div className="px-5 mb-3">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[14px] font-semibold">이번 주 설교</p>
+          <p className="text-base font-semibold">이번 주 설교</p>
           {sermonDateLabel && <span className="text-[12px] text-gray-400">{sermonDateLabel}</span>}
         </div>
         <div
@@ -575,7 +575,7 @@ export default function HomePageConnected() {
 
       <div className="px-5 mb-3">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[14px] font-semibold">공지</p>
+          <p className="text-base font-semibold">공지</p>
           <button
             onClick={() => navigate('/notice')}
             className="text-[11px] text-primary bg-transparent border-none cursor-pointer"
@@ -634,7 +634,7 @@ export default function HomePageConnected() {
 
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
-        <p className="text-[14px] font-semibold mb-2">청년부 기도제목</p>
+        <p className="text-base font-semibold mb-2">청년부 기도제목</p>
         <div className="border border-gray-300 rounded-xl p-4">
 
           {communityPrayers.length === 0 ? (

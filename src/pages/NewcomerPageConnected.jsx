@@ -573,33 +573,52 @@ export default function NewcomerPageConnected() {
                     </div>
                   </div>
 
-                  <div className="relative shrink-0">
+                  <div className="shrink-0 flex flex-col items-end gap-1">
                     {canAssignFam ? (
                       <>
-                        <button
-                          onClick={() => setFamDropdown(dropdownOpen ? null : newcomer.id)}
-                          disabled={assigningId === newcomer.id || assignableFams.length === 0}
-                          className={`text-xs px-2.5 py-1.5 rounded-lg border-none whitespace-nowrap ${
-                            newcomer.fam
-                              ? 'bg-success-light text-success'
-                              : 'bg-warning-light text-warning'
-                          } ${
-                            assigningId === newcomer.id || assignableFams.length === 0
-                              ? 'opacity-60 cursor-not-allowed'
-                              : 'cursor-pointer'
-                          }`}
-                        >
-                          {assigningId === newcomer.id
-                            ? '배정 중...'
-                            : newcomer.fam || (assignableFams.length === 0 ? '배정 불가' : '팸 배정')}
-                        </button>
+                        <div className="relative">
+                          <button
+                            onClick={() => setFamDropdown(dropdownOpen ? null : newcomer.id)}
+                            disabled={assigningId === newcomer.id || assignableFams.length === 0}
+                            className={`text-xs px-2.5 py-1.5 rounded-lg border-none whitespace-nowrap ${
+                              newcomer.fam
+                                ? 'bg-success-light text-success'
+                                : 'bg-warning-light text-warning'
+                            } ${
+                              assigningId === newcomer.id || assignableFams.length === 0
+                                ? 'opacity-60 cursor-not-allowed'
+                                : 'cursor-pointer'
+                            }`}
+                          >
+                            {assigningId === newcomer.id
+                              ? '배정 중...'
+                              : newcomer.fam || (assignableFams.length === 0 ? '배정 불가' : '팸 배정')}
+                          </button>
+
+                          {dropdownOpen && assignableFams.length > 0 && (
+                            <div className="absolute right-0 top-9 bg-white border border-gray-300 rounded-xl shadow-xl z-50 w-44 max-h-56 overflow-y-auto">
+                              {assignableFams.map((fam) => (
+                                <button
+                                  key={fam.name}
+                                  onClick={() => assignFam(newcomer.id, fam.name)}
+                                  className={`w-full text-left px-3 py-2.5 text-sm border-none cursor-pointer hover:bg-gray-100 ${
+                                    newcomer.fam === fam.name ? 'bg-primary-light text-primary font-medium' : ''
+                                  }`}
+                                >
+                                  <p>{fam.name}</p>
+                                  <p className="text-[11px] text-gray-500 mt-0.5">{fam.villageName}</p>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
 
                         {/* 리더/마을장이 아니어야만 수정/삭제 표시 */}
                         {!isAssignOnlyRole && (
-                          <div className="flex gap-1 mt-2">
+                          <div className="flex gap-1">
                             <button
                               onClick={() => openEditModal(newcomer)}
-                              className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
+                              className="text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
                             >
                               수정
                             </button>
@@ -607,7 +626,7 @@ export default function NewcomerPageConnected() {
                               <button
                                 onClick={() => deleteNewcomer(newcomer.id)}
                                 disabled={deletingId === newcomer.id}
-                                className={`flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
+                                className={`text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
                                   deletingId === newcomer.id
                                     ? 'text-gray-400 cursor-not-allowed opacity-60'
                                     : 'text-danger cursor-pointer'
@@ -616,23 +635,6 @@ export default function NewcomerPageConnected() {
                                 {deletingId === newcomer.id ? '...' : '삭제'}
                               </button>
                             )}
-                          </div>
-                        )}
-
-                        {dropdownOpen && assignableFams.length > 0 && (
-                          <div className="absolute right-0 top-9 bg-white border border-gray-300 rounded-xl shadow-lg z-20 w-40 max-h-56 overflow-y-auto">
-                            {assignableFams.map((fam) => (
-                              <button
-                                key={fam.name}
-                                onClick={() => assignFam(newcomer.id, fam.name)}
-                                className={`w-full text-left px-3 py-2.5 text-sm border-none cursor-pointer hover:bg-gray-100 ${
-                                  newcomer.fam === fam.name ? 'bg-primary-light text-primary font-medium' : ''
-                                }`}
-                              >
-                                <p>{fam.name}</p>
-                                <p className="text-[11px] text-gray-500 mt-0.5">{fam.villageName}</p>
-                              </button>
-                            ))}
                           </div>
                         )}
                       </>
