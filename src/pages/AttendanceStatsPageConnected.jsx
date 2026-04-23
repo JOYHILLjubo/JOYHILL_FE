@@ -56,6 +56,7 @@ function mapMemberStats(items) {
     id: item.id,
     name: item.name ?? '',
     worshipRate: toRate(item.worshipRate),
+    onlineRate: toRate(item.onlineRate),
     famRate: toRate(item.famRate),
   }))
 }
@@ -108,7 +109,7 @@ function AttendBadge({ present, label }) {
 }
 
 function RateBar({ rate, type }) {
-  const barColor = type === 'worship' ? '#4285F4' : '#F9AB00'
+  const barColor = type === 'worship' ? '#4285F4' : type === 'online' ? '#34A853' : '#F9AB00'
   return (
     <div className="flex items-center gap-2">
       <div style={{ flex: 1, height: 6, borderRadius: 3, background: '#F0F0F0', overflow: 'hidden' }}>
@@ -168,6 +169,10 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
               <div className="flex items-center gap-1.5 justify-end">
                 <span className="text-[10px] text-primary">예배</span>
                 <RateBar rate={member.worshipRate} type="worship" />
+              </div>
+              <div className="flex items-center gap-1.5 justify-end">
+                <span className="text-[10px]" style={{color:'#34A853'}}>온라인</span>
+                <RateBar rate={member.onlineRate} type="online" />
               </div>
               <div className="flex items-center gap-1.5 justify-end">
                 <span className="text-[10px] text-warning">팸</span>
@@ -403,6 +408,7 @@ function VillageStatsView({
                       <p className="text-sm font-medium">{fam}</p>
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-semibold text-primary bg-primary-light px-2 py-0.5 rounded-full">예배 {toRate(stats?.worshipRate)}%</span>
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{color:'#34A853',background:'#E6F4EA'}}>온라인 {toRate(stats?.onlineRate)}%</span>
                         <span className="text-[11px] font-semibold text-warning bg-warning-light px-2 py-0.5 rounded-full">팸 {toRate(stats?.famRate)}%</span>
                         <span className="text-gray-500 text-[1rem]">→</span>
                       </div>
