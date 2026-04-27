@@ -363,6 +363,7 @@ function VillageStatsView({
   isPastorOrAbove, summaryLabel, summaryStats, villages, famStatsMap,
   selectedYear, setSelectedYear, selectedFam, setSelectedFam,
   selectedFamMembers, detailLoading, expandedVillage, setExpandedVillage, weekAttendMap,
+  famCheckStatusMap = {},
 }) {
   const selectedFamStats = selectedFam ? famStatsMap[selectedFam] : null
 
@@ -405,7 +406,14 @@ function VillageStatsView({
                   return (
                     <div key={fam} onClick={() => setSelectedFam(fam)}
                       className={`flex items-center justify-between px-4 py-3.5 cursor-pointer hover:bg-gray-100 transition-colors ${index < fams.length - 1 ? 'border-b border-gray-300' : ''}`}>
-                      <p className="text-sm font-medium">{fam}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium">{fam}</p>
+                        {isPastorOrAbove && famCheckStatusMap[fam] === false && (
+                          <span style={{ fontSize: 10, fontWeight: 600, color: '#EA4335', background: '#FDECEA', padding: '1px 6px', borderRadius: 20 }}>
+                            미입력
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-semibold text-primary bg-primary-light px-2 py-0.5 rounded-full">예배 {toRate(stats?.worshipRate)}%</span>
                         <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{color:'#34A853',background:'#E6F4EA'}}>온라인 {toRate(stats?.onlineRate)}%</span>
@@ -444,6 +452,7 @@ export default function AttendanceStatsPageConnected() {
   const [selectedFamMembers, setSelectedFamMembers] = useState([])
   const [expandedVillage, setExpandedVillage] = useState(null)
   const [weekAttendMap, setWeekAttendMap] = useState({})
+  const [famCheckStatusMap, setFamCheckStatusMap] = useState({})
 
   const handleExpiredSession = () => { logout(); navigate('/login', { replace: true }) }
 
@@ -504,16 +513,27 @@ export default function AttendanceStatsPageConnected() {
         }
 
         const accessibleFams = Object.values(nextVillages).flat()
-        const famStatsEntries = await Promise.all(
-          accessibleFams.map(async (famName) => [
-            famName,
-            await callAuthedApi(`/api/attendance/stats?scope=fam&famName=${encodeURIComponent(famName)}&year=${selectedYear}`),
-          ])
-        )
+        const [famStatsEntries, checkStatusData] = await Promise.all([
+          Promise.all(
+            accessibleFams.map(async (famName) => [
+              famName,
+              await callAuthedApi(`/api/attendance/stats?scope=fam&famName=${encodeURIComponent(famName)}&year=${selectedYear}`),
+            ])
+          ),
+          isPastorOrAbove
+            ? callAuthedApi(`/api/attendance/check-status?date=${getThisSundayKey()}`).catch(() => [])
+            : Promise.resolve([]),
+        ])
+
+        const nextCheckStatusMap = {}
+        ;(Array.isArray(checkStatusData) ? checkStatusData : []).forEach((item) => {
+          nextCheckStatusMap[item.famName] = item.hasRecord
+        })
 
         setSummaryStats(summaryData)
         setVillages(nextVillages)
         setFamStatsMap(Object.fromEntries(famStatsEntries))
+        setFamCheckStatusMap(nextCheckStatusMap)
         if (accessibleVillageNames.length > 0 && !expandedVillage) setExpandedVillage(accessibleVillageNames[0])
         if (selectedFam && !accessibleFams.includes(selectedFam)) setSelectedFam(null)
       } catch (err) {
@@ -587,7 +607,7 @@ export default function AttendanceStatsPageConnected() {
               selectedFam={selectedFam} setSelectedFam={setSelectedFam}
               selectedFamMembers={selectedFamMembers} detailLoading={detailLoading}
               expandedVillage={expandedVillage} setExpandedVillage={setExpandedVillage}
-              weekAttendMap={weekAttendMap}
+              weekAttendMap={weekAttendMap} famCheckStatusMap={famCheckStatusMap}
             />
           )
         ) : (
