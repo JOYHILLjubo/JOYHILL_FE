@@ -671,12 +671,12 @@ export default function HomePageConnected() {
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handlePrayerSubmit() }}
               placeholder="기도제목을 남겨주세요... (익명)"
               maxLength={200}
-              className="flex-1 text-sm bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-200 outline-none focus:border-primary"
+              className="text-sm bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-200 outline-none focus:border-primary" style={{width: '70%'}}
             />
             <button
               onClick={handlePrayerSubmit}
               disabled={prayerSubmitting || prayerInput.trim() === ''}
-              className="shrink-0 text-sm font-medium text-white bg-primary rounded-lg px-4 py-1.5 border-none cursor-pointer disabled:opacity-40"
+              className="shrink-0 text-sm font-medium text-white bg-primary rounded-lg px-4 py-2.5 border-none cursor-pointer disabled:opacity-40"
             >
               올리기
             </button>
