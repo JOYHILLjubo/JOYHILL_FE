@@ -535,9 +535,11 @@ export default function HomePageConnected() {
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
               <div className="flex flex-col gap-0.5">
-                <p className="text-[15px] font-semibold text-gray-900 leading-snug">{sermon.title}</p>
-                {sermonDateLabel && <p className="text-[11px] text-gray-400 text-right">{sermonDateLabel}</p>}
                 <div className="flex items-center justify-between">
+                  <p className="text-[15px] font-semibold text-gray-900 leading-snug">{sermon.title}</p>
+                  {sermonDateLabel && <span className="text-[11px] text-gray-400 shrink-0 ml-2">{sermonDateLabel}</span>}
+                </div>
+                <div className="flex items-center justify-between mt-0.5">
                   {sermon.verse && <span className="text-sm text-gray-600">{sermon.verse}</span>}
                   {sermon.preacher && <span className="text-sm text-gray-600 font-medium shrink-0">설교자 : {sermon.preacher}</span>}
                 </div>
