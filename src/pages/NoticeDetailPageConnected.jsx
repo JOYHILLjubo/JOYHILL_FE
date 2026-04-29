@@ -373,14 +373,11 @@ export default function NoticeDetailPageConnected() {
         </div>
 
         <div className="pt-2 pb-4 border-b border-gray-300">
-          <h1 className="text-[17px] font-semibold leading-snug mb-2">{notice.title}</h1>
-          <div className="flex items-center gap-1.5">
-            <p className="text-xs text-gray-500">{notice.author || 'JOYHILL'} · {notice.date}</p>
-            {notice.deadline && (
-              <span className="text-[11px] text-warning bg-warning-light px-1.5 py-0.5 rounded">
-                ~{notice.deadline}
-              </span>
-            )}
+          <h1 className="text-2xl font-semibold leading-snug mb-3">{notice.title}</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-500">작성자 <span className="text-gray-700 font-medium">{notice.author || 'JOYHILL'}</span></span>
+            <span className="text-gray-300">|</span>
+            <span className="text-xs text-gray-500">등록일 <span className="text-gray-700 font-medium">{notice.date}</span></span>
           </div>
         </div>
 
