@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import logoHome from '../assets/logo-home.png'
 import { useNavigate } from 'react-router-dom'
 import { TvMinimalPlay, Camera, BookOpen, MessageCircle, Church } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
@@ -464,7 +465,7 @@ export default function HomePageConnected() {
     <div className="pb-20">
       <div className="flex justify-between items-center px-5 pt-6 pb-3">
         <div>
-          <p className="text-lg font-semibold mt-0.5">JOY HILL</p>
+          <img src={logoHome} alt="joyhill" className="h-6" />
           <p className="text-[12px] text-gray-500 mt-0.5">{headerDescription}</p>
         </div>
         <button
