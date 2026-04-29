@@ -46,7 +46,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center px-8">
       <div className="text-center mb-10">
-        <img src={logoLogin} alt="joyhill 기쁨의동산교회 청년부" className="mx-auto w-48" />
+        <img src={logoLogin} alt="joyhill 기쁨의동산교회 청년부" className="mx-auto w-40" />
       </div>
 
       <form onSubmit={handleLogin} className="space-y-3">
