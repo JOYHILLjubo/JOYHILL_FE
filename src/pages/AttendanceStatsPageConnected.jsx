@@ -65,7 +65,7 @@ function buildAttendanceMap(records) {
   const map = {}
   ;(records || []).forEach((r) => {
     const id = r.userId ?? r.famMemberId
-    if (id) map[id] = { worship: Boolean(r.worshipPresent), fam: Boolean(r.famPresent) }
+    if (id) map[id] = { worship: Boolean(r.worshipPresent), online: Boolean(r.onlinePresent), fam: Boolean(r.famPresent) }
   })
   return map
 }
@@ -97,12 +97,12 @@ async function requestTokenRefresh() {
 // ── 공통 컴포넌트 ──
 
 function AttendBadge({ present, label }) {
+  let bg, color
+  if (label === '예배') { bg = present ? '#E8F0FE' : '#F5F5F5'; color = present ? '#4285F4' : '#AAAAAA' }
+  else if (label === '온라인') { bg = present ? '#E6F4EA' : '#F5F5F5'; color = present ? '#34A853' : '#AAAAAA' }
+  else { bg = present ? '#FEF7E0' : '#F5F5F5'; color = present ? '#F9AB00' : '#AAAAAA' }
   return (
-    <span style={{
-      fontSize: 10, fontWeight: 600, padding: '2px 5px', borderRadius: 6,
-      background: present ? (label === '예배' ? '#E8F0FE' : '#FEF7E0') : '#F5F5F5',
-      color: present ? (label === '예배' ? '#4285F4' : '#F9AB00') : '#AAAAAA',
-    }}>
+    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 5px', borderRadius: 6, background: bg, color }}>
       {label} {present ? '✓' : '✗'}
     </span>
   )
@@ -161,6 +161,7 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
               {weekRecord !== undefined && (
                 <div className="flex gap-1 mt-0.5">
                   <AttendBadge present={weekRecord.worship} label="예배" />
+                  <AttendBadge present={weekRecord.online} label="온라인" />
                   <AttendBadge present={weekRecord.fam} label="팸" />
                 </div>
               )}
@@ -225,7 +226,7 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
       setIsLoading(true); setError('')
       try {
         const [membersData, attendData] = await Promise.all([
-          callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members`),
+          callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?year=${new Date().getFullYear()}`),
           callAuthedApi(`/api/attendance?famName=${encodeURIComponent(famName)}&date=${weekDate}`),
         ])
         if (cancelled) return
@@ -242,6 +243,7 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
   }, [famName, weekDate])
 
   const worshipCount = members.filter((m) => attendMap[m.id]?.worship).length
+  const onlineCount = members.filter((m) => attendMap[m.id]?.online).length
   const famCount = members.filter((m) => attendMap[m.id]?.fam).length
 
   return (
@@ -251,6 +253,7 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
       <div className="flex gap-2 mb-3">
         <span className="text-xs bg-primary-light text-primary px-2.5 py-1 rounded-full">재적 {members.length}명</span>
         <span className="text-xs bg-primary-light text-primary px-2.5 py-1 rounded-full">예배 {worshipCount}명</span>
+        <span className="text-xs px-2.5 py-1 rounded-full" style={{background:'#E6F4EA',color:'#34A853'}}>온라인 {onlineCount}명</span>
         <span className="text-xs bg-warning-light text-warning px-2.5 py-1 rounded-full">팸 {famCount}명</span>
       </div>
       {isLoading ? (
@@ -258,22 +261,35 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
       ) : members.length === 0 ? (
         <p className="text-sm text-gray-500 text-center py-8">팸원이 없습니다.</p>
       ) : (
-        <div className="border border-gray-300 rounded-xl overflow-hidden">
-          <div className="flex px-4 py-2 bg-gray-50 border-b border-gray-300">
-            <div className="flex-1 text-xs text-gray-500">이름</div>
-            <div className="w-16 text-center text-xs text-primary font-medium">예배</div>
-            <div className="w-16 text-center text-xs text-warning font-medium">팸모임</div>
-          </div>
-          {members.map((member, idx) => {
+        <div className="flex flex-col gap-3">
+          {members.map((member) => {
+            const color = getColor(member.id)
             const record = attendMap[member.id]
             return (
-              <div key={member.id} className={`flex items-center px-4 py-3 ${idx < members.length - 1 ? 'border-b border-gray-300' : ''}`}>
-                <div className="flex-1">
-                  <p className="text-sm">{member.name}</p>
-                  <p className="text-[11px] text-gray-500">{member.role === 'leader' ? '리더' : '팸원'}</p>
+              <div key={member.id} className="border border-gray-300 rounded-xl px-5 py-3 flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{member.name}</p>
+                  <div className="flex gap-1 mt-0.5">
+                    <AttendBadge present={Boolean(record?.worship)} label="예배" />
+                    <AttendBadge present={Boolean(record?.online)} label="온라인" />
+                    <AttendBadge present={Boolean(record?.fam)} label="팸" />
+                  </div>
                 </div>
-                <div className="w-16 flex justify-center"><span style={{ fontSize: 18 }}>{record?.worship ? '✅' : '⬜'}</span></div>
-                <div className="w-16 flex justify-center"><span style={{ fontSize: 18 }}>{record?.fam ? '✅' : '⬜'}</span></div>
+                <div className="flex flex-col gap-1 shrink-0 min-w-[130px]">
+                  <div className="flex items-center gap-1.5 justify-end">
+                    <span className="text-[10px] text-primary">예배</span>
+                    <RateBar rate={member.worshipRate ?? 0} type="worship" />
+                  </div>
+                  <div className="flex items-center gap-1.5 justify-end">
+                    <span className="text-[10px]" style={{color:'#34A853'}}>온라인</span>
+                    <RateBar rate={member.onlineRate ?? 0} type="online" />
+                  </div>
+                  <div className="flex items-center gap-1.5 justify-end">
+                    <span className="text-[10px] text-warning">팸</span>
+                    <RateBar rate={member.famRate ?? 0} type="fam" />
+                  </div>
+                </div>
               </div>
             )
           })}
