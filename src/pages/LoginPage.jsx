@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import logoLogin from '../assets/logo-login.png'
 import { useLocation } from 'react-router-dom'
 import { requestLogin } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
@@ -45,11 +46,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center px-8">
       <div className="text-center mb-10">
-        <div className="w-16 h-16 rounded-full bg-primary-light mx-auto mb-3 flex items-center justify-center">
-          <span className="text-2xl text-primary font-bold">J</span>
-        </div>
-        <h1 className="text-xl font-medium">JOY HILL</h1>
-        <p className="text-[13px] text-gray-500 mt-1">기쁨의 동산교회 청년부</p>
+        <img src={logoLogin} alt="joyhill 기쁨의동산교회 청년부" className="mx-auto w-64" />
       </div>
 
       <form onSubmit={handleLogin} className="space-y-3">

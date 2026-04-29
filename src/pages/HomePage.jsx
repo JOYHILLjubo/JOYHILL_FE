@@ -1,4 +1,5 @@
 import HomePageConnected from './HomePageConnected'
+import logoHome from '../assets/logo-home.png'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSermon } from '../context/SermonContext'
@@ -30,7 +31,7 @@ function LegacyHomePage() {
       <div className="flex justify-between items-center px-5 pt-4 pb-3">
         <div>
           <p className="text-[11px] text-gray-500">{dateStr}</p>
-          <p className="text-lg font-medium mt-0.5">JOY HILL 주보</p>
+          <img src={logoHome} alt="joyhill" className="h-6 mt-0.5" />
         </div>
         <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm">
           🔔
