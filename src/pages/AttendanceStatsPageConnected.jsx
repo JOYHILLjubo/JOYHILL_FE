@@ -28,7 +28,10 @@ function getThisSundayKey() {
   const today = new Date()
   const sunday = new Date(today)
   sunday.setDate(today.getDate() - today.getDay())
-  return sunday.toISOString().slice(0, 10)
+  const y = sunday.getFullYear()
+  const m = String(sunday.getMonth() + 1).padStart(2, '0')
+  const d = String(sunday.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
 function getRecentSundays(n = 8) {
