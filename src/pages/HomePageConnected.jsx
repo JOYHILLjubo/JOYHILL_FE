@@ -496,7 +496,6 @@ export default function HomePageConnected() {
       <div className="px-5 mb-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-lg font-semibold">이번 주 설교</p>
-          {sermonDateLabel && <span className="text-[12px] text-gray-400">{sermonDateLabel}</span>}
         </div>
         <div
           onClick={handleSermonClick}
@@ -539,7 +538,10 @@ export default function HomePageConnected() {
                 <p className="text-[15px] font-semibold text-gray-900 leading-snug">{sermon.title}</p>
                 <div className="flex items-center justify-between mt-0.5">
                   {sermon.verse && <span className="text-sm text-gray-600">{sermon.verse}</span>}
-                  {sermon.preacher && <span className="text-sm text-gray-600 font-medium shrink-0">설교자 : {sermon.preacher}</span>}
+                  <div className="flex flex-col items-end shrink-0">
+                    {sermonDateLabel && <span className="text-[12px] text-gray-400">{sermonDateLabel}</span>}
+                    {sermon.preacher && <span className="text-sm text-gray-600 font-medium">설교자 : {sermon.preacher}</span>}
+                  </div>
                 </div>
               </div>
             ) : (
