@@ -536,14 +536,10 @@ export default function HomePageConnected() {
             ) : sermon.title ? (
               <div className="flex flex-col gap-0.5">
                 <p className="text-[15px] font-semibold text-gray-900 leading-snug">{sermon.title}</p>
-                <div className="flex items-baseline justify-between mt-0.5">
+                {sermonDateLabel && <p className="text-[11px] text-gray-400 text-right">{sermonDateLabel}</p>}
+                <div className="flex items-center justify-between">
                   {sermon.verse && <span className="text-sm text-gray-600">{sermon.verse}</span>}
-                  {sermon.preacher && (
-                    <div className="flex flex-col items-end shrink-0">
-                      {sermonDateLabel && <span className="text-[11px] text-gray-400">{sermonDateLabel}</span>}
-                      <span className="text-sm text-gray-600 font-medium">설교자 : {sermon.preacher}</span>
-                    </div>
-                  )}
+                  {sermon.preacher && <span className="text-sm text-gray-600 font-medium shrink-0">설교자 : {sermon.preacher}</span>}
                 </div>
               </div>
             ) : (
