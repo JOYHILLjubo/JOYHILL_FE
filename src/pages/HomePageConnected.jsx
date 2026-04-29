@@ -332,9 +332,12 @@ export default function HomePageConnected() {
       }
 
       try {
-        const noticeData = await callAuthedApi('/api/notices?page=0&size=3')
+        const noticeData = await callAuthedApi('/api/notices?page=0&size=20')
         nextNotices = Array.isArray(noticeData?.content)
-          ? noticeData.content.map(normalizeNotice)
+          ? noticeData.content
+              .filter(n => !n.pinned)
+              .slice(0, 3)
+              .map(normalizeNotice)
           : []
       } catch (error) {
         const message =

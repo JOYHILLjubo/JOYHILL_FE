@@ -6,6 +6,15 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        '2xs': ['11px', { lineHeight: '1.4' }],
+        'xs':  ['13px', { lineHeight: '1.4' }],
+        'sm':  ['15px', { lineHeight: '1.5' }],
+        'base':['18px', { lineHeight: '1.5' }],
+        'lg':  ['20px', { lineHeight: '1.4' }],
+        'xl':  ['22px', { lineHeight: '1.3' }],
+        '2xl': ['26px', { lineHeight: '1.3' }],
+      },
       colors: {
         primary: {
           DEFAULT: '#4285F4',
