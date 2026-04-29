@@ -671,7 +671,7 @@ export default function HomePageConnected() {
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handlePrayerSubmit() }}
               placeholder="기도제목을 남겨주세요... (익명)"
               maxLength={200}
-              className="text-sm bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-200 outline-none focus:border-primary" style={{width: '70%'}}
+              className="text-sm bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-200 outline-none focus:border-primary" style={{width: '78%'}}
             />
             <button
               onClick={handlePrayerSubmit}
