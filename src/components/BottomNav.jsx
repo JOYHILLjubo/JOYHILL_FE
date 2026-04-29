@@ -32,7 +32,7 @@ export default function BottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-gray-300 flex justify-around z-50"
-      style={{ paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))', paddingTop: '8px', height: '64px' }}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', paddingTop: '8px', height: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}
     >
       {tabs.map((tab) => {
         const isActive = location.pathname.startsWith(tab.path)
