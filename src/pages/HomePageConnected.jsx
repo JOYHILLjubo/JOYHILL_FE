@@ -638,12 +638,9 @@ export default function HomePageConnected() {
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
         <p className="text-lg font-semibold mb-2">청년부 기도제목</p>
-        <div className="border border-gray-300 rounded-xl p-4">
-
-          {communityPrayers.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
-          ) : (
-            <div className="flex flex-col gap-2 mb-8 max-h-60 overflow-y-auto">
+        <div className="border border-gray-300 rounded-xl overflow-hidden">
+          {communityPrayers.length > 0 && (
+            <div className="flex flex-col gap-2 p-4 max-h-60 overflow-y-auto">
               {communityPrayers.map((p) => (
                 <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5 flex items-start gap-2">
                   <div className="flex-1">
@@ -662,8 +659,7 @@ export default function HomePageConnected() {
               ))}
             </div>
           )}
-
-          <div className="flex items-center gap-2 pt-5 border-t border-gray-100">
+          <div className={`flex items-center gap-2 px-4 py-3 ${communityPrayers.length > 0 ? 'border-t border-gray-100' : ''}`}>
             <input
               type="text"
               value={prayerInput}
