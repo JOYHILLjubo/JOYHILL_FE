@@ -587,7 +587,7 @@ export default function TeamManagePageConnected() {
   }
 
   return (
-    <div className="pb-24">
+    <div style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-semibold flex-1">사역팀 관리</p>

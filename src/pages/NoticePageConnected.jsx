@@ -239,7 +239,7 @@ export default function NoticePageConnected() {
   }
 
   return (
-    <div className="pb-20">
+    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex justify-between items-center px-5 pt-6" style={{ marginBottom: '20px' }}>
         <p style={{ fontSize: '1.25rem' }} className="font-semibold">전체 공지사항</p>
         {canWriteNotice && (

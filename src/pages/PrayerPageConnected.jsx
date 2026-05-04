@@ -226,7 +226,7 @@ export default function PrayerPageConnected() {
   const pageSubtitle = isPastor ? '교역자 · 부장 공유' : (user?.fam || '소속 팸 없음')
 
   return (
-    <div className="pb-20">
+    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="px-5 pt-6 pb-3">
         <p className="text-lg font-semibold">{pageTitle}</p>
         <p className="text-xs text-gray-500 mt-0.5">{pageSubtitle}</p>

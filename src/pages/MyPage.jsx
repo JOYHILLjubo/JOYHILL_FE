@@ -28,7 +28,7 @@ export default function MyPage() {
   }
 
   return (
-    <div className="pb-20">
+    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="px-5 pt-5 pb-4">
         <p className="text-lg font-semibold flex-1">MY</p>
       </div>
