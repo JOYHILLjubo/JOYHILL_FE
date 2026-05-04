@@ -212,7 +212,7 @@ export default function PrayerWritePageConnected() {
         <textarea
           value={content}
           onChange={(event) => { setContent(event.target.value); setSubmitError('') }}
-          placeholder={'기도제목을 작성해주세요.\n\n예) 이번 주 시험이 있어 집중해서 준비할 수 있도록 기도 부탁드립니다.'}
+          placeholder={'기도제목을 작성해주세요.'}
           className="w-full h-48 p-3 border border-gray-300 rounded-xl text-sm leading-relaxed resize-none focus:outline-none focus:border-primary placeholder:text-gray-500 placeholder:text-[13px]"
         />
         <div className="flex justify-end mt-1">

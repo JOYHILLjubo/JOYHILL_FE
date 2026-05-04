@@ -252,7 +252,7 @@ export default function NoticeWritePageConnected() {
   }
 
   return (
-    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', overflowX: 'hidden' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={handleBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-semibold flex-1">{isEdit ? '공지사항 수정' : '공지사항 등록'}</p>
@@ -340,13 +340,20 @@ export default function NoticeWritePageConnected() {
         {/* 게시 기한 */}
         <div className="py-5 border-b border-gray-100">
           <p className="text-xs text-gray-500 mb-1.5">게시 기한</p>
-          <input
-            type="date"
-            value={deadline}
-            onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white text-gray-800"
-            style={{ colorScheme: 'light' }}
-          />
+          <div className="relative w-full">
+            {!deadline && (
+              <span className="absolute inset-0 flex items-center px-3 text-sm text-gray-400 pointer-events-none">
+                날짜 선택
+              </span>
+            )}
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white text-gray-800"
+              style={{ colorScheme: 'light' }}
+            />
+          </div>
           <p className="text-[11px] text-gray-500 mt-1 ml-1">
             {deadline ? `${deadline} 이후 자동 삭제는 아직 연결되지 않았습니다.` : '미설정 시 계속 게시됩니다.'}
           </p>
