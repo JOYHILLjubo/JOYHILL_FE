@@ -345,7 +345,7 @@ export default function NoticeWritePageConnected() {
             value={deadline}
             onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white text-gray-800"
-            style={{ WebkitAppearance: 'none', colorScheme: 'light' }}
+            style={{ colorScheme: 'light' }}
           />
           <p className="text-[11px] text-gray-500 mt-1 ml-1">
             {deadline ? `${deadline} 이후 자동 삭제는 아직 연결되지 않았습니다.` : '미설정 시 계속 게시됩니다.'}
