@@ -51,6 +51,7 @@ function mapNotice(item) {
     linkUrl: item?.linkUrl ?? null,
     createdAt: item?.createdAt ?? '',
     date: formatNoticeDate(item?.createdAt ?? ''),
+    viewCount: item?.viewCount ?? 0,
   }
 }
 
@@ -378,6 +379,8 @@ export default function NoticeDetailPageConnected() {
             <span className="text-xs text-gray-500">작성자 <span className="text-gray-700 font-medium">{notice.author || 'JOYHILL'}</span></span>
             <span className="text-gray-300">|</span>
             <span className="text-xs text-gray-500">등록일 <span className="text-gray-700 font-medium">{notice.date}</span></span>
+            <span className="text-gray-300">|</span>
+            <span className="text-xs text-gray-500">👁 <span className="text-gray-700 font-medium">{notice.viewCount}</span></span>
           </div>
         </div>
 

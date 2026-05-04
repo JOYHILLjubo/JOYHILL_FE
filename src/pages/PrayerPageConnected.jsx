@@ -310,7 +310,7 @@ export default function PrayerPageConnected() {
                   {getInitial(prayer.name)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium">
+                  <p className="text-[17px] font-medium">
                     {prayer.name || '이름 없음'}
                     {prayer.userId === user?.id && <span className="ml-1 text-[11px] text-primary">(나)</span>}
                   </p>

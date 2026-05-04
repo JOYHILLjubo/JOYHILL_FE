@@ -51,6 +51,7 @@ function mapNotice(item) {
     fileUrl: item?.fileUrl ?? null,
     createdAt: item?.createdAt ?? '',
     date: formatNoticeDate(item?.createdAt),
+    viewCount: item?.viewCount ?? 0,
   }
 }
 
@@ -358,6 +359,8 @@ export default function NoticePageConnected() {
                   <span className="text-[11px] text-gray-500">{notice.author || 'JOYHILL'}</span>
                   <span className="text-[11px] text-gray-500">·</span>
                   <span className="text-[11px] text-gray-500">{notice.date}</span>
+                  <span className="text-[11px] text-gray-500">·</span>
+                  <span className="text-[11px] text-gray-500">👁 {notice.viewCount}</span>
                 </div>
               </div>
             )
