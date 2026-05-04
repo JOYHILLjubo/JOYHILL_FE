@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import DateSelect from '../components/DateSelect'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -258,7 +259,7 @@ export default function NoticeWritePageConnected() {
         <p className="text-base font-semibold flex-1">{isEdit ? '공지사항 수정' : '공지사항 등록'}</p>
       </div>
 
-      <div className="px-5 pt-2 flex flex-col">
+      <div className="px-5 pt-2 flex flex-col" style={{ minWidth: 0 }}>
 
         {/* 제목 */}
         <div className="py-5 border-b border-gray-100">
@@ -340,20 +341,14 @@ export default function NoticeWritePageConnected() {
         {/* 게시 기한 */}
         <div className="py-5 border-b border-gray-100">
           <p className="text-xs text-gray-500 mb-1.5">게시 기한</p>
-          <div className="relative w-full">
-            {!deadline && (
-              <span className="absolute inset-0 flex items-center px-3 text-sm text-gray-400 pointer-events-none">
-                날짜 선택
-              </span>
-            )}
-            <input
-              type="date"
-              value={deadline}
-              onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white text-gray-800"
-              style={{ colorScheme: 'light' }}
-            />
-          </div>
+          <input
+            type="date"
+            value={deadline}
+            onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
+            min={new Date().toISOString().slice(0, 10)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white"
+            style={{ colorScheme: 'light', minHeight: '44px' }}
+          />
           <p className="text-[11px] text-gray-500 mt-1 ml-1">
             {deadline ? `${deadline} 이후 자동 삭제는 아직 연결되지 않았습니다.` : '미설정 시 계속 게시됩니다.'}
           </p>
