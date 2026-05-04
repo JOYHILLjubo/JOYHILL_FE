@@ -191,10 +191,6 @@ export default function NoticePageConnected() {
           size: '100',
         })
 
-        if (filter) {
-          params.set('tag', filter)
-        }
-
         const data = await callAuthedApi(`/api/notices?${params.toString()}`)
 
         if (cancelled) return
@@ -316,6 +312,9 @@ export default function NoticePageConnected() {
           <p className="text-sm text-gray-400 text-center mt-10">검색 결과가 없습니다.</p>
         ) : (() => {
           const filtered = notices.filter((notice) => {
+            const noticeTags = notice.tag ? notice.tag.split(',').map((t) => t.trim()) : []
+            const matchFilter = !filter || noticeTags.includes(filter)
+            if (!matchFilter) return false
             if (!debouncedSearchQuery) return true
             const keyword = debouncedSearchQuery.replace(/\s/g, '')
             const title = notice.title.replace(/\s/g, '')
@@ -341,11 +340,14 @@ export default function NoticePageConnected() {
                       고정
                     </span>
                   )}
-                  {notice.tag && (
-                    <span className={`text-[11px] ${color.text} ${color.bg} px-1.5 py-0.5 rounded`}>
-                      {notice.tag}
-                    </span>
-                  )}
+                  {notice.tag && notice.tag.split(',').map((t) => t.trim()).filter(Boolean).map((t) => {
+                    const c = TAG_COLORS[t] || TAG_COLORS['소식']
+                    return (
+                      <span key={t} className={`text-[11px] ${c.text} ${c.bg} px-1.5 py-0.5 rounded`}>
+                        {t}
+                      </span>
+                    )
+                  })}
 
                 </div>
                 <p className="text-sm font-medium">{notice.title}</p>
