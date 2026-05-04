@@ -259,7 +259,7 @@ export default function NoticeWritePageConnected() {
         <p className="text-base font-semibold flex-1">{isEdit ? '공지사항 수정' : '공지사항 등록'}</p>
       </div>
 
-      <div className="px-5 pt-2 flex flex-col" style={{ minWidth: 0 }}>
+      <div className="px-5 pt-2 flex flex-col" style={{ minWidth: 0, boxSizing: 'border-box', width: '100%' }}>
 
         {/* 제목 */}
         <div className="py-5 border-b border-gray-100">
@@ -341,14 +341,25 @@ export default function NoticeWritePageConnected() {
         {/* 게시 기한 */}
         <div className="py-5 border-b border-gray-100">
           <p className="text-xs text-gray-500 mb-1.5">게시 기한</p>
-          <input
-            type="date"
-            value={deadline}
-            onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
-            min={new Date().toISOString().slice(0, 10)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white"
-            style={{ colorScheme: 'light', minHeight: '44px' }}
-          />
+          <div className="flex gap-2 items-center">
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
+              min={new Date().toISOString().slice(0, 10)}
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white"
+              style={{ colorScheme: 'light', minHeight: '44px', boxSizing: 'border-box', minWidth: 0 }}
+            />
+            {deadline && (
+              <button
+                type="button"
+                onClick={() => { setDeadline(''); setSubmitError('') }}
+                className="shrink-0 text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg border-none cursor-pointer hover:bg-gray-200 transition-colors whitespace-nowrap"
+              >
+                초기화
+              </button>
+            )}
+          </div>
           <p className="text-[11px] text-gray-500 mt-1 ml-1">
             {deadline ? `${deadline} 이후 자동 삭제는 아직 연결되지 않았습니다.` : '미설정 시 계속 게시됩니다.'}
           </p>
