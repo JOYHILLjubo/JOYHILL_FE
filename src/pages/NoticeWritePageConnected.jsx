@@ -252,7 +252,7 @@ export default function NoticeWritePageConnected() {
   }
 
   return (
-    <div className="pb-28">
+    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={handleBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-semibold flex-1">{isEdit ? '공지사항 수정' : '공지사항 등록'}</p>
@@ -344,7 +344,8 @@ export default function NoticeWritePageConnected() {
             type="date"
             value={deadline}
             onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white text-gray-800"
+            style={{ WebkitAppearance: 'none', colorScheme: 'light' }}
           />
           <p className="text-[11px] text-gray-500 mt-1 ml-1">
             {deadline ? `${deadline} 이후 자동 삭제는 아직 연결되지 않았습니다.` : '미설정 시 계속 게시됩니다.'}
@@ -370,7 +371,7 @@ export default function NoticeWritePageConnected() {
         {submitError && <p className="text-[12px] text-danger pb-3">{submitError}</p>}
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 bg-white border-t border-gray-300" style={{ paddingTop: '12px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
