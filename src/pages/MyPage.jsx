@@ -234,7 +234,7 @@ export default function MyPage() {
             onClick={(e) => e.stopPropagation()}
             style={{
               width: '100%', maxHeight: '80vh',
-              background: 'var(--color-background-primary)',
+              background: '#ffffff',
               borderRadius: '20px 20px 0 0',
               display: 'flex', flexDirection: 'column',
               overflow: 'hidden',

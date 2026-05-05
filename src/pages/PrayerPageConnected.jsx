@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
+import { BibleAvatarIcon } from '../components/BibleAvatars'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -75,6 +76,7 @@ function normalizePrayer(item, currentUser) {
     month: item?.month ?? null,
     week: item?.week ?? null,
     famName: item?.famName ?? '',
+    avatarKey: item?.userId === currentUser?.id ? (currentUser?.avatarKey ?? null) : (item?.avatarKey ?? null),
   }
 }
 
@@ -306,9 +308,13 @@ export default function PrayerPageConnected() {
             const color = getColor(prayer.id)
             return (
               <div key={prayer.id} className="flex items-start gap-2 py-3 border-b border-gray-300 last:border-b-0">
-                <div className={`w-7 h-7 rounded-full ${color.bg} flex items-center justify-center text-[11px] font-medium ${color.text} shrink-0 mt-0.5`}>
-                  {getInitial(prayer.name)}
-                </div>
+                {prayer.avatarKey ? (
+                  <BibleAvatarIcon avatarKey={prayer.avatarKey} size={28} />
+                ) : (
+                  <div className={`w-7 h-7 rounded-full ${color.bg} flex items-center justify-center text-[11px] font-medium ${color.text} shrink-0 mt-0.5`}>
+                    {getInitial(prayer.name)}
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <p className="text-[17px] font-medium">
                     {prayer.name || '이름 없음'}

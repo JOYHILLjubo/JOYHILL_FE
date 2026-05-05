@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BottomNav from '../components/BottomNav'
 import DateSelect from '../components/DateSelect'
+import { BibleAvatarIcon } from '../components/BibleAvatars'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -71,6 +72,7 @@ function mapMember(item, currentFam) {
     note: item.note ?? '',
     worshipRate: Number(item.worshipRate ?? 0),
     famRate: Number(item.famRate ?? 0),
+    avatarKey: item.avatarKey ?? null,
   }
 }
 
@@ -585,9 +587,13 @@ export default function FamManagePageConnected() {
                 onClick={() => setEditTarget(member)}
                 className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0 cursor-pointer hover:bg-gray-100 -mx-5 px-5 transition-colors"
               >
-                <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                  {member.name[0]}
-                </div>
+                {member.avatarKey ? (
+                  <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                ) : (
+                  <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
+                    {member.name[0]}
+                  </div>
+                )}
                 <div className="flex-1">
                   <p className="text-sm font-medium">{member.name}</p>
                   <p className="text-[11px] text-gray-500">{member.phone || '—'}</p>

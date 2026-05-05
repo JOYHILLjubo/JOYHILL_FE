@@ -327,25 +327,25 @@ function JesusSvg() {
   return (
     <svg width="100%" height="100%" viewBox="0 0 72 72">
       <clipPath id="av-cje"><circle cx="36" cy="36" r="36"/></clipPath>
-      <circle cx="36" cy="36" r="36" fill="#FFF8DC"/>
-      <rect x="32" y="0" width="8" height="72" rx="2" fill="#8B6914" opacity=".25" clipPath="url(#av-cje)"/>
-      <rect x="0" y="22" width="72" height="8" rx="2" fill="#8B6914" opacity=".25" clipPath="url(#av-cje)"/>
-      <circle cx="36" cy="28" r="19" fill="none" stroke="#F9AB00" strokeWidth="2.5"/>
-      <circle cx="36" cy="28" r="22" fill="none" stroke="#F9AB00" strokeWidth=".7" opacity=".35"/>
-      <rect x="14" y="48" width="44" height="26" rx="7" fill="#E8E0D0" clipPath="url(#av-cje)"/>
-      <path d="M36 13 Q26 15 21 22 Q17 30 18 46" fill="#7A4F1E"/>
-      <path d="M36 13 Q46 15 51 22 Q55 30 54 46" fill="#7A4F1E"/>
-      <path d="M18 18 Q36 10 54 18 Q46 14 36 13 Q26 14 18 18Z" fill="#7A4F1E"/>
-      <circle cx="36" cy="28" r="13" fill="#F0C878"/>
-      <path d="M27 36 Q36 44 45 36 Q42 40 36 42 Q30 40 27 36Z" fill="#8B5E1A"/>
-      <ellipse cx="36" cy="37" rx="7" ry="4" fill="#9B6E2A"/>
-      <path d="M27 22 Q30 20 33 22" fill="none" stroke="#7A4F1E" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M39 22 Q42 20 45 22" fill="none" stroke="#7A4F1E" strokeWidth="1.5" strokeLinecap="round"/>
-      <circle cx="30" cy="25" r="2.2" fill="#2C3E50"/>
-      <circle cx="42" cy="25" r="2.2" fill="#2C3E50"/>
-      <circle cx="31" cy="24" r=".8" fill="white"/>
-      <circle cx="43" cy="24" r=".8" fill="white"/>
-      <path d="M34 29 Q36 31 38 29" fill="none" stroke="#C8956A" strokeWidth="1.2" strokeLinecap="round"/>
+      <circle cx="36" cy="36" r="36" fill="#FFF8E8"/>
+      <rect x="33" y="0" width="6" height="72" fill="#C8A060" opacity=".2" clipPath="url(#av-cje)"/>
+      <rect x="0" y="24" width="72" height="6" fill="#C8A060" opacity=".2" clipPath="url(#av-cje)"/>
+      <circle cx="36" cy="30" r="20" fill="#FFF3CC" opacity=".9"/>
+      <circle cx="36" cy="30" r="20" fill="none" stroke="#F9D054" strokeWidth="1.5"/>
+      <rect x="16" y="50" width="40" height="24" rx="8" fill="#E8DDD0" clipPath="url(#av-cje)"/>
+      <path d="M36 14 Q22 16 16 26 Q12 34 14 50" fill="#8B6030" clipPath="url(#av-cje)"/>
+      <path d="M36 14 Q50 16 56 26 Q60 34 58 50" fill="#8B6030" clipPath="url(#av-cje)"/>
+      <ellipse cx="36" cy="16" rx="16" ry="8" fill="#8B6030"/>
+      <circle cx="36" cy="30" r="15" fill="#FADA9E"/>
+      <ellipse cx="36" cy="41" rx="9" ry="6" fill="#A07030"/>
+      <path d="M27 38 Q36 46 45 38" fill="#A07030"/>
+      <path d="M28 25 Q31 23 34 25" fill="none" stroke="#7A4F1E" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M38 25 Q41 23 44 25" fill="none" stroke="#7A4F1E" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="31" cy="29" r="2.5" fill="#2C3E50"/>
+      <circle cx="41" cy="29" r="2.5" fill="#2C3E50"/>
+      <circle cx="32" cy="28" r="1" fill="white"/>
+      <circle cx="42" cy="28" r="1" fill="white"/>
+      <path d="M34 33 Q36 35 38 33" fill="none" stroke="#C8956A" strokeWidth="1.2" strokeLinecap="round"/>
     </svg>
   )
 }
