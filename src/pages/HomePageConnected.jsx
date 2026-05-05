@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { TvMinimalPlay, Camera, BookOpen, MessageCircle, Church } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
+import { BibleAvatarIcon } from '../components/BibleAvatars'
 
 const QUICK_LINKS = [
   {
@@ -473,9 +474,12 @@ export default function HomePageConnected() {
         </div>
         <button
           onClick={() => navigate('/my')}
-          className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium border-none cursor-pointer hover:bg-gray-200 transition-colors"
+          className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium border-none cursor-pointer hover:bg-gray-200 transition-colors overflow-hidden"
         >
-          {getInitial(user?.name)}
+          {user?.avatarKey
+            ? <BibleAvatarIcon avatarKey={user.avatarKey} size={32} />
+            : getInitial(user?.name)
+          }
         </button>
       </div>
 

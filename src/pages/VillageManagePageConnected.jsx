@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
 import DateSelect from '../components/DateSelect'
+import { BibleAvatarIcon } from '../components/BibleAvatars'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -66,6 +67,7 @@ function mapMember(item, currentFam) {
     note: item?.note ?? '',
     worshipRate: Number(item?.worshipRate ?? 0),
     famRate: Number(item?.famRate ?? 0),
+    avatarKey: item?.avatarKey ?? null,
   }
 }
 
@@ -355,7 +357,10 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canCh
             return (
               <div key={member.id} onClick={() => setEditTarget(member)}
                 className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0 cursor-pointer hover:bg-gray-100 -mx-5 px-5 transition-colors">
-                <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+                {member.avatarKey
+                  ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                  : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+                }
                 <div className="flex-1">
                   <p className="text-sm font-medium">{member.name}</p>
                   <p className="text-[11px] text-gray-500">{FAM_ROLE_LABELS[member.role] ?? member.role} · {member.phone || '—'}</p>
@@ -684,7 +689,10 @@ export default function VillageManagePageConnected() {
                   <div key={`member_${result.member.id}_${index}`}
                     onClick={() => setEditingMember({ member: result.member, famName: result.famName })}
                     className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0 cursor-pointer hover:bg-gray-100 -mx-5 px-5 transition-colors">
-                    <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{result.member.name[0]}</div>
+                    {result.member.avatarKey
+                      ? <BibleAvatarIcon avatarKey={result.member.avatarKey} size={36} />
+                      : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{result.member.name[0]}</div>
+                    }
                     <div className="flex-1">
                       <p className="text-sm font-medium">{result.member.name}</p>
                       <p className="text-[11px] text-gray-500">{result.villageName} · {result.famName} · {ROLE_LABELS[result.member.role] ?? result.member.role}</p>
@@ -763,9 +771,10 @@ export default function VillageManagePageConnected() {
                         const color = getAvatarColor(member.id)
                         return (
                           <div key={member.id} onClick={() => setEditingMember({ member, famName: null })} className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
-                            <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                              {member.name[0]}
-                            </div>
+                            {member.avatarKey
+                              ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                              : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+                            }
                             <div className="flex-1">
                               <p className="text-sm font-medium">{member.name}</p>
                               <p className="text-[11px] text-gray-500">{member.phone || '연락처 없음'}</p>

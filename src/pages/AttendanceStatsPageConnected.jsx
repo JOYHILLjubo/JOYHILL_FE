@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BottomNav from '../components/BottomNav'
+import { BibleAvatarIcon } from '../components/BibleAvatars'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -61,6 +62,7 @@ function mapMemberStats(items) {
     worshipRate: toRate(item.worshipRate),
     onlineRate: toRate(item.onlineRate),
     famRate: toRate(item.famRate),
+    avatarKey: item.avatarKey ?? null,
   }))
 }
 
@@ -158,7 +160,10 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
         const weekRecord = weekAttendMap[member.id]
         return (
           <div key={member.id} className="border border-gray-300 rounded-xl px-5 py-3 flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+            {member.avatarKey
+              ? <BibleAvatarIcon avatarKey={member.avatarKey} size={32} />
+              : <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+            }
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{member.name}</p>
               {weekRecord !== undefined && (
@@ -270,7 +275,10 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
             const record = attendMap[member.id]
             return (
               <div key={member.id} className="border border-gray-300 rounded-xl px-5 py-3 flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+                {member.avatarKey
+                  ? <BibleAvatarIcon avatarKey={member.avatarKey} size={32} />
+                  : <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
+                }
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{member.name}</p>
                   <div className="flex gap-1 mt-0.5">

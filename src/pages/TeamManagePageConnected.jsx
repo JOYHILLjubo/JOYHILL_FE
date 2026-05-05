@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
+import { BibleAvatarIcon } from '../components/BibleAvatars'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -80,12 +81,12 @@ function mapMember(item) {
     birth: formatBirth(item?.birth ?? ''),
     role: item?.role ?? 'member',
     isLeader: Boolean(item?.isLeader),
+    avatarKey: item?.avatarKey ?? null,
   }
 }
 
 function mapUser(item) {
   const summary = item?.summary ?? {}
-
   return {
     id: item?.id ?? null,
     name: item?.name ?? summary?.name ?? '',
@@ -93,6 +94,7 @@ function mapUser(item) {
     village: item?.villageName ?? summary?.village ?? '',
     phone: formatPhone(item?.phone ?? summary?.phone ?? ''),
     role: item?.role ?? summary?.role ?? 'member',
+    avatarKey: item?.avatarKey ?? null,
   }
 }
 
@@ -717,9 +719,10 @@ export default function TeamManagePageConnected() {
                             ) : (
                               subCandidates.map((candidate) => (
                                 <div key={candidate.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-300 last:border-b-0">
-                                  <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-[13px] font-medium text-primary shrink-0">
-                                    {getInitial(candidate.name)}
-                                  </div>
+                                  {candidate.avatarKey
+                                    ? <BibleAvatarIcon avatarKey={candidate.avatarKey} size={36} />
+                                    : <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-[13px] font-medium text-primary shrink-0">{getInitial(candidate.name)}</div>
+                                  }
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm truncate">{candidate.name}</p>
                                     <p className="text-[11px] text-gray-500 truncate">{[candidate.village, candidate.fam, candidate.phone].filter(Boolean).join(' · ')}</p>
@@ -744,9 +747,10 @@ export default function TeamManagePageConnected() {
                           const showAsLeader = member.isLeader || (currentSubTeam.teamLeaderName && member.name === currentSubTeam.teamLeaderName)
                           return (
                             <div key={member.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                              <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                                {getInitial(member.name)}
-                              </div>
+                              {member.avatarKey
+                                ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                                : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(member.name)}</div>
+                              }
                               <div className="flex-1 ml-3">
                                 <p className="text-sm">{member.name}</p>
                                 <p className="text-[11px] text-gray-500">{[member.famName, formatPhone(member.phone), formatBirth(member.birth)].filter(Boolean).join(' · ')}</p>
@@ -821,9 +825,10 @@ export default function TeamManagePageConnected() {
                     ) : (
                       candidates.map((candidate) => (
                         <div key={candidate.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-300 last:border-b-0">
-                          <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-[13px] font-medium text-primary shrink-0">
-                            {getInitial(candidate.name)}
-                          </div>
+                          {candidate.avatarKey
+                            ? <BibleAvatarIcon avatarKey={candidate.avatarKey} size={36} />
+                            : <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-[13px] font-medium text-primary shrink-0">{getInitial(candidate.name)}</div>
+                          }
                           <div className="flex-1 min-w-0">
                             <p className="text-sm truncate">{candidate.name}</p>
                             <p className="text-[11px] text-gray-500 truncate">
@@ -857,9 +862,10 @@ export default function TeamManagePageConnected() {
 
                   return (
                     <div key={member.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                      <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                        {getInitial(member.name)}
-                      </div>
+                      {member.avatarKey
+                        ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                        : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(member.name)}</div>
+                      }
                       <div className="flex-1 ml-3">
                         <p className="text-sm">{member.name}</p>
                         <p className="text-[11px] text-gray-500">{[member.famName, member.phone, member.birth].filter(Boolean).join(' · ')}</p>
