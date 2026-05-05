@@ -1,6 +1,10 @@
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import BottomNav from '../components/BottomNav'
+import { useAuth } from '../context/AuthContext'
+import { BIBLE_AVATARS, BibleAvatarIcon } from '../components/BibleAvatars'
+
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
 const ROLE_LABELS = {
   admin: '관리자',
@@ -10,10 +14,13 @@ const ROLE_LABELS = {
   member: '청년',
 }
 
+const OT_AVATARS = BIBLE_AVATARS.filter((a) => a.category === '구약')
+const NT_AVATARS = BIBLE_AVATARS.filter((a) => a.category === '신약')
+
 export default function MyPage() {
   const navigate = useNavigate()
   const {
-    user, logout,
+    user, logout, accessToken, setUser,
     isVillageLeaderOrAbove, isPastorOrAbove, isAdmin,
     isTeamLeader, isNewFamilyTeamLeader,
   } = useAuth()
@@ -22,9 +29,45 @@ export default function MyPage() {
   const isVillageLeader = user.role === 'village_leader'
   const myTeams = user.teams ?? []
   const isTeamMemberOnly = myTeams.length > 0 && user.teamRoles.length === 0
+
+  const [showAvatarModal, setShowAvatarModal] = useState(false)
+  const [pendingKey, setPendingKey] = useState(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const accessTokenRef = useRef(accessToken)
+  accessTokenRef.current = accessToken
+
   const handleLogout = () => {
     logout()
     navigate('/login', { replace: true })
+  }
+
+  const openModal = () => {
+    setPendingKey(user.avatarKey ?? null)
+    setShowAvatarModal(true)
+  }
+
+  const handleApply = async () => {
+    if (isSaving) return
+    setIsSaving(true)
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/me/avatar`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessTokenRef.current}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ avatarKey: pendingKey }),
+      })
+      if (res.ok) {
+        setUser((prev) => ({ ...prev, avatarKey: pendingKey }))
+        setShowAvatarModal(false)
+      }
+    } catch {
+      // 실패 시 무시
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -36,9 +79,33 @@ export default function MyPage() {
       {/* 프로필 카드 */}
       <div className="px-5 mb-5">
         <div className="flex items-center gap-3 p-4 bg-gray-100 rounded-xl">
-          <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center text-base font-medium text-primary">
-            {user.name[0]}
-          </div>
+          {/* 아바타 — 클릭하면 모달 */}
+          <button
+            onClick={openModal}
+            className="relative shrink-0 border-none bg-transparent p-0 cursor-pointer"
+            style={{ width: 48, height: 48 }}
+          >
+            {user.avatarKey ? (
+              <BibleAvatarIcon avatarKey={user.avatarKey} size={48} />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center text-base font-medium text-primary">
+                {user.name[0]}
+              </div>
+            )}
+            {/* 편집 뱃지 */}
+            <div style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 16, height: 16, borderRadius: '50%',
+              background: '#4285F4', display: 'flex',
+              alignItems: 'center', justifyContent: 'center',
+              border: '1.5px solid white',
+            }}>
+              <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+                <path d="M1 9 L2.5 5.5 L7.5 0.5 L9.5 2.5 L4.5 7.5 L1 9Z" fill="white"/>
+              </svg>
+            </div>
+          </button>
+
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-medium">{user.name}</p>
             <p className="text-xs text-gray-500 mt-0.5 truncate">
@@ -68,7 +135,6 @@ export default function MyPage() {
         </div>
       </div>
 
-      {/* 내 사역팀 보기 — 팀장 아닌 팀 소속 팀원 */}
       {isTeamMemberOnly && (
         <div className="px-5 mb-3">
           <div className="border border-gray-300 rounded-xl overflow-hidden">
@@ -78,7 +144,6 @@ export default function MyPage() {
         </div>
       )}
 
-      {/* 사역팀 관리 — 사역팀장 */}
       {isTeamLeader && (
         <div className="px-5 mb-3">
           <div className="border border-gray-300 rounded-xl overflow-hidden">
@@ -95,7 +160,6 @@ export default function MyPage() {
         </div>
       )}
 
-      {/* 팸 관리 — 리더 전용 */}
       {isLeader && (
         <div className="px-5 mb-3">
           <div className="border border-gray-300 rounded-xl overflow-hidden">
@@ -108,7 +172,6 @@ export default function MyPage() {
         </div>
       )}
 
-      {/* 마을 관리 — 마을장 전용 */}
       {isVillageLeader && (
         <div className="px-5 mb-3">
           <div className="border border-gray-300 rounded-xl overflow-hidden">
@@ -122,7 +185,6 @@ export default function MyPage() {
         </div>
       )}
 
-      {/* 청년부 전체 관리 — 교역자·부장 */}
       {isPastorOrAbove && !isAdmin && (
         <div className="px-5 mb-3">
           <div className="border border-gray-300 rounded-xl overflow-hidden">
@@ -135,7 +197,6 @@ export default function MyPage() {
         </div>
       )}
 
-      {/* 관리자 */}
       {isAdmin && (
         <>
           <div className="px-5 mb-3">
@@ -158,7 +219,124 @@ export default function MyPage() {
       )}
 
       <BottomNav />
+
+      {/* 아바타 선택 모달 */}
+      {showAvatarModal && (
+        <div
+          onClick={() => setShowAvatarModal(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 50,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'flex-end',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxHeight: '80vh',
+              background: 'var(--color-background-primary)',
+              borderRadius: '20px 20px 0 0',
+              display: 'flex', flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            {/* 헤더 */}
+            <div style={{
+              padding: '16px 20px 12px',
+              borderBottom: '1px solid var(--color-border-tertiary)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              flexShrink: 0,
+            }}>
+              <p style={{ fontSize: 16, fontWeight: 500 }}>아바타 선택</p>
+              <button
+                onClick={() => setShowAvatarModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--color-text-secondary)' }}
+              >✕</button>
+            </div>
+
+            {/* 스크롤 영역 */}
+            <div style={{ overflowY: 'auto', flex: 1, padding: '16px 16px 0' }}>
+              {/* 구약 */}
+              <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)', marginBottom: 10 }}>구약</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
+                {OT_AVATARS.map((avatar) => (
+                  <AvatarCell
+                    key={avatar.key}
+                    avatar={avatar}
+                    selected={pendingKey === avatar.key}
+                    onSelect={() => setPendingKey(avatar.key)}
+                  />
+                ))}
+              </div>
+              {/* 신약 */}
+              <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)', marginBottom: 10 }}>신약</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
+                {NT_AVATARS.map((avatar) => (
+                  <AvatarCell
+                    key={avatar.key}
+                    avatar={avatar}
+                    selected={pendingKey === avatar.key}
+                    onSelect={() => setPendingKey(avatar.key)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* 적용 버튼 */}
+            <div style={{
+              padding: '12px 16px',
+              paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+              borderTop: '1px solid var(--color-border-tertiary)',
+              flexShrink: 0,
+            }}>
+              <button
+                onClick={handleApply}
+                disabled={isSaving || pendingKey === user.avatarKey}
+                style={{
+                  width: '100%', padding: '14px',
+                  borderRadius: 12, border: 'none',
+                  background: (isSaving || pendingKey === user.avatarKey) ? 'var(--color-background-secondary)' : '#4285F4',
+                  color: (isSaving || pendingKey === user.avatarKey) ? 'var(--color-text-tertiary)' : 'white',
+                  fontSize: 15, fontWeight: 500, cursor: (isSaving || pendingKey === user.avatarKey) ? 'default' : 'pointer',
+                  transition: 'background 0.15s',
+                }}
+              >
+                {isSaving ? '저장 중...' : '적용하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  )
+}
+
+function AvatarCell({ avatar, selected, onSelect }) {
+  return (
+    <button
+      onClick={onSelect}
+      style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+      }}
+    >
+      <div style={{
+        borderRadius: '50%', overflow: 'hidden',
+        width: 54, height: 54,
+        outline: selected ? '3px solid #4285F4' : '3px solid transparent',
+        outlineOffset: 2,
+        transition: 'outline 0.1s',
+      }}>
+        <BibleAvatarIcon avatarKey={avatar.key} size={54} />
+      </div>
+      <span style={{
+        fontSize: 10,
+        color: selected ? '#4285F4' : 'var(--color-text-tertiary)',
+        fontWeight: selected ? 500 : 400,
+      }}>
+        {avatar.label}
+      </span>
+    </button>
   )
 }
 

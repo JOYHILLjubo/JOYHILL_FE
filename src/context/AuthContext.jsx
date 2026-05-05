@@ -26,6 +26,7 @@ function normalizeUser(user) {
     phone: formatPhone(user.phone),
     birth: user.birth ?? '',
     passwordChanged: Boolean(user.passwordChanged),
+    avatarKey: user.avatarKey ?? null,
   }
 }
 
