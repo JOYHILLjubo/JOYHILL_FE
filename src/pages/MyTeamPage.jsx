@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BottomNav from '../components/BottomNav'
+import { BibleAvatarIcon } from '../components/BibleAvatars'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -212,9 +213,10 @@ export default function MyTeamPage() {
                       const showAsLeader = item.isLeader || (currentSubTeam.teamLeaderName && item.name === currentSubTeam.teamLeaderName)
                       return (
                         <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                          <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                            {getInitial(item.name)}
-                          </div>
+                          {item.avatarKey
+                            ? <BibleAvatarIcon avatarKey={item.avatarKey} size={36} />
+                            : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(item.name)}</div>
+                          }
                           <div className="flex-1 ml-3">
                             <p className="text-sm">{item.name}</p>
                             <p className="text-[11px] text-gray-500">{subInfo}</p>
@@ -245,9 +247,10 @@ export default function MyTeamPage() {
                 const subInfo = [item.famName, formatPhone(item.phone), formatBirth(item.birth)].filter(Boolean).join(' · ')
                 return (
                   <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                    <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>
-                      {getInitial(item.name)}
-                    </div>
+                    {item.avatarKey
+                      ? <BibleAvatarIcon avatarKey={item.avatarKey} size={36} />
+                      : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(item.name)}</div>
+                    }
                     <div className="flex-1 ml-3">
                       <p className="text-sm">{item.name}</p>
                       <p className="text-[11px] text-gray-500">{subInfo}</p>
