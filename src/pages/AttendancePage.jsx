@@ -64,6 +64,7 @@ function buildAttendanceMap(records) {
     if (!id) return
     next[id] = {
       worship: record.worshipPresent === true,
+      online: record.onlinePresent === true,
       fam: record.famPresent === true,
     }
   })
