@@ -38,7 +38,7 @@ function readStoredAuth() {
     const parsed = JSON.parse(raw)
     return {
       user: normalizeUser(parsed?.user),
-      accessToken: '', // access token은 메모리에만 보관, localStorage에서 읽지 않음
+      accessToken: typeof parsed?.accessToken === 'string' ? parsed.accessToken : '',
       verified: false, // 앱 로드 시 항상 미검증 상태로 시작
     }
   } catch {
@@ -118,7 +118,7 @@ export function AuthProvider({ children }) {
       window.localStorage.removeItem(STORAGE_KEY)
       return
     }
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ user }))
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, accessToken }))
   }, [user, accessToken])
 
   const setUser = (nextUser) => {
