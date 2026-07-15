@@ -91,10 +91,29 @@ function getApiErrorMessage(result, fallbackMessage) {
 }
 
 async function requestTokenRefresh() {
-  const result = await requestApi('/api/auth/refresh', { method: 'POST' })
+  let storedRefreshToken = ''
+  try {
+    const raw = window.localStorage.getItem('joyhill.auth')
+    storedRefreshToken = raw ? (JSON.parse(raw)?.refreshToken ?? '') : ''
+  } catch { /* ignore */ }
+
+  const result = await requestApi('/api/auth/refresh', {
+    method: 'POST',
+    headers: storedRefreshToken ? { 'X-Refresh-Token': storedRefreshToken } : {},
+  })
   if (!result.response.ok || !result.payload?.success || !result.payload?.data?.accessToken) {
     throw new Error(getApiErrorMessage(result, '세션이 만료되었습니다. 다시 로그인해주세요.'))
   }
+
+  const newRefreshToken = result.payload.data.refreshToken
+  if (newRefreshToken) {
+    try {
+      const raw = window.localStorage.getItem('joyhill.auth')
+      const parsed = raw ? JSON.parse(raw) : {}
+      window.localStorage.setItem('joyhill.auth', JSON.stringify({ ...parsed, refreshToken: newRefreshToken }))
+    } catch { /* ignore */ }
+  }
+
   return result.payload.data.accessToken
 }
 
@@ -536,8 +555,14 @@ export default function VillageManagePageConnected() {
         })
       })
     })
+    // 팸 미배정 인원도 검색 대상에 포함
+    unassignedMembers.forEach((member) => {
+      if ([member.name, member.phone, ROLE_LABELS[member.role] ?? member.role].some((v) => String(v ?? '').toLowerCase().includes(nq))) {
+        results.push({ type: 'member', villageName: '미배정', famName: null, member })
+      }
+    })
     return results
-  }, [famInfoMap, famMembersMap, search, villages])
+  }, [famInfoMap, famMembersMap, search, unassignedMembers, villages])
 
   const handleDeleteFam = async (famName) => {
     if (!window.confirm(`'${famName}' 팸을 삭제하시겠습니까?`)) return
@@ -695,7 +720,7 @@ export default function VillageManagePageConnected() {
                     }
                     <div className="flex-1">
                       <p className="text-sm font-medium">{result.member.name}</p>
-                      <p className="text-[11px] text-gray-500">{result.villageName} · {result.famName} · {ROLE_LABELS[result.member.role] ?? result.member.role}</p>
+                      <p className="text-[11px] text-gray-500">{[result.villageName, result.famName, ROLE_LABELS[result.member.role] ?? result.member.role].filter(Boolean).join(' · ')}</p>
                       {result.member.phone && <p className="text-[11px] text-gray-500">{result.member.phone}</p>}
                     </div>
                     <span className="text-gray-500 text-[1rem] shrink-0">→</span>

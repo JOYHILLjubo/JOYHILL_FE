@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 const AuthContext = createContext(null)
 
 const STORAGE_KEY = 'joyhill.auth'
-const INITIAL_AUTH_STATE = { user: null, accessToken: '', verified: false }
+const INITIAL_AUTH_STATE = { user: null, accessToken: '', refreshToken: '', verified: false }
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
 function formatPhone(phone) {
@@ -39,6 +39,7 @@ function readStoredAuth() {
     return {
       user: normalizeUser(parsed?.user),
       accessToken: typeof parsed?.accessToken === 'string' ? parsed.accessToken : '',
+      refreshToken: typeof parsed?.refreshToken === 'string' ? parsed.refreshToken : '',
       verified: false, // 앱 로드 시 항상 미검증 상태로 시작
     }
   } catch {
@@ -52,6 +53,7 @@ export function AuthProvider({ children }) {
 
   const user = authState.user
   const accessToken = authState.accessToken
+  const refreshToken = authState.refreshToken
   const verified = authState.verified
   const role = user?.role ?? ''
   const teamRoles = user?.teamRoles ?? []
@@ -71,16 +73,20 @@ export function AuthProvider({ children }) {
       }
 
       // refresh token으로 세션 유효성 확인
+      // credentials:'include'(쿠키)와 X-Refresh-Token 헤더(localStorage) 둘 다 보냄 —
+      // iOS PWA 등에서 쿠키가 유지되지 않아도 헤더로 대체되어 로그아웃되지 않음
       try {
         const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
+          headers: stored.refreshToken ? { 'X-Refresh-Token': stored.refreshToken } : undefined,
         })
         const payload = await res.json().catch(() => null)
 
         if (res.ok && payload?.success && payload?.data?.accessToken) {
-          // 세션 유효 → accessToken 갱신 후 /me로 최신 유저 정보 가져오기
+          // 세션 유효 → accessToken/refreshToken 갱신 후 /me로 최신 유저 정보 가져오기
           const newToken = payload.data.accessToken
+          const newRefreshToken = payload.data.refreshToken || stored.refreshToken
           try {
             const meRes = await fetch(`${API_BASE_URL}/api/users/me`, {
               headers: { Authorization: `Bearer ${newToken}` },
@@ -91,12 +97,13 @@ export function AuthProvider({ children }) {
               setAuthState({
                 user: normalizeUser(mePayload.data),
                 accessToken: newToken,
+                refreshToken: newRefreshToken,
                 verified: true,
               })
               return
             }
           } catch { /* /me 실패해도 기존 stored user 유지 */ }
-          setAuthState({ user: stored.user, accessToken: newToken, verified: true })
+          setAuthState({ user: stored.user, accessToken: newToken, refreshToken: newRefreshToken, verified: true })
         } else {
           // refresh 실패 → 세션 만료, 로그아웃 처리
           window.localStorage.removeItem(STORAGE_KEY)
@@ -118,8 +125,8 @@ export function AuthProvider({ children }) {
       window.localStorage.removeItem(STORAGE_KEY)
       return
     }
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, accessToken }))
-  }, [user, accessToken])
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, accessToken, refreshToken }))
+  }, [user, accessToken, refreshToken])
 
   const setUser = (nextUser) => {
     setAuthState((prev) => ({
@@ -137,10 +144,11 @@ export function AuthProvider({ children }) {
     }))
   }
 
-  const login = ({ user: nextUser, accessToken: nextAccessToken }) => {
+  const login = ({ user: nextUser, accessToken: nextAccessToken, refreshToken: nextRefreshToken }) => {
     setAuthState({
       user: normalizeUser(nextUser),
       accessToken: nextAccessToken ?? '',
+      refreshToken: nextRefreshToken ?? '',
       verified: true,
     })
   }

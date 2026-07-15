@@ -114,12 +114,27 @@ function getApiErrorMessage(result, fallbackMessage) {
 }
 
 async function requestTokenRefresh() {
+  let storedRefreshToken = ''
+  try {
+    const raw = window.localStorage.getItem('joyhill.auth')
+    storedRefreshToken = raw ? (JSON.parse(raw)?.refreshToken ?? '') : ''
+  } catch { /* ignore */ }
+
   const result = await requestApi('/api/auth/refresh', {
     method: 'POST',
+    headers: storedRefreshToken ? { 'X-Refresh-Token': storedRefreshToken } : {},
   })
-
   if (!result.response.ok || !result.payload?.success || !result.payload?.data?.accessToken) {
     throw new Error(getApiErrorMessage(result, '세션이 만료되었습니다. 다시 로그인해주세요.'))
+  }
+
+  const newRefreshToken = result.payload.data.refreshToken
+  if (newRefreshToken) {
+    try {
+      const raw = window.localStorage.getItem('joyhill.auth')
+      const parsed = raw ? JSON.parse(raw) : {}
+      window.localStorage.setItem('joyhill.auth', JSON.stringify({ ...parsed, refreshToken: newRefreshToken }))
+    } catch { /* ignore */ }
   }
 
   return result.payload.data.accessToken
@@ -134,6 +149,8 @@ function MemberEditViewConnected({
   onBack,
   onSave,
   onDelete,
+  onSearchUnassigned,
+  onAttachExisting,
 }) {
   const [form, setForm] = useState({
     name: '',
@@ -146,6 +163,11 @@ function MemberEditViewConnected({
   })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [addMode, setAddMode] = useState('search')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState(null)
+  const [isSearching, setIsSearching] = useState(false)
+  const [attachingId, setAttachingId] = useState(null)
 
   useEffect(() => {
     setForm({
@@ -160,6 +182,40 @@ function MemberEditViewConnected({
     setError('')
     setIsSubmitting(false)
   }, [member, currentFam])
+
+  useEffect(() => {
+    if (!isNew || addMode !== 'search' || !onSearchUnassigned) return
+    const query = searchQuery.trim()
+    if (!query) {
+      setSearchResults(null)
+      return
+    }
+    let cancelled = false
+    setIsSearching(true)
+    const timer = setTimeout(async () => {
+      try {
+        const results = await onSearchUnassigned(query)
+        if (!cancelled) setSearchResults(results)
+      } catch {
+        if (!cancelled) setSearchResults([])
+      } finally {
+        if (!cancelled) setIsSearching(false)
+      }
+    }, 300)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [addMode, isNew, onSearchUnassigned, searchQuery])
+
+  const handleAttach = async (candidate) => {
+    setAttachingId(candidate.id)
+    setError('')
+    try {
+      await onAttachExisting(candidate)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '팸원 추가에 실패했습니다.')
+    } finally {
+      setAttachingId(null)
+    }
+  }
 
   const color = getAvatarColor(form.fam?.charCodeAt?.(0) ?? form.id ?? 0)
 
@@ -228,6 +284,72 @@ function MemberEditViewConnected({
         )}
       </div>
 
+      {isNew && (
+        <div className="px-5 pt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setAddMode('search')}
+            className={`flex-1 text-xs py-2 rounded-full border transition-colors ${
+              addMode === 'search' ? 'bg-primary-light text-primary border-primary' : 'bg-white text-gray-500 border-gray-300'
+            }`}
+          >
+            기존 회원 검색
+          </button>
+          <button
+            type="button"
+            onClick={() => setAddMode('manual')}
+            className={`flex-1 text-xs py-2 rounded-full border transition-colors ${
+              addMode === 'manual' ? 'bg-primary-light text-primary border-primary' : 'bg-white text-gray-500 border-gray-300'
+            }`}
+          >
+            신규 등록
+          </button>
+        </div>
+      )}
+
+      {isNew && addMode === 'search' ? (
+        <div className="px-5 pt-4">
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="이름 또는 전화번호로 검색"
+            autoFocus
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"
+          />
+          {error && <p className="text-xs text-danger mt-2">{error}</p>}
+          <div className="mt-3">
+            {isSearching && <p className="text-xs text-gray-500 text-center py-4">검색 중...</p>}
+            {!isSearching && searchResults !== null && searchResults.length === 0 && (
+              <p className="text-xs text-gray-500 text-center py-4">일치하는 미배정 회원이 없습니다.</p>
+            )}
+            {!isSearching && searchResults?.map((candidate) => (
+              <div
+                key={candidate.id}
+                className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0"
+              >
+                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-[13px] font-medium text-gray-600 shrink-0">
+                  {candidate.name?.[0] || '?'}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{candidate.name}</p>
+                  <p className="text-[11px] text-gray-500">{candidate.phone || '연락처 없음'}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleAttach(candidate)}
+                  disabled={attachingId === candidate.id}
+                  className="text-xs text-white bg-primary px-3 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-60"
+                >
+                  {attachingId === candidate.id ? '추가 중...' : '추가'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {(!isNew || addMode === 'manual') && (
+        <>
       {!isNew && (
         <div className="flex flex-col items-center pt-5 pb-3">
           <div className={`w-14 h-14 rounded-full ${color.bg} flex items-center justify-center text-xl font-medium ${color.text} mb-2`}>
@@ -344,6 +466,8 @@ function MemberEditViewConnected({
           {isSubmitting ? '저장 중...' : isNew ? '추가하기' : '저장하기'}
         </button>
       </div>
+        </>
+      )}
     </div>
   )
 }
@@ -519,6 +643,22 @@ export default function FamManagePageConnected() {
               }
             : null
         }
+        onSearchUnassigned={async (query) => {
+          const results = await callAuthedApi(`/api/users?search=${encodeURIComponent(query)}`)
+          return (Array.isArray(results) ? results : []).filter((item) => !item.famName)
+        }}
+        onAttachExisting={async (candidate) => {
+          await callAuthedApi(`/api/fam-members/${candidate.id}`, {
+            method: 'PUT',
+            body: {
+              name: candidate.name,
+              famName: myFam,
+            },
+          })
+
+          await loadData()
+          setEditTarget(null)
+        }}
       />
     )
   }

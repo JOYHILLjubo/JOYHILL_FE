@@ -35,6 +35,7 @@ export default function LoginPage() {
       login({
         user: data.user,
         accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : '로그인 중 오류가 발생했습니다.')
