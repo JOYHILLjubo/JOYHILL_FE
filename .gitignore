@@ -27,3 +27,7 @@ Thumbs.db
 
 # Vite
 *.local
+
+# 유출 방지
+*.pem
+*.ppk
