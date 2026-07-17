@@ -20,6 +20,8 @@ import VillageManagePageConnected from './pages/VillageManagePageConnected'
 import SermonUploadPageConnected from './pages/SermonUploadPageConnected'
 import AccountManagePageConnected from './pages/AccountManagePageConnected'
 import MyTeamPage from './pages/MyTeamPage'
+import SermonNoteListPage from './pages/SermonNoteListPage'
+import SermonNoteWritePage from './pages/SermonNoteWritePage'
 
 // 로그인 안 된 사람만 접근 가능
 // 로그인됐는데 비밀번호 미변경 → /my/edit 강제
@@ -88,6 +90,8 @@ export default function App() {
           <Route path="/fam/manage" element={<FamManagePageConnected />} />
           <Route path="/village/manage" element={<VillageManagePageConnected />} />
           <Route path="/sermon/upload" element={<SermonUploadPageConnected />} />
+          <Route path="/sermon-note" element={<SermonNoteListPage />} />
+          <Route path="/sermon-note/write" element={<SermonNoteWritePage />} />
           <Route path="/account/manage" element={<AccountManagePageConnected />} />
           <Route path="/my/team" element={<MyTeamPage />} />
         </Route>

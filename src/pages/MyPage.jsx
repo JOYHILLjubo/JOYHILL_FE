@@ -127,6 +127,7 @@ export default function MyPage() {
       {/* 기본 메뉴 */}
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <MenuItem label="설교노트" onPress={() => navigate('/sermon-note')} />
           <MenuItem label="비밀번호 변경" onPress={() => navigate('/my/edit')} />
           <MenuItem label="알림 설정" />
           <div className="px-4 py-3.5">

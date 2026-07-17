@@ -139,6 +139,36 @@ function getScheduleDateParts(value) {
   }
 }
 
+function getWeekStartKey(value) {
+  const date = toDate(value)
+  if (!date) return null
+  const sunday = new Date(date)
+  sunday.setDate(date.getDate() - date.getDay())
+  const year = sunday.getFullYear()
+  const month = String(sunday.getMonth() + 1).padStart(2, '0')
+  const day = String(sunday.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// 노트가 있는 가장 최근 주부터 거슬러 올라가며 빈틈없이 연속된 주 수를 센다
+function computeNoteStreak(notes) {
+  const weekKeys = new Set(notes.map((note) => getWeekStartKey(note.noteDate)).filter(Boolean))
+  if (weekKeys.size === 0) return 0
+
+  const sortedDesc = [...weekKeys].sort().reverse()
+  let streak = 0
+  const cursor = new Date(sortedDesc[0])
+
+  for (const key of sortedDesc) {
+    const cursorKey = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`
+    if (key !== cursorKey) break
+    streak += 1
+    cursor.setDate(cursor.getDate() - 7)
+  }
+
+  return streak
+}
+
 function getInitial(name) {
   const trimmed = String(name ?? '').trim()
   return trimmed ? trimmed[0] : 'J'
@@ -267,6 +297,8 @@ export default function HomePageConnected() {
   const [communityPrayers, setCommunityPrayers] = useState([])
   const [prayerInput, setPrayerInput] = useState('')
   const [prayerSubmitting, setPrayerSubmitting] = useState(false)
+
+  const [noteStreak, setNoteStreak] = useState(0)
 
   const accessTokenRef = useRef(accessToken)
 
@@ -414,6 +446,14 @@ export default function HomePageConnected() {
     callAuthedApi('/api/community-prayers')
       .then((data) => {
         if (Array.isArray(data)) setCommunityPrayers(data)
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    callAuthedApi('/api/sermon-notes')
+      .then((data) => {
+        if (Array.isArray(data)) setNoteStreak(computeNoteStreak(data))
       })
       .catch(() => {})
   }, [])
@@ -571,6 +611,24 @@ export default function HomePageConnected() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="px-5 mb-3">
+        <button
+          onClick={() => navigate('/sermon-note/write')}
+          className="w-full flex items-center gap-3.5 rounded-2xl px-4 py-4 border-none cursor-pointer text-left bg-primary-light"
+        >
+          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-base shrink-0 shadow-[0_3px_8px_rgba(66,133,244,0.18)]">
+            📝
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13.5px] font-bold text-gray-900">오늘 설교, 어떤 은혜 받으셨나요?</p>
+            {noteStreak > 0 && (
+              <p className="text-[11px] font-bold mt-0.5" style={{ color: '#B9530E' }}>🔥 {noteStreak}주 연속 작성 중</p>
+            )}
+          </div>
+          <span className="text-primary text-base shrink-0">→</span>
+        </button>
       </div>
 
       <div className="mb-3">

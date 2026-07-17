@@ -32,3 +32,9 @@ body {
   background-color: #FFFFFF;
   position: relative;
 }
+
+/* 설교노트 리치 텍스트 에디터 placeholder */
+.note-rich-editor:empty:before {
+  content: attr(data-placeholder);
+  color: #AAAAAA;
+}
