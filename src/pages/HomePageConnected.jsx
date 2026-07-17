@@ -631,30 +631,6 @@ export default function HomePageConnected() {
         </button>
       </div>
 
-      <div className="mb-3">
-        <div
-          className="flex justify-between px-5 py-2"
-        >
-          {QUICK_LINKS.map(({ label, icon: Icon, href, bg, iconColor }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 no-underline shrink-0 active:opacity-70 transition-opacity"
-            >
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm"
-                style={{ backgroundColor: bg }}
-              >
-                <Icon size={24} color={iconColor} strokeWidth={1.8} />
-              </div>
-              <p className="text-[12px] text-gray-600 text-center leading-tight" style={{ maxWidth: '72px' }}>{label}</p>
-            </a>
-          ))}
-        </div>
-      </div>
-
       <div className="px-5 mb-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-lg font-semibold">공지</p>
@@ -760,6 +736,30 @@ export default function HomePageConnected() {
               올리기
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <div
+          className="flex justify-between px-5 py-2"
+        >
+          {QUICK_LINKS.map(({ label, icon: Icon, href, bg, iconColor }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-2 no-underline shrink-0 active:opacity-70 transition-opacity"
+            >
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm"
+                style={{ backgroundColor: bg }}
+              >
+                <Icon size={24} color={iconColor} strokeWidth={1.8} />
+              </div>
+              <p className="text-[12px] text-gray-600 text-center leading-tight" style={{ maxWidth: '72px' }}>{label}</p>
+            </a>
+          ))}
         </div>
       </div>
 
