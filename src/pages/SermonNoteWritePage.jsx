@@ -159,6 +159,15 @@ export default function SermonNoteWritePage() {
     setCharCount((editorRef.current?.textContent || '').length)
   }
 
+  // 일부 브라우저에서 contentEditable의 기본 Enter 동작(줄바꿈)이 씹히는 경우가 있어 직접 처리
+  const handleEditorKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+      e.preventDefault()
+      document.execCommand('insertLineBreak')
+      handleEditorInput()
+    }
+  }
+
   const handleAddVerse = () => {
     const trimmed = verseInput.trim()
     if (trimmed && !verseTags.includes(trimmed)) {
@@ -335,6 +344,7 @@ export default function SermonNoteWritePage() {
           suppressContentEditableWarning
           data-placeholder="오늘 예배에서 느낀 점, 은혜받은 구절, 삶에 적용하고 싶은 부분을 자유롭게 적어보세요."
           onInput={handleEditorInput}
+          onKeyDown={handleEditorKeyDown}
         />
         <p className="text-[11px] text-gray-400 text-right mt-1.5">{charCount}자</p>
 

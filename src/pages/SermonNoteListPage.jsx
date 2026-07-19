@@ -22,8 +22,10 @@ function formatNoteDate(value) {
 
 function stripHtml(html) {
   if (!html) return ''
+  // textContent는 <br>/블록 경계에 줄바꿈을 넣어주지 않아 줄들이 붙어버리므로 먼저 \n으로 치환
+  const withBreaks = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(div|p)>/gi, '\n')
   const div = document.createElement('div')
-  div.innerHTML = html
+  div.innerHTML = withBreaks
   return div.textContent || div.innerText || ''
 }
 
@@ -259,7 +261,7 @@ export default function SermonNoteListPage() {
             const checklist = parseChecklist(note.checklistJson)
             const doneCount = checklist.filter((c) => c.done).length
             const verseTags = note.verseTags ? note.verseTags.split(',').map((t) => t.trim()).filter(Boolean) : []
-            const preview = stripHtml(note.content)
+            const preview = stripHtml(note.content).replace(/\n{3,}/g, '\n\n').trim()
 
             return (
               <div
@@ -279,7 +281,7 @@ export default function SermonNoteListPage() {
                 </div>
                 {note.title && <p className="text-[14.5px] font-bold mb-1">{note.title}</p>}
                 {preview && (
-                  <p className="text-[12.5px] text-gray-500 leading-relaxed line-clamp-2">{preview}</p>
+                  <p className="text-[12.5px] text-gray-500 leading-relaxed line-clamp-2 whitespace-pre-line">{preview}</p>
                 )}
                 {(verseTags.length > 0 || checklist.length > 0) && (
                   <div className="flex gap-1.5 mt-2.5 flex-wrap">
