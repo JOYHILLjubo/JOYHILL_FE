@@ -152,18 +152,82 @@ export default function SermonNoteWritePage() {
   const focusEditor = () => editorRef.current?.focus()
 
   const applyBold = () => { focusEditor(); document.execCommand('bold') }
-  const applyHighlight = () => { focusEditor(); document.execCommand('hiliteColor', false, HIGHLIGHT_COLOR) }
+
+  // 브라우저 색상 표기(hex/rgb 등)가 달라도 같은 색인지 비교하기 위해 표준 rgb 문자열로 정규화
+  const colorsEqual = (a, b) => {
+    if (!a || !b) return false
+    const boxA = document.createElement('div')
+    const boxB = document.createElement('div')
+    boxA.style.color = a
+    boxB.style.color = b
+    document.body.appendChild(boxA)
+    document.body.appendChild(boxB)
+    const equal = getComputedStyle(boxA).color === getComputedStyle(boxB).color
+    boxA.remove()
+    boxB.remove()
+    return equal
+  }
+
+  // 현재 커서/선택 영역이 이미 하이라이트된 상태인지 DOM을 직접 훑어서 확인
+  // (execCommand('hiliteColor')는 브라우저마다 상태 조회가 불안정해서 신뢰할 수 없음)
+  const selectionHasHighlight = () => {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0 || !editorRef.current) return false
+    let node = sel.anchorNode
+    if (node && node.nodeType === Node.TEXT_NODE) node = node.parentElement
+    while (node && node !== editorRef.current) {
+      const bg = node.style?.backgroundColor
+      if (bg && bg !== 'transparent' && colorsEqual(bg, HIGHLIGHT_COLOR)) return true
+      node = node.parentElement
+    }
+    return false
+  }
+
+  const applyHighlight = () => {
+    focusEditor()
+    const isHighlighted = selectionHasHighlight()
+    document.execCommand('hiliteColor', false, isHighlighted ? 'transparent' : HIGHLIGHT_COLOR)
+  }
+
   const applyColor = (color) => { focusEditor(); document.execCommand('foreColor', false, color) }
 
   const handleEditorInput = () => {
     setCharCount((editorRef.current?.textContent || '').length)
+    autoFormatListIfTriggered()
   }
 
-  // 일부 브라우저에서 contentEditable의 기본 Enter 동작(줄바꿈)이 씹히는 경우가 있어 직접 처리
+  // 워드처럼 "1. " / "- " / "* "를 줄 맨 앞에 치면 자동으로 번호/글머리 목록으로 전환
+  const autoFormatListIfTriggered = () => {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return
+    const range = sel.getRangeAt(0)
+    const node = range.startContainer
+    if (node.nodeType !== Node.TEXT_NODE) return
+
+    const textBeforeCursor = node.textContent.slice(0, range.startOffset)
+    const isBullet = /^[-*]\s$/.test(textBeforeCursor)
+    const isNumbered = /^\d+\.\s$/.test(textBeforeCursor)
+    if (!isBullet && !isNumbered) return
+
+    node.textContent = node.textContent.slice(range.startOffset)
+    const newRange = document.createRange()
+    newRange.setStart(node, 0)
+    newRange.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(newRange)
+
+    document.execCommand(isBullet ? 'insertUnorderedList' : 'insertOrderedList')
+  }
+
+  const isCursorInList = () =>
+    document.queryCommandState('insertUnorderedList') || document.queryCommandState('insertOrderedList')
+
+  // 일부 브라우저에서 contentEditable의 기본 Enter 동작(줄바꿈)이 씹히는 경우가 있어 직접 처리.
+  // 목록 안에서는 insertParagraph를 써야 다음 항목 생성/빈 항목에서 목록 탈출이 정상 동작함.
   const handleEditorKeyDown = (e) => {
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
       e.preventDefault()
-      document.execCommand('insertLineBreak')
+      document.execCommand(isCursorInList() ? 'insertParagraph' : 'insertLineBreak')
       handleEditorInput()
     }
   }

@@ -23,7 +23,7 @@ function formatNoteDate(value) {
 function stripHtml(html) {
   if (!html) return ''
   // textContent는 <br>/블록 경계에 줄바꿈을 넣어주지 않아 줄들이 붙어버리므로 먼저 \n으로 치환
-  const withBreaks = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(div|p)>/gi, '\n')
+  const withBreaks = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(div|p|li)>/gi, '\n')
   const div = document.createElement('div')
   div.innerHTML = withBreaks
   return div.textContent || div.innerText || ''

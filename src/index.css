@@ -38,3 +38,19 @@ body {
   content: attr(data-placeholder);
   color: #AAAAAA;
 }
+
+/* 전역 리셋(padding:0)으로 목록 들여쓰기/마커가 사라지는 것 보정 */
+.note-rich-editor ul,
+.note-rich-editor ol {
+  padding-left: 1.4em;
+  margin: 0.3em 0;
+}
+.note-rich-editor ul {
+  list-style: disc;
+}
+.note-rich-editor ol {
+  list-style: decimal;
+}
+.note-rich-editor li {
+  margin: 0.15em 0;
+}
