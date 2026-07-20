@@ -124,15 +124,10 @@ export default function MyPage() {
         </div>
       </div>
 
-      {/* 기본 메뉴 */}
+      {/* 내 활동 */}
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl overflow-hidden">
-          <MenuItem label="설교노트" onPress={() => navigate('/sermon-note')} />
-          <MenuItem label="비밀번호 변경" onPress={() => navigate('/my/edit')} />
-          <MenuItem label="알림 설정" />
-          <div className="px-4 py-3.5">
-            <span className="text-sm text-danger cursor-pointer" onClick={handleLogout}>로그아웃</span>
-          </div>
+          <MenuItem label="설교노트" onPress={() => navigate('/sermon-note')} last />
         </div>
       </div>
 
@@ -218,6 +213,17 @@ export default function MyPage() {
           </div>
         </>
       )}
+
+      {/* 계정 설정 */}
+      <div className="px-5 mb-3">
+        <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <MenuItem label="비밀번호 변경" onPress={() => navigate('/my/edit')} />
+          <MenuItem label="알림 설정" />
+          <div className="px-4 py-3.5">
+            <span className="text-sm text-danger cursor-pointer" onClick={handleLogout}>로그아웃</span>
+          </div>
+        </div>
+      </div>
 
       <BottomNav />
 

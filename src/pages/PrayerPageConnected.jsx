@@ -307,7 +307,7 @@ export default function PrayerPageConnected() {
             {isLoading ? (
               <p className="text-[13px] text-primary-hover opacity-70 mt-1">공동 기도제목을 불러오는 중입니다.</p>
             ) : commonPrayer?.content ? (
-              <p className="text-[13px] leading-relaxed">{commonPrayer.content}</p>
+              <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{commonPrayer.content}</p>
             ) : (
               <p className="text-[13px] text-primary-hover opacity-60 mt-1">아직 이번 달 공동 기도제목이 등록되지 않았습니다.</p>
             )}
@@ -339,7 +339,7 @@ export default function PrayerPageConnected() {
                     {prayer.name || '이름 없음'}
                     {prayer.userId === user?.id && <span className="ml-1 text-[11px] text-primary">(나)</span>}
                   </p>
-                  <p className="text-[13px] mt-0.5 leading-relaxed">{prayer.content}</p>
+                  <p className="text-[13px] mt-0.5 leading-relaxed whitespace-pre-wrap">{prayer.content}</p>
                 </div>
               </div>
             )

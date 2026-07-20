@@ -149,6 +149,7 @@ export default function NoticeWritePageConnected() {
   const [deadline, setDeadline] = useState(editingNotice?.deadline ?? '')
   const [pinned, setPinned] = useState(editingNotice?.pinned ?? false)
   const [submitError, setSubmitError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const accessTokenRef = useRef(accessToken)
@@ -209,10 +210,18 @@ export default function NoticeWritePageConnected() {
 
   const handleSubmit = async () => {
     if (isSubmitting) return
-    if (!title.trim()) { setSubmitError('제목을 입력해주세요.'); return }
-    if (!content.trim()) { setSubmitError('내용을 입력해주세요.'); return }
-    if (!tags.length) { setSubmitError('태그를 하나 이상 선택해주세요.'); return }
 
+    const nextFieldErrors = {}
+    if (!title.trim()) nextFieldErrors.title = '제목을 입력해주세요.'
+    if (!content.trim()) nextFieldErrors.content = '내용을 입력해주세요.'
+    if (!tags.length) nextFieldErrors.tags = '태그를 하나 이상 선택해주세요.'
+    if (Object.keys(nextFieldErrors).length) {
+      setFieldErrors(nextFieldErrors)
+      setSubmitError('입력하지 않은 항목이 있습니다. 표시된 항목을 확인해주세요.')
+      return
+    }
+
+    setFieldErrors({})
     setSubmitError('')
     setIsSubmitting(true)
 
@@ -285,10 +294,11 @@ export default function NoticeWritePageConnected() {
           <p className="text-xs text-gray-500 mb-1.5">제목 <span className="text-danger">*</span></p>
           <input
             value={title}
-            onChange={(e) => { setTitle(e.target.value); setSubmitError('') }}
+            onChange={(e) => { setTitle(e.target.value); setSubmitError(''); setFieldErrors((prev) => ({ ...prev, title: undefined })) }}
             placeholder="공지 제목을 입력하세요"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"
+            className={`w-full border rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary ${fieldErrors.title ? 'border-danger' : 'border-gray-300'}`}
           />
+          {fieldErrors.title && <p className="text-[11px] text-danger mt-1 ml-1">{fieldErrors.title}</p>}
         </div>
 
         {/* 내용 */}
@@ -296,11 +306,12 @@ export default function NoticeWritePageConnected() {
           <p className="text-xs text-gray-500 mb-1.5">내용 <span className="text-danger">*</span></p>
           <textarea
             value={content}
-            onChange={(e) => { setContent(e.target.value); setSubmitError('') }}
+            onChange={(e) => { setContent(e.target.value); setSubmitError(''); setFieldErrors((prev) => ({ ...prev, content: undefined })) }}
             placeholder="공지 내용을 입력하세요"
             rows={7}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary resize-none"
+            className={`w-full border rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary resize-none ${fieldErrors.content ? 'border-danger' : 'border-gray-300'}`}
           />
+          {fieldErrors.content && <p className="text-[11px] text-danger mt-1 ml-1">{fieldErrors.content}</p>}
         </div>
 
         {/* 태그 */}
@@ -315,7 +326,7 @@ export default function NoticeWritePageConnected() {
               return (
                 <button
                   key={option}
-                  onClick={() => { setTags((prev) => prev.includes(option) ? prev.filter(t => t !== option) : [...prev, option]); setSubmitError('') }}
+                  onClick={() => { setTags((prev) => prev.includes(option) ? prev.filter(t => t !== option) : [...prev, option]); setSubmitError(''); setFieldErrors((prev) => ({ ...prev, tags: undefined })) }}
                   className={`text-sm px-3.5 py-1.5 rounded-full border cursor-pointer transition-all ${selected ? TAG_STYLE[option].active : 'bg-white text-gray-500 border-gray-300'}`}
                 >
                   {option}
@@ -323,6 +334,7 @@ export default function NoticeWritePageConnected() {
               )
             })}
           </div>
+          {fieldErrors.tags && <p className="text-[11px] text-danger mt-1.5 ml-1">{fieldErrors.tags}</p>}
         </div>
 
         {/* 이미지 첨부 */}
