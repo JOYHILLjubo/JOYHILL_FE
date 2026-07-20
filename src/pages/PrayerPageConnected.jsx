@@ -154,6 +154,7 @@ export default function PrayerPageConnected() {
   const [isLoading, setIsLoading] = useState(true)
   const [pageError, setPageError] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const accessTokenRef = useRef(accessToken)
   useEffect(() => { accessTokenRef.current = accessToken }, [accessToken])
@@ -240,6 +241,22 @@ export default function PrayerPageConnected() {
     loadPrayers()
     return () => { cancelled = true }
   }, [effectiveFamName, selectedWeek.year, selectedWeek.month, reloadKey, isPastor, isAdmin])
+
+  const handleDelete = async (prayer) => {
+    if (isDeleting) return
+    if (!window.confirm('이 기도제목을 삭제할까요?')) return
+    setIsDeleting(true)
+    try {
+      await callAuthedApi(`/api/prayers/${prayer.id}`, { method: 'DELETE' })
+      setMonthlyPrayers((prev) => prev.filter((p) => p.id !== prayer.id))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '기도제목 삭제에 실패했습니다.'
+      if (isSessionError(message)) { handleExpiredSession(); return }
+      setPageError(message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   if (isAdmin) return null
 
@@ -341,6 +358,15 @@ export default function PrayerPageConnected() {
                   </p>
                   <p className="text-[13px] mt-0.5 leading-relaxed whitespace-pre-wrap">{prayer.content}</p>
                 </div>
+                {prayer.userId === user?.id && (
+                  <button
+                    onClick={() => handleDelete(prayer)}
+                    disabled={isDeleting}
+                    className="shrink-0 text-[11px] text-gray-500 bg-transparent border-none cursor-pointer px-1.5 py-1 hover:text-danger transition-colors disabled:cursor-not-allowed"
+                  >
+                    삭제
+                  </button>
+                )}
               </div>
             )
           })
