@@ -174,6 +174,25 @@ function getInitial(name) {
   return trimmed ? trimmed[0] : 'J'
 }
 
+function getBirthdayBadge(day, todayDate) {
+  const todayDay = todayDate.getDate()
+  if (day === todayDay) return { label: '오늘', variant: 'today' }
+  if (day > todayDay) return { label: `D-${day - todayDay}`, variant: 'upcoming' }
+  return { label: '지남', variant: 'passed' }
+}
+
+function normalizeBirthday(item) {
+  return {
+    id: item?.id ?? null,
+    name: item?.name ?? '',
+    famName: item?.famName ?? '',
+    villageName: item?.villageName ?? '',
+    avatarKey: item?.avatarKey ?? null,
+    day: item?.day ?? null,
+    isToday: Boolean(item?.isToday),
+  }
+}
+
 function normalizeSermon(item) {
   return {
     title: item?.title ?? '',
@@ -299,6 +318,9 @@ export default function HomePageConnected() {
   const [prayerSubmitting, setPrayerSubmitting] = useState(false)
 
   const [noteStreak, setNoteStreak] = useState(0)
+
+  const [birthdays, setBirthdays] = useState([])
+  const [birthdaysLoaded, setBirthdaysLoaded] = useState(false)
 
   const accessTokenRef = useRef(accessToken)
 
@@ -458,6 +480,15 @@ export default function HomePageConnected() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    callAuthedApi('/api/users/birthdays')
+      .then((data) => {
+        if (Array.isArray(data)) setBirthdays(data.map(normalizeBirthday))
+      })
+      .catch(() => {})
+      .finally(() => setBirthdaysLoaded(true))
+  }, [])
+
   const handlePrayerSubmit = async () => {
     const trimmed = prayerInput.trim()
     if (!trimmed || prayerSubmitting) return
@@ -475,6 +506,19 @@ export default function HomePageConnected() {
       // 조용히 실패
     } finally {
       setPrayerSubmitting(false)
+    }
+  }
+
+  const handleTogglePray = async (id) => {
+    try {
+      const data = await callAuthedApi(`/api/community-prayers/${id}/pray`, { method: 'POST' })
+      setCommunityPrayers((prev) =>
+        prev.map((p) =>
+          p.id === id ? { ...p, participantCount: data.participantCount, joinedByMe: data.joinedByMe } : p,
+        ),
+      )
+    } catch {
+      // 조용히 실패
     }
   }
 
@@ -553,12 +597,12 @@ export default function HomePageConnected() {
       )}
 
       <div className="px-5 mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-lg font-semibold">이번 주 설교</p>
+        <div className="flex items-center justify-between mb-2 px-1">
+          <p className="text-[13px] font-semibold text-gray-500">이번 주 설교</p>
         </div>
         <div
           onClick={handleSermonClick}
-          className={`rounded-2xl overflow-hidden border border-gray-200 ${
+          className={`rounded-2xl overflow-hidden shadow-sm ${
             videoId ? 'cursor-pointer active:opacity-90' : ''
           }`}
         >
@@ -616,24 +660,65 @@ export default function HomePageConnected() {
       <div className="px-5 mb-3">
         <button
           onClick={() => navigate('/sermon-note/write')}
-          className="w-full flex items-center gap-3.5 rounded-2xl px-4 py-4 border-none cursor-pointer text-left bg-primary-light"
+          className="w-full flex items-center gap-3.5 rounded-2xl px-4 py-4 border-none cursor-pointer text-left bg-white shadow-sm"
         >
-          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-base shrink-0 shadow-[0_3px_8px_rgba(66,133,244,0.18)]">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-base text-white shrink-0">
             📝
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13.5px] font-bold text-gray-900">오늘 설교, 어떤 은혜 받으셨나요?</p>
+            <p className="text-[13.5px] font-semibold text-gray-900">오늘 설교, 어떤 은혜 받으셨나요?</p>
             {noteStreak > 0 && (
               <p className="text-[11px] font-bold mt-0.5" style={{ color: '#B9530E' }}>🔥 {noteStreak}주 연속 작성 중</p>
             )}
           </div>
-          <span className="text-primary text-base shrink-0">→</span>
+          <span className="text-gray-300 text-base shrink-0">›</span>
         </button>
       </div>
 
       <div className="px-5 mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-lg font-semibold">공지</p>
+        <div className="flex items-center justify-between mb-2 px-1">
+          <p className="text-[13px] font-semibold text-gray-500">🎂 이달의 생일</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm px-4 pt-4 pb-3.5">
+          {!birthdaysLoaded ? (
+            <p className="text-sm text-gray-400 text-center py-2">생일 정보를 불러오는 중입니다.</p>
+          ) : birthdays.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-2">이번 달 생일인 팀원이 없어요.</p>
+          ) : (
+            <>
+              <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {birthdays.map((b) => {
+                  const badge = getBirthdayBadge(b.day, new Date())
+                  return (
+                    <div key={b.id} className="flex flex-col items-center gap-1.5 shrink-0" style={{ width: '54px' }}>
+                      <div
+                        className="relative w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden"
+                        style={{ backgroundColor: badge.variant === 'today' ? '#F9AB00' : '#9AA0A6' }}
+                      >
+                        {b.avatarKey ? <BibleAvatarIcon avatarKey={b.avatarKey} size={44} /> : getInitial(b.name)}
+                        {badge.variant === 'today' && (
+                          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-primary border-2 border-white" />
+                        )}
+                      </div>
+                      <p className="text-[11.5px] font-medium text-gray-800 truncate w-full text-center">{b.name}</p>
+                      <p className={`text-[10px] ${badge.variant === 'today' ? 'font-bold' : 'text-gray-400'}`} style={badge.variant === 'today' ? { color: '#B9530E' } : undefined}>
+                        {badge.label}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                <span className="text-[11.5px] text-gray-500">이번 달 생일 {birthdays.length}명</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="px-5 mb-3">
+        <div className="flex items-center justify-between mb-2 px-1">
+          <p className="text-[13px] font-semibold text-gray-500">공지</p>
           <button
             onClick={() => navigate('/notice')}
             className="text-[11px] text-primary bg-transparent border-none cursor-pointer"
@@ -641,7 +726,7 @@ export default function HomePageConnected() {
             전체보기
           </button>
         </div>
-        <div className="border border-gray-300 rounded-xl p-4">
+        <div className="bg-white rounded-2xl shadow-sm p-4">
           {isLoading ? (
             <p className="text-[13px] text-gray-500 py-1.5">공지를 불러오는 중입니다.</p>
           ) : notices.length === 0 ? (
@@ -692,27 +777,42 @@ export default function HomePageConnected() {
 
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
-        <p className="text-lg font-semibold mb-2">청년부 기도제목</p>
-        <div className="border border-gray-300 rounded-xl p-4">
+        <p className="text-[13px] font-semibold text-gray-500 mb-2 px-1">청년부 기도제목</p>
+        <div className="bg-white rounded-2xl shadow-sm p-4">
 
           {communityPrayers.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
           ) : (
             <div className="flex flex-col gap-2 mb-3 max-h-60 overflow-y-auto">
               {communityPrayers.map((p) => (
-                <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5 flex items-start gap-2">
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-800 leading-relaxed">{p.content}</p>
-                    <p className="text-[12px] text-gray-400 mt-1">{p.createdAt}</p>
+                <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-800 leading-relaxed">{p.content}</p>
+                      <p className="text-[12px] text-gray-400 mt-1">{p.createdAt}</p>
+                    </div>
+                    {canDelete(p) && (
+                      <button
+                        onClick={() => handlePrayerDelete(p.id)}
+                        className="shrink-0 text-gray-300 hover:text-danger bg-transparent border-none cursor-pointer text-sm leading-none pt-0.5"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
-                  {canDelete(p) && (
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
                     <button
-                      onClick={() => handlePrayerDelete(p.id)}
-                      className="shrink-0 text-gray-300 hover:text-danger bg-transparent border-none cursor-pointer text-sm leading-none pt-0.5"
+                      onClick={() => handleTogglePray(p.id)}
+                      className={`flex items-center gap-1 text-[11.5px] font-bold rounded-full px-3 py-1.5 border-none cursor-pointer transition-colors ${
+                        p.joinedByMe ? 'bg-primary-light text-primary-hover' : 'bg-gray-100 text-gray-500'
+                      }`}
                     >
-                      ✕
+                      🙏 함께 기도해요
                     </button>
-                  )}
+                    <span className="text-[11px] text-gray-500">
+                      {p.participantCount > 0 ? `${p.participantCount}명이 함께 기도했어요` : '아직 없어요'}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

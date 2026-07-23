@@ -14,10 +14,22 @@
 - **공유 API 클라이언트가 없다.** `requestApi`/`requestTokenRefresh`/`callAuthedApi`/`isSessionError` 같은 fetch 보일러플레이트가 페이지 파일마다 복붙되어 있음(18개 이상). 인증 흐름을 바꾸려면 `AuthContext.jsx` 하나만 고치면 안 되고 이 보일러플레이트가 있는 모든 파일을 확인해야 함. 새 `*Connected.jsx` 페이지를 만들 때도 이 패턴을 그대로 복붙해서 씀(리팩터링해서 공유 모듈로 뽑는 건 별도 논의 없이 하지 말 것).
 - 인증 토큰: `accessToken`은 메모리(AuthContext state) + localStorage(`joyhill.auth`), `refreshToken`은 httpOnly 쿠키 + `X-Refresh-Token` 헤더 폴백(iOS PWA에서 쿠키 유지 안 되는 문제 대응).
 - 목록/작성 페이지 쌍은 라우터 state로 데이터를 주고받는 패턴(`navigate('/x/write', { state: { mode: 'edit', note } })`) — 별도 fetch-by-id 없이 목록에서 이미 받아온 객체를 그대로 넘김.
+- 폼 필수값 검증은 필드별 에러 상태(`fieldErrors` 객체)로 관리해서 어떤 항목이 비었는지 각 입력 바로 아래에 표시할 것 — 제출 버튼 하나 눌렀을 때 페이지 하단에 뭉뚱그린 에러 메시지 하나만 보여주는 방식은 지양 (`NoticeWritePageConnected.jsx` 참고, 2026-07-23).
 
 ## contentEditable 리치 텍스트를 쓸 때 주의
 
 `SermonNoteWritePage.jsx`의 에디터가 유일한 contentEditable 사용처. **네이티브 Enter 키 동작에 의존하면 안 됨** — 실사용자 환경에서 Enter를 눌러도 줄바꿈이 아예 안 생기는 경우가 있어(모바일 웹뷰 계열 추정), `onKeyDown`에서 Enter를 가로채 `execCommand('insertLineBreak')`(리스트 안이면 `insertParagraph`)로 명시적으로 처리해야 함. 목록 자동 서식(`- `/`1. ` 트리거), 하이라이트 토글(DOM 직접 확인 후 적용/제거) 패턴도 이 파일 참고. 다른 작성 화면(공지/기도)은 전부 네이티브 `<textarea>`라 이 문제가 없음 — 앞으로도 멀티라인 입력은 특별한 이유 없으면 `<textarea>`를 쓰고, contentEditable은 서식(굵게/색상 등)이 꼭 필요할 때만 쓸 것.
+
+## textarea로 받은 멀티라인 텍스트를 표시할 때 `whitespace-pre-wrap`/`whitespace-pre-line` 빠뜨리지 말 것
+
+`<textarea>`는 개행문자(`\n`)를 그대로 저장하지만, 화면에 표시하는 `<p>`/`<span>`은 기본 CSS(`white-space: normal`)가 개행을 무시해버려서 줄바꿈이 사라진 것처럼 보임. `NoticeDetailPageConnected.jsx`(공지 상세)는 처음부터 `whitespace-pre-line`이 붙어있었지만 `PrayerPageConnected.jsx`(개인/공동 기도제목 표시)엔 빠져있어서 실제 버그로 나타났다가 2026-07-23에 수정됨. 새로 textarea 기반 컨텐츠를 표시하는 화면을 만들 때마다 이 클래스가 있는지 확인할 것.
+
+## PWA 업데이트 범위 — 뭐가 자동 반영되고 뭐가 "홈 화면에 추가"를 다시 해야 하는지
+
+`vite.config.js`의 `VitePWA` 설정 기준:
+- **백엔드 API 응답은 서비스워커 캐싱 대상이 아님**(`workbox.globPatterns`가 정적 자산 확장자만 포함, `/api/*`용 `runtimeCaching` 규칙 없음) — 백엔드만 고친 배포는 클라이언트 조치 없이 즉시 반영됨.
+- **프론트 JS/CSS 변경**은 `registerType: 'autoUpdate'` + `skipWaiting: true` + `clientsClaim: true`라서 사용자가 앱을 다음에 열 때 자동으로 최신 버전으로 교체됨. 재설치 불필요.
+- **"홈 화면에 추가"를 다시 해야 하는 경우는 딱 하나**: `manifest`(= `public/manifest.json`)에 정의된, 설치 시점에 OS가 스냅샷 떠서 저장해두는 값 — 앱 아이콘(`icons`), 이름(`name`/`short_name`), 테마/배경색(`theme_color`/`background_color`, iOS 스플래시 화면에 씀), `start_url`, `display` 모드. 이 값들을 바꿔도 이미 설치된 홈 화면 아이콘엔 반영 안 됨(특히 iOS Safari가 심함) — 사용자에게 재설치 안내가 필요한 유일한 케이스.
 
 ## 로컬 개발
 

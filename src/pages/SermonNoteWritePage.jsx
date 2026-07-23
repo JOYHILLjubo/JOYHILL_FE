@@ -185,8 +185,32 @@ export default function SermonNoteWritePage() {
 
   const applyHighlight = () => {
     focusEditor()
+    const sel = window.getSelection()
     const isHighlighted = selectionHasHighlight()
-    document.execCommand('hiliteColor', false, isHighlighted ? 'transparent' : HIGHLIGHT_COLOR)
+
+    // 드래그로 텍스트를 선택하지 않고 커서만 하이라이트된 글자 안에 놓은 경우,
+    // execCommand는 선택된 범위가 없어 기존 텍스트에 아무 영향을 주지 않는다(하이라이트가 안 꺼지는 버그의 원인).
+    // 이 경우 커서가 속한 하이라이트 span을 직접 찾아 해제한다.
+    if (isHighlighted && sel && sel.rangeCount > 0 && sel.isCollapsed) {
+      let node = sel.anchorNode
+      if (node && node.nodeType === Node.TEXT_NODE) node = node.parentElement
+      while (node && node !== editorRef.current) {
+        const bg = node.style?.backgroundColor
+        if (bg && bg !== 'transparent' && colorsEqual(bg, HIGHLIGHT_COLOR)) {
+          node.style.backgroundColor = ''
+          if (!node.getAttribute('style')) {
+            const parent = node.parentNode
+            while (node.firstChild) parent.insertBefore(node.firstChild, node)
+            parent.removeChild(node)
+          }
+          break
+        }
+        node = node.parentElement
+      }
+      return
+    }
+
+    document.execCommand('hiliteColor', false, isHighlighted ? 'inherit' : HIGHLIGHT_COLOR)
   }
 
   const applyColor = (color) => { focusEditor(); document.execCommand('foreColor', false, color) }
