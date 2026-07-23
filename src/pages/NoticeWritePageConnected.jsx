@@ -327,7 +327,7 @@ export default function NoticeWritePageConnected() {
                 <button
                   key={option}
                   onClick={() => { setTags((prev) => prev.includes(option) ? prev.filter(t => t !== option) : [...prev, option]); setSubmitError(''); setFieldErrors((prev) => ({ ...prev, tags: undefined })) }}
-                  className={`text-sm px-3.5 py-1.5 rounded-full border cursor-pointer transition-all ${selected ? TAG_STYLE[option].active : 'bg-white text-gray-500 border-gray-300'}`}
+                  className={`text-sm px-3.5 py-1.5 rounded-full border cursor-pointer transition-all ${selected ? TAG_STYLE[option].active : 'bg-surface text-gray-500 border-gray-300'}`}
                 >
                   {option}
                 </button>
@@ -378,7 +378,7 @@ export default function NoticeWritePageConnected() {
               value={deadline}
               onChange={(e) => { setDeadline(e.target.value); setSubmitError('') }}
               min={new Date().toISOString().slice(0, 10)}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface"
               style={{ colorScheme: 'light', minHeight: '44px', boxSizing: 'border-box', minWidth: 0 }}
             />
             {deadline && (
@@ -407,7 +407,7 @@ export default function NoticeWritePageConnected() {
               onClick={() => setPinned((prev) => !prev)}
               className={`w-12 h-6 rounded-full transition-colors relative border-none cursor-pointer shrink-0 ${pinned ? 'bg-primary' : 'bg-gray-300'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${pinned ? 'left-6' : 'left-0.5'}`} />
+              <span className={`absolute top-0.5 w-5 h-5 bg-surface rounded-full shadow transition-all ${pinned ? 'left-6' : 'left-0.5'}`} />
             </button>
           </div>
         </div>
@@ -415,7 +415,7 @@ export default function NoticeWritePageConnected() {
         {submitError && <p className="text-[12px] text-danger pb-3">{submitError}</p>}
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 bg-white border-t border-gray-300" style={{ paddingTop: '12px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 bg-surface border-t border-gray-300" style={{ paddingTop: '12px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}

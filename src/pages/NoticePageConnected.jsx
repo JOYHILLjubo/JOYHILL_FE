@@ -313,7 +313,7 @@ export default function NoticePageConnected() {
             <p className="text-sm text-danger">{loadError}</p>
             <button
               onClick={() => setReloadKey((prev) => prev + 1)}
-              className="mt-3 text-xs text-danger bg-white px-4 py-2 rounded-full border-none cursor-pointer"
+              className="mt-3 text-xs text-danger bg-surface px-4 py-2 rounded-full border-none cursor-pointer"
             >
               다시 시도
             </button>

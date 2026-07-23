@@ -144,7 +144,7 @@ function LegacySignupVerifyPage() {
         <div>
           <label className="text-xs text-gray-500 block mb-1.5">소속 마을 <span className="text-danger">*</span></label>
           <select value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value, fam: '' })}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-surface">
             <option value="">마을을 선택하세요</option>
             {VILLAGE_LIST.map((v) => <option key={v} value={v}>{v}</option>)}
           </select>
@@ -154,7 +154,7 @@ function LegacySignupVerifyPage() {
         <div>
           <label className="text-xs text-gray-500 block mb-1.5">소속 팸 <span className="text-danger">*</span></label>
           <select value={form.fam} onChange={(e) => setForm({ ...form, fam: e.target.value })}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-surface">
             <option value="">팸을 선택하세요</option>
             {FAM_LIST.map((f) => <option key={f} value={f}>{f}</option>)}
           </select>
@@ -179,7 +179,7 @@ function LegacySignupVerifyPage() {
                 className={`text-sm px-3.5 py-1.5 rounded-full border cursor-pointer transition-all ${
                   form.role === r
                     ? 'bg-primary-light text-primary border-primary'
-                    : 'bg-white text-gray-500 border-gray-300'
+                    : 'bg-surface text-gray-500 border-gray-300'
                 }`}>
                 {r}
               </button>
@@ -197,7 +197,7 @@ function LegacySignupVerifyPage() {
             <button
               onClick={() => setForm((prev) => ({ ...prev, hasTeam: !prev.hasTeam, teams: [], isTeamLeader: false, leaderTeams: [] }))}
               className={`w-12 h-6 rounded-full transition-colors relative border-none cursor-pointer shrink-0 ${form.hasTeam ? 'bg-primary' : 'bg-gray-300'}`}>
-              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${form.hasTeam ? 'left-6' : 'left-0.5'}`} />
+              <span className={`absolute top-0.5 w-5 h-5 bg-surface rounded-full shadow transition-all ${form.hasTeam ? 'left-6' : 'left-0.5'}`} />
             </button>
           </div>
 
@@ -208,7 +208,7 @@ function LegacySignupVerifyPage() {
                 {TEAM_OPTIONS.map((t) => (
                   <button key={t} onClick={() => toggleTeam(t)}
                     className={`text-xs px-2.5 py-1.5 rounded-full border cursor-pointer transition-all ${
-                      form.teams.includes(t) ? 'bg-primary-light text-primary border-primary' : 'bg-white text-gray-500 border-gray-300'
+                      form.teams.includes(t) ? 'bg-primary-light text-primary border-primary' : 'bg-surface text-gray-500 border-gray-300'
                     }`}>
                     {t}
                   </button>
@@ -222,7 +222,7 @@ function LegacySignupVerifyPage() {
                     <button
                       onClick={() => setForm((prev) => ({ ...prev, isTeamLeader: !prev.isTeamLeader, leaderTeams: [] }))}
                       className={`w-12 h-6 rounded-full transition-colors relative border-none cursor-pointer shrink-0 ${form.isTeamLeader ? 'bg-primary' : 'bg-gray-300'}`}>
-                      <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${form.isTeamLeader ? 'left-6' : 'left-0.5'}`} />
+                      <span className={`absolute top-0.5 w-5 h-5 bg-surface rounded-full shadow transition-all ${form.isTeamLeader ? 'left-6' : 'left-0.5'}`} />
                     </button>
                   </div>
                   {form.isTeamLeader && (
@@ -232,7 +232,7 @@ function LegacySignupVerifyPage() {
                         {form.teams.map((t) => (
                           <button key={t} onClick={() => toggleLeaderTeam(t)}
                             className={`text-xs px-2.5 py-1.5 rounded-full border cursor-pointer transition-all ${
-                              form.leaderTeams.includes(t) ? 'bg-warning-light text-warning border-warning' : 'bg-white text-gray-500 border-gray-300'
+                              form.leaderTeams.includes(t) ? 'bg-warning-light text-warning border-warning' : 'bg-surface text-gray-500 border-gray-300'
                             }`}>
                             {t}
                           </button>

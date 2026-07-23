@@ -95,7 +95,7 @@ function LegacyPrayerPage() {
         </button>
 
         {showWeekPicker && (
-          <div className="mt-1 border border-gray-300 rounded-lg bg-white max-h-48 overflow-y-auto">
+          <div className="mt-1 border border-gray-300 rounded-lg bg-surface max-h-48 overflow-y-auto">
             {weeks.map((w) => {
               const isSelected =
                 w.month === selectedWeek.month && w.week === selectedWeek.week
@@ -109,7 +109,7 @@ function LegacyPrayerPage() {
                   className={`w-full text-left px-3 py-2.5 text-sm border-none cursor-pointer border-b border-gray-300 last:border-b-0 ${
                     isSelected
                       ? 'bg-primary-light text-primary font-medium'
-                      : 'bg-white hover:bg-gray-100'
+                      : 'bg-surface hover:bg-gray-100'
                   }`}
                 >
                   {w.label}
@@ -135,7 +135,7 @@ function LegacyPrayerPage() {
                   }`
                 )
               }
-              className="text-[11px] text-primary-hover bg-white px-2 py-1 rounded-full border border-primary-hover cursor-pointer hover:bg-white/80 transition-colors shrink-0 ml-2"
+              className="text-[11px] text-primary-hover bg-surface px-2 py-1 rounded-full border border-primary-hover cursor-pointer hover:bg-surface/80 transition-colors shrink-0 ml-2"
             >
               {commonPrayer ? '수정하기' : '작성하기'}
             </button>
@@ -187,7 +187,7 @@ function LegacyPrayerPage() {
         {/* 개인 기도제목 작성 버튼 */}
         <button
           onClick={() => navigate('/prayer/write')}
-          className="w-full mt-4 py-2.5 border border-gray-300 rounded-lg text-[13px] text-primary bg-white cursor-pointer hover:bg-primary-light transition-colors"
+          className="w-full mt-4 py-2.5 border border-gray-300 rounded-lg text-[13px] text-primary bg-surface cursor-pointer hover:bg-primary-light transition-colors"
         >
           + 내 기도제목 작성하기
         </button>

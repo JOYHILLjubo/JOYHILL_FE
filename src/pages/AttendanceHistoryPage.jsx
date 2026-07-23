@@ -291,7 +291,7 @@ export default function AttendanceHistoryPage() {
         <p className="text-sm font-medium">{famName || '팸을 선택하세요'}</p>
         <select value={`${selectedYear}-${selectedMonth}`}
           onChange={(e) => { const [y, m] = e.target.value.split('-').map(Number); setSelectedYear(y); setSelectedMonth(m) }}
-          className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none">
+          className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-surface outline-none">
           {monthOptions.map(({ year, month }) => (
             <option key={`${year}-${month}`} value={`${year}-${month}`}>{year}년 {month}월</option>
           ))}
@@ -302,7 +302,7 @@ export default function AttendanceHistoryPage() {
         <div className="px-5 pt-3">
           <div className="border border-danger-light bg-danger-light rounded-xl px-4 py-3">
             <p className="text-xs text-danger">{pageError}</p>
-            <button onClick={() => void loadData()} className="mt-2 text-xs text-danger bg-white px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
+            <button onClick={() => void loadData()} className="mt-2 text-xs text-danger bg-surface px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
           </div>
         </div>
       )}
@@ -395,7 +395,7 @@ export default function AttendanceHistoryPage() {
         <span style={{ fontSize: 11, color: '#888' }}>· 탭하면 변경</span>
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         {saveError && <p className="text-xs text-danger mb-2">{saveError}</p>}
         <button onClick={handleSave} disabled={isLoading || isSaving || famMembers.length === 0}
           className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'} ${isLoading || isSaving || famMembers.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>

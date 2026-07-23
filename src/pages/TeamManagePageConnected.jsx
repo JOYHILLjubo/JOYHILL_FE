@@ -715,7 +715,7 @@ export default function TeamManagePageConnected() {
                       </div>
 
                       {subAddPanel && (
-                        <div className="mb-4 rounded-xl border border-primary/20 bg-white p-4 shadow-sm">
+                        <div className="mb-4 rounded-xl border border-primary/20 bg-surface p-4 shadow-sm">
                           <div className="flex items-center justify-between mb-3">
                             <p className="text-sm font-medium">{currentSubTeam.subTeamName} 멤버 추가</p>
                             <button onClick={() => setSubAddPanel(false)} className="text-xs text-gray-500 bg-transparent border-none cursor-pointer">닫기</button>
@@ -810,7 +810,7 @@ export default function TeamManagePageConnected() {
               </div>
 
               {showAddPanel && (
-                <div className="mb-4 rounded-xl border border-primary/20 bg-white p-4 shadow-sm">
+                <div className="mb-4 rounded-xl border border-primary/20 bg-surface p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm font-medium">{selectedTeam} 팀원 추가</p>
                     <button onClick={() => setShowAddPanel(false)} className="text-xs text-gray-500 bg-transparent border-none cursor-pointer">닫기</button>
@@ -931,7 +931,7 @@ export default function TeamManagePageConnected() {
                         setEditingIntro(false)
                         setIntroDraft(selectedTeamInfo.intro ?? '')
                       }}
-                      className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500 bg-white cursor-pointer"
+                      className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500 bg-surface cursor-pointer"
                     >
                       취소
                     </button>
@@ -953,7 +953,7 @@ export default function TeamManagePageConnected() {
                   </div>
                   <button
                     onClick={() => setEditingIntro(true)}
-                    className="w-full mt-3 py-2.5 border border-primary text-primary rounded-lg text-sm cursor-pointer bg-white"
+                    className="w-full mt-3 py-2.5 border border-primary text-primary rounded-lg text-sm cursor-pointer bg-surface"
                   >
                     소개 수정
                   </button>

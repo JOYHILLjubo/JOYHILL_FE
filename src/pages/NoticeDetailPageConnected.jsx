@@ -366,7 +366,7 @@ export default function NoticeDetailPageConnected() {
             <p className="text-sm text-danger">{loadError}</p>
             <button
               onClick={handleRetry}
-              className="mt-3 text-xs text-danger bg-white px-4 py-2 rounded-full border-none cursor-pointer"
+              className="mt-3 text-xs text-danger bg-surface px-4 py-2 rounded-full border-none cursor-pointer"
             >
               다시 시도
             </button>
@@ -412,7 +412,7 @@ export default function NoticeDetailPageConnected() {
         )}
 
         <div className="pt-4">
-          <p className="text-sm leading-relaxed text-gray-900 whitespace-pre-line">
+          <p className="text-sm leading-relaxed text-ink whitespace-pre-line">
             {notice.content}
           </p>
         </div>

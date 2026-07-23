@@ -221,7 +221,7 @@ function YearSelect({ value, onChange }) {
     <select
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
-      className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none"
+      className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-surface outline-none"
     >
       {years.map((y) => (
         <option key={y} value={y}>{y}년</option>
@@ -234,7 +234,7 @@ function YearSelect({ value, onChange }) {
 function WeekSelect({ value, onChange }) {
   const sundays = useMemo(() => getRecentSundays(8), [])
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white outline-none">
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-surface outline-none">
       {sundays.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
     </select>
   )

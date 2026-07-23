@@ -200,7 +200,7 @@ export default function SermonNoteListPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="노트 검색 (내용, 말씀구절)"
-          className="w-full bg-white rounded-full px-4 py-2.5 text-xs outline-none border border-gray-200 focus:border-primary"
+          className="w-full bg-surface rounded-full px-4 py-2.5 text-xs outline-none border border-gray-200 focus:border-primary"
         />
       </div>
 
@@ -231,7 +231,7 @@ export default function SermonNoteListPage() {
             <p className="text-sm text-danger">{loadError}</p>
             <button
               onClick={() => setReloadKey((prev) => prev + 1)}
-              className="mt-3 text-xs text-danger bg-white px-4 py-2 rounded-full border-none cursor-pointer"
+              className="mt-3 text-xs text-danger bg-surface px-4 py-2 rounded-full border-none cursor-pointer"
             >
               다시 시도
             </button>
@@ -267,7 +267,7 @@ export default function SermonNoteListPage() {
               <div
                 key={note.id}
                 onClick={() => navigate('/sermon-note/write', { state: { mode: 'edit', note } })}
-                className="bg-white rounded-2xl p-4 mb-2.5 cursor-pointer shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]"
+                className="bg-surface rounded-2xl p-4 mb-2.5 cursor-pointer shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]"
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[11px] font-semibold text-primary">{formatNoteDate(note.noteDate)}</span>

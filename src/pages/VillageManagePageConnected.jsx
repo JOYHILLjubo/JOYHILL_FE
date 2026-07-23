@@ -128,7 +128,7 @@ function RateChip({ rate, type }) {
 function BottomSheet({ onClose, children }) {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="bg-white rounded-t-2xl w-full max-w-[430px] flex flex-col" style={{ maxHeight: '80vh' }} onClick={(e) => e.stopPropagation()}>
+      <div className="bg-surface rounded-t-2xl w-full max-w-[430px] flex flex-col" style={{ maxHeight: '80vh' }} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -146,7 +146,7 @@ function FamMoveSheet({ fam, currentVillage, villageNames, onClose, onSave, isSu
       <div className="px-5 flex-1 overflow-y-auto pb-3">
         <p className="text-xs text-gray-500 mb-1.5">이동할 마을</p>
         <select value={targetVillage} onChange={(e) => setTargetVillage(e.target.value)} disabled={isSubmitting}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white disabled:bg-gray-100">
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface disabled:bg-gray-100">
           {villageNames.map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
       </div>
@@ -229,7 +229,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
             {FAM_ROLES.map((role) => (
               <button key={role} type="button" onClick={() => canChangeRole && setForm((p) => ({ ...p, role }))}
                 disabled={isSubmitting || (!canChangeRole && !isNew)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${form.role === role ? 'bg-primary-light text-primary border-primary' : 'bg-white text-gray-500 border-gray-300'} ${isSubmitting || (!canChangeRole && !isNew) ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${form.role === role ? 'bg-primary-light text-primary border-primary' : 'bg-surface text-gray-500 border-gray-300'} ${isSubmitting || (!canChangeRole && !isNew) ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                 {FAM_ROLE_LABELS[role]}
               </button>
             ))}
@@ -243,7 +243,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
               value={form.fam || ''}
               onChange={(e) => setForm((p) => ({ ...p, fam: e.target.value }))}
               disabled={isSubmitting}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white disabled:bg-gray-100"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface disabled:bg-gray-100"
             >
               <option value="">소속 팸 없음</option>
               {famOptions.map((f) => (
@@ -261,7 +261,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
         </div>
         {error && <p className="text-xs text-danger">{error}</p>}
       </div>
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         <button onClick={handleSave} disabled={isSubmitting}
           className="w-full py-3 bg-primary text-white rounded-lg text-sm font-medium border-none cursor-pointer hover:bg-primary-hover transition-colors disabled:opacity-60">
           {isSubmitting ? '저장 중...' : isNew ? '추가하기' : '저장하기'}
@@ -349,7 +349,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canCh
         <div className="px-5 pt-3">
           <div className="bg-danger-light rounded-xl px-4 py-3">
             <p className="text-xs text-danger">{pageError}</p>
-            <button onClick={() => void loadMembers()} className="mt-2 text-xs text-danger bg-white px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
+            <button onClick={() => void loadMembers()} className="mt-2 text-xs text-danger bg-surface px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
           </div>
         </div>
       )}
@@ -680,7 +680,7 @@ export default function VillageManagePageConnected() {
             <div className="px-5 pb-2">
               <div className="bg-danger-light rounded-xl px-4 py-3">
                 <p className="text-sm text-danger">{pageError}</p>
-                <button onClick={() => setReloadKey((p) => p + 1)} className="mt-2 text-xs text-danger bg-white px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
+                <button onClick={() => setReloadKey((p) => p + 1)} className="mt-2 text-xs text-danger bg-surface px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
               </div>
             </div>
           )}
@@ -821,7 +821,7 @@ export default function VillageManagePageConnected() {
           {teamError && (
             <div className="bg-danger-light rounded-xl px-4 py-3 mb-3">
               <p className="text-sm text-danger">{teamError}</p>
-              <button onClick={() => setReloadKey((p) => p + 1)} className="mt-2 text-xs text-danger bg-white px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
+              <button onClick={() => setReloadKey((p) => p + 1)} className="mt-2 text-xs text-danger bg-surface px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
             </div>
           )}
           {isLoadingTeams ? (

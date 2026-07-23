@@ -2,7 +2,10 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { BIBLE_AVATARS, BibleAvatarIcon } from '../components/BibleAvatars'
+
+const THEME_LABELS = { light: '라이트', dark: '다크', sepia: '세피아' }
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -24,6 +27,7 @@ export default function MyPage() {
     isVillageLeaderOrAbove, isPastorOrAbove, isAdmin,
     isTeamLeader, isNewFamilyTeamLeader,
   } = useAuth()
+  const { theme, setTheme, themes } = useTheme()
 
   const isLeader = user.role === 'leader'
   const isVillageLeader = user.role === 'village_leader'
@@ -218,6 +222,10 @@ export default function MyPage() {
       <div className="px-5 mb-3">
         <div className="border border-gray-300 rounded-xl overflow-hidden">
           <MenuItem label="비밀번호 변경" onPress={() => navigate('/my/edit')} />
+          <div className="flex justify-between items-center px-4 py-3.5 border-b border-gray-300">
+            <span className="text-sm">화면 모드</span>
+            <ThemeSwitcher theme={theme} setTheme={setTheme} themes={themes} />
+          </div>
           <MenuItem label="알림 설정" />
           <div className="px-4 py-3.5">
             <span className="text-sm text-danger cursor-pointer" onClick={handleLogout}>로그아웃</span>
@@ -344,6 +352,24 @@ function AvatarCell({ avatar, selected, onSelect }) {
         {avatar.label}
       </span>
     </button>
+  )
+}
+
+function ThemeSwitcher({ theme, setTheme, themes }) {
+  return (
+    <div className="flex gap-1 bg-gray-100 rounded-full p-0.5">
+      {themes.map((t) => (
+        <button
+          key={t}
+          onClick={() => setTheme(t)}
+          className={`text-xs font-medium rounded-full px-2.5 py-1 border-none cursor-pointer transition-colors ${
+            theme === t ? 'bg-primary text-white' : 'bg-transparent text-gray-500'
+          }`}
+        >
+          {THEME_LABELS[t]}
+        </button>
+      ))}
+    </div>
   )
 }
 

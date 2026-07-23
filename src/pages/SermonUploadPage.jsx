@@ -167,7 +167,7 @@ function LegacySermonUploadPage() {
       </div>
 
       {/* 저장 버튼 */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         <button
           onClick={handleSave}
           className={`w-full py-3 rounded-lg text-sm font-medium border-none cursor-pointer transition-colors ${

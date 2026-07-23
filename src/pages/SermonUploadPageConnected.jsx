@@ -417,7 +417,7 @@ export default function SermonUploadPageConnected() {
 
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         <button
           onClick={handleSave}
           disabled={isLoading || isSubmitting}

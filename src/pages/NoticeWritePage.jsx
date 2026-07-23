@@ -130,7 +130,7 @@ function LegacyNoticeWritePage() {
               return (
                 <button key={tag} onClick={() => toggleTag(tag)}
                   className={`text-sm px-3.5 py-1.5 rounded-full border cursor-pointer transition-all ${
-                    selected ? tagStyle[tag].active : 'bg-white text-gray-500 border-gray-300'
+                    selected ? tagStyle[tag].active : 'bg-surface text-gray-500 border-gray-300'
                   }`}>
                   {tag}
                 </button>
@@ -170,13 +170,13 @@ function LegacyNoticeWritePage() {
           </div>
           <button onClick={() => setPinned(!pinned)}
             className={`w-12 h-6 rounded-full transition-colors relative border-none cursor-pointer shrink-0 ${pinned ? 'bg-primary' : 'bg-gray-300'}`}>
-            <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${pinned ? 'left-6' : 'left-0.5'}`} />
+            <span className={`absolute top-0.5 w-5 h-5 bg-surface rounded-full shadow transition-all ${pinned ? 'left-6' : 'left-0.5'}`} />
           </button>
         </div>
       </div>
 
       {/* 저장 버튼 */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         <button onClick={handleSubmit}
           className="w-full py-3 bg-primary text-white rounded-lg text-sm font-medium border-none cursor-pointer hover:bg-primary-hover transition-colors">
           {isEdit ? '공지 수정하기' : '공지 등록하기'}

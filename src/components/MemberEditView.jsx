@@ -160,7 +160,7 @@ export default function MemberEditView({
                 className={`text-xs px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
                   form.role === r
                     ? 'bg-primary-light text-primary border-primary'
-                    : 'bg-white text-gray-500 border-gray-300'
+                    : 'bg-surface text-gray-500 border-gray-300'
                 }`}>
                 {FAM_ROLE_LABELS[r]}
               </button>
@@ -181,7 +181,7 @@ export default function MemberEditView({
           <div>
             <p className="text-xs text-gray-500 mb-1.5">소속 팸 <span className="text-danger">*</span></p>
             <select value={form.fam} onChange={(e) => setForm({ ...form, fam: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white">
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface">
               <option value="">선택</option>
               {allFams.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
@@ -209,7 +209,7 @@ export default function MemberEditView({
       </div>
 
       {/* 저장 버튼 */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         <button onClick={handleSave}
           className="w-full py-3 bg-primary text-white rounded-lg text-sm font-medium border-none cursor-pointer hover:bg-primary-hover transition-colors">
           {isNew ? '추가하기' : '저장하기'}

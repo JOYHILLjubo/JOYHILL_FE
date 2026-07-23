@@ -178,7 +178,7 @@ function getBirthdayBadge(day, todayDate) {
   const todayDay = todayDate.getDate()
   if (day === todayDay) return { label: '오늘', variant: 'today' }
   if (day > todayDay) return { label: `D-${day - todayDay}`, variant: 'upcoming' }
-  return { label: '지남', variant: 'passed' }
+  return { label: `D+${todayDay - day}`, variant: 'passed' }
 }
 
 function normalizeBirthday(item) {
@@ -565,7 +565,7 @@ export default function HomePageConnected() {
   }
 
   return (
-    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="bg-[var(--jh-page-bg)] min-h-screen" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex justify-between items-center px-5 pt-6 pb-3">
         <div>
           <img src={logoHome} alt="joyhill" className="h-8" />
@@ -588,7 +588,7 @@ export default function HomePageConnected() {
             <p className="text-sm text-danger">{loadError}</p>
             <button
               onClick={handleRetry}
-              className="mt-3 text-xs text-danger bg-white px-4 py-2 rounded-full border-none cursor-pointer"
+              className="mt-3 text-xs text-danger bg-surface px-4 py-2 rounded-full border-none cursor-pointer"
             >
               다시 시도
             </button>
@@ -633,13 +633,13 @@ export default function HomePageConnected() {
             )}
           </div>
           {/* 텍스트 영역 */}
-          <div className="px-3 py-2.5 bg-white">
+          <div className="px-3 py-2.5 bg-surface">
             {isLoading ? (
               <p className="text-sm text-gray-500">최신 설교를 불러오는 중입니다.</p>
             ) : sermon.title ? (
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center justify-between">
-                  <p className="text-[15px] font-semibold text-gray-900 leading-snug">{sermon.title}</p>
+                  <p className="text-[15px] font-semibold text-ink leading-snug">{sermon.title}</p>
                   {sermonDateLabel && <span className="text-[11px] text-gray-400 shrink-0 ml-2">{sermonDateLabel}</span>}
                 </div>
                 <div className="flex items-center justify-between mt-0.5">
@@ -660,13 +660,13 @@ export default function HomePageConnected() {
       <div className="px-5 mb-3">
         <button
           onClick={() => navigate('/sermon-note/write')}
-          className="w-full flex items-center gap-3.5 rounded-2xl px-4 py-4 border-none cursor-pointer text-left bg-white shadow-sm"
+          className="w-full flex items-center gap-3.5 rounded-2xl px-4 py-4 border-none cursor-pointer text-left bg-surface shadow-sm"
         >
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-base text-white shrink-0">
             📝
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13.5px] font-semibold text-gray-900">오늘 설교, 어떤 은혜 받으셨나요?</p>
+            <p className="text-[13.5px] font-semibold text-ink">오늘 설교, 어떤 은혜 받으셨나요?</p>
             {noteStreak > 0 && (
               <p className="text-[11px] font-bold mt-0.5" style={{ color: '#B9530E' }}>🔥 {noteStreak}주 연속 작성 중</p>
             )}
@@ -679,7 +679,7 @@ export default function HomePageConnected() {
         <div className="flex items-center justify-between mb-2 px-1">
           <p className="text-[13px] font-semibold text-gray-500">🎂 이달의 생일</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm px-4 pt-4 pb-3.5">
+        <div className="bg-surface rounded-2xl shadow-sm px-4 pt-4 pb-3.5">
           {!birthdaysLoaded ? (
             <p className="text-sm text-gray-400 text-center py-2">생일 정보를 불러오는 중입니다.</p>
           ) : birthdays.length === 0 ? (
@@ -700,7 +700,7 @@ export default function HomePageConnected() {
                           <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-primary border-2 border-white" />
                         )}
                       </div>
-                      <p className="text-[11.5px] font-medium text-gray-800 truncate w-full text-center">{b.name}</p>
+                      <p className="text-[11.5px] font-medium text-ink truncate w-full text-center">{b.name}</p>
                       <p className={`text-[10px] ${badge.variant === 'today' ? 'font-bold' : 'text-gray-400'}`} style={badge.variant === 'today' ? { color: '#B9530E' } : undefined}>
                         {badge.label}
                       </p>
@@ -726,7 +726,7 @@ export default function HomePageConnected() {
             전체보기
           </button>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm p-4">
+        <div className="bg-surface rounded-2xl shadow-sm p-4">
           {isLoading ? (
             <p className="text-[13px] text-gray-500 py-1.5">공지를 불러오는 중입니다.</p>
           ) : notices.length === 0 ? (
@@ -778,7 +778,7 @@ export default function HomePageConnected() {
       {/* 청년부 기도제목 */}
       <div className="px-5 mb-3">
         <p className="text-[13px] font-semibold text-gray-500 mb-2 px-1">청년부 기도제목</p>
-        <div className="bg-white rounded-2xl shadow-sm p-4">
+        <div className="bg-surface rounded-2xl shadow-sm p-4">
 
           {communityPrayers.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-3">아직 등록된 기도제목이 없습니다.</p>
@@ -788,7 +788,7 @@ export default function HomePageConnected() {
                 <div key={p.id} className="bg-gray-50 rounded-lg px-3 py-2.5">
                   <div className="flex items-start gap-2">
                     <div className="flex-1">
-                      <p className="text-sm text-gray-800 leading-relaxed">{p.content}</p>
+                      <p className="text-sm text-ink leading-relaxed">{p.content}</p>
                       <p className="text-[12px] text-gray-400 mt-1">{p.createdAt}</p>
                     </div>
                     {canDelete(p) && (
@@ -810,7 +810,7 @@ export default function HomePageConnected() {
                       🙏 함께 기도해요
                     </button>
                     <span className="text-[11px] text-gray-500">
-                      {p.participantCount > 0 ? `${p.participantCount}명이 함께 기도했어요` : '아직 없어요'}
+                      {p.participantCount}명이 함께 기도했어요
                     </span>
                   </div>
                 </div>

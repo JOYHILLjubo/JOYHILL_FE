@@ -183,33 +183,13 @@ export default function SermonNoteWritePage() {
     return false
   }
 
+  // Bold(applyBold)와 동일하게, 드래그로 선택한 범위에만 적용/해제된다.
+  // 커서만 놓인 상태(선택 영역 없음)에서는 Bold와 마찬가지로 기존 텍스트를 건드리지 않는다 —
+  // 예전에는 이 경우 커서가 속한 하이라이트 span 전체를 강제로 지웠는데, 그러면 드래그로 선택한 일부가 아니라
+  // 그 span에 걸쳐 있던 하이라이트 전체(문장 전체 등)가 한번에 사라져버리는 문제가 있었다.
   const applyHighlight = () => {
     focusEditor()
-    const sel = window.getSelection()
     const isHighlighted = selectionHasHighlight()
-
-    // 드래그로 텍스트를 선택하지 않고 커서만 하이라이트된 글자 안에 놓은 경우,
-    // execCommand는 선택된 범위가 없어 기존 텍스트에 아무 영향을 주지 않는다(하이라이트가 안 꺼지는 버그의 원인).
-    // 이 경우 커서가 속한 하이라이트 span을 직접 찾아 해제한다.
-    if (isHighlighted && sel && sel.rangeCount > 0 && sel.isCollapsed) {
-      let node = sel.anchorNode
-      if (node && node.nodeType === Node.TEXT_NODE) node = node.parentElement
-      while (node && node !== editorRef.current) {
-        const bg = node.style?.backgroundColor
-        if (bg && bg !== 'transparent' && colorsEqual(bg, HIGHLIGHT_COLOR)) {
-          node.style.backgroundColor = ''
-          if (!node.getAttribute('style')) {
-            const parent = node.parentNode
-            while (node.firstChild) parent.insertBefore(node.firstChild, node)
-            parent.removeChild(node)
-          }
-          break
-        }
-        node = node.parentElement
-      }
-      return
-    }
-
     document.execCommand('hiliteColor', false, isHighlighted ? 'inherit' : HIGHLIGHT_COLOR)
   }
 
@@ -409,7 +389,7 @@ export default function SermonNoteWritePage() {
           </div>
         )}
 
-        <div className="flex items-center gap-1.5 bg-white rounded-2xl p-2 mb-2.5 shadow-[0_1px_1px_rgba(20,22,42,0.03),0_4px_12px_rgba(20,22,42,0.05)]">
+        <div className="flex items-center gap-1.5 bg-surface rounded-2xl p-2 mb-2.5 shadow-[0_1px_1px_rgba(20,22,42,0.03),0_4px_12px_rgba(20,22,42,0.05)]">
           <button onClick={applyBold} className="w-8 h-8 rounded-lg bg-gray-100 border-none cursor-pointer font-extrabold text-[13px]">B</button>
           <button onClick={applyHighlight} className="w-8 h-8 rounded-lg bg-gray-100 border-none cursor-pointer font-bold text-[13px]">H</button>
           <div className="w-px h-4 bg-gray-200 mx-1" />
@@ -426,7 +406,7 @@ export default function SermonNoteWritePage() {
 
         <div
           ref={editorRef}
-          className="note-rich-editor bg-white rounded-2xl p-4 text-sm leading-relaxed outline-none shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]"
+          className="note-rich-editor bg-surface rounded-2xl p-4 text-sm leading-relaxed outline-none shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]"
           style={{ minHeight: 180 }}
           contentEditable
           suppressContentEditableWarning
@@ -436,7 +416,7 @@ export default function SermonNoteWritePage() {
         />
         <p className="text-[11px] text-gray-400 text-right mt-1.5">{charCount}자</p>
 
-        <div className="bg-white rounded-2xl p-4 mt-3.5 shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]">
+        <div className="bg-surface rounded-2xl p-4 mt-3.5 shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]">
           <div className="flex items-center justify-between mb-2.5">
             <p className="text-[13px] font-bold">적용할 점</p>
             <button onClick={handleAddChecklistItem} className="text-xs font-bold text-primary bg-transparent border-none cursor-pointer">+ 추가</button>
@@ -448,7 +428,7 @@ export default function SermonNoteWritePage() {
               <div key={item.id} className="flex items-start gap-2.5 py-1.5">
                 <button
                   onClick={() => handleToggleChecklistDone(item.id)}
-                  className={`w-[18px] h-[18px] rounded-md flex items-center justify-center text-[11px] font-black border-none cursor-pointer shrink-0 mt-0.5 ${item.done ? 'bg-primary text-white' : 'bg-white border-[1.8px] border-gray-300'}`}
+                  className={`w-[18px] h-[18px] rounded-md flex items-center justify-center text-[11px] font-black border-none cursor-pointer shrink-0 mt-0.5 ${item.done ? 'bg-primary text-white' : 'bg-surface border-[1.8px] border-gray-300'}`}
                 >
                   {item.done ? '✓' : ''}
                 </button>
@@ -489,7 +469,7 @@ export default function SermonNoteWritePage() {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 bg-white border-t border-gray-300" style={{ paddingTop: '12px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 bg-surface border-t border-gray-300" style={{ paddingTop: '12px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
         <button
           onClick={handleSave}
           disabled={isSubmitting}

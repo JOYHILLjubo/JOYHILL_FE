@@ -42,7 +42,7 @@ function RateChip({ rate, type }) {
 function BottomSheet({ onClose, children }) {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="bg-white rounded-t-2xl w-full max-w-[430px] flex flex-col"
+      <div className="bg-surface rounded-t-2xl w-full max-w-[430px] flex flex-col"
         style={{ maxHeight: '80vh' }} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
@@ -65,7 +65,7 @@ function FamMoveSheet({ fam, currentVillage, villageNames, onClose, onSave }) {
       <div className="px-5 flex-1 overflow-y-auto pb-3">
         <p className="text-xs text-gray-500 mb-1.5">이동할 마을</p>
         <select value={targetVillage} onChange={(e) => setTargetVillage(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white">
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface">
           {villageNames.map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
       </div>
@@ -229,14 +229,14 @@ function TeamDetailView({ team, onBack }) {
             <>
               <textarea value={intro} onChange={(e) => setIntro(e.target.value)} rows={6} className="w-full border border-primary rounded-lg px-3 py-2.5 text-sm outline-none resize-none" />
               <div className="flex gap-2 mt-3">
-                <button onClick={() => setEditingIntro(false)} className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500 bg-white cursor-pointer">취소</button>
+                <button onClick={() => setEditingIntro(false)} className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500 bg-surface cursor-pointer">취소</button>
                 <button onClick={() => setEditingIntro(false)} className="flex-1 py-2.5 bg-primary text-white rounded-lg text-sm font-medium border-none cursor-pointer">저장</button>
               </div>
             </>
           ) : (
             <>
               <div className="border border-gray-300 rounded-xl p-4 min-h-[100px]"><p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{intro}</p></div>
-              <button onClick={() => setEditingIntro(true)} className="w-full mt-3 py-2.5 border border-primary text-primary rounded-lg text-sm cursor-pointer bg-white">소개 수정</button>
+              <button onClick={() => setEditingIntro(true)} className="w-full mt-3 py-2.5 border border-primary text-primary rounded-lg text-sm cursor-pointer bg-surface">소개 수정</button>
             </>
           )}
         </div>

@@ -178,7 +178,7 @@ function LegacyTeamManagePage() {
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => setEditingIntro(false)}
-                  className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500 bg-white cursor-pointer"
+                  className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500 bg-surface cursor-pointer"
                 >
                   취소
                 </button>
@@ -199,7 +199,7 @@ function LegacyTeamManagePage() {
               </div>
               <button
                 onClick={() => setEditingIntro(true)}
-                className="w-full mt-3 py-2.5 border border-primary text-primary rounded-lg text-sm cursor-pointer bg-white"
+                className="w-full mt-3 py-2.5 border border-primary text-primary rounded-lg text-sm cursor-pointer bg-surface"
               >
                 소개 수정
               </button>

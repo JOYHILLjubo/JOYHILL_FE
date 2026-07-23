@@ -237,7 +237,7 @@ export default function AttendancePage() {
         <div className="px-5 pb-2">
           <div className="border border-danger-light bg-danger-light rounded-xl px-4 py-3">
             <p className="text-xs text-danger">{pageError}</p>
-            <button onClick={() => void loadData()} className="mt-2 text-xs text-danger bg-white px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
+            <button onClick={() => void loadData()} className="mt-2 text-xs text-danger bg-surface px-3 py-1.5 rounded-full border border-danger-light cursor-pointer">다시 시도</button>
           </div>
         </div>
       )}
@@ -304,7 +304,7 @@ export default function AttendancePage() {
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full border border-gray-300" /><span className="text-[11px] text-gray-500">결석</span></div>
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         {saveError && <p className="text-xs text-danger mb-2">{saveError}</p>}
         <button onClick={handleSave} disabled={isLoading || isSaving || members.length === 0}
           className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'} ${isLoading || isSaving || members.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>

@@ -27,7 +27,7 @@ function getDays(year, month) {
   return Array.from({ length: count }, (_, i) => String(i + 1))
 }
 
-const selectClass = 'flex-1 border border-gray-300 rounded-lg px-2 py-2.5 text-sm outline-none focus:border-primary bg-white disabled:bg-gray-100'
+const selectClass = 'flex-1 border border-gray-300 rounded-lg px-2 py-2.5 text-sm outline-none focus:border-primary bg-surface disabled:bg-gray-100'
 
 export default function DateSelect({ value, onChange, disabled }) {
   const { year, month, day } = parseDateString(value)

@@ -106,7 +106,7 @@ function LegacyNewcomerPage() {
                   {n.fam ? n.fam : '팸 배정 ▾'}
                 </button>
                 {famDropdown === n.id && (
-                  <div className="absolute right-0 top-9 bg-white border border-gray-300 rounded-xl shadow-lg z-20 w-32 max-h-52 overflow-y-auto">
+                  <div className="absolute right-0 top-9 bg-surface border border-gray-300 rounded-xl shadow-lg z-20 w-32 max-h-52 overflow-y-auto">
                     {FAM_LIST.map((fam) => (
                       <button key={fam} onClick={() => assignFam(n.id, fam)}
                         className={`w-full text-left text-sm px-3 py-2.5 border-none cursor-pointer hover:bg-gray-100 transition-colors ${
@@ -131,7 +131,7 @@ function LegacyNewcomerPage() {
       {/* 등록 모달 */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-t-2xl w-full max-w-[430px] p-5 pb-10 mb-10" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-surface rounded-t-2xl w-full max-w-[430px] p-5 pb-10 mb-10" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <p className="text-base font-medium">새가족 등록</p>
               <button onClick={() => setShowModal(false)} className="text-gray-500 text-lg bg-transparent border-none cursor-pointer">✕</button>

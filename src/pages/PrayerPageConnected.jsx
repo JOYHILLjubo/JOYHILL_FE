@@ -280,14 +280,14 @@ export default function PrayerPageConnected() {
           <span className="text-gray-500 text-xs">{showWeekPicker ? '닫기' : '선택'}</span>
         </button>
         {showWeekPicker && (
-          <div className="mt-1 border border-gray-300 rounded-lg bg-white max-h-48 overflow-y-auto">
+          <div className="mt-1 border border-gray-300 rounded-lg bg-surface max-h-48 overflow-y-auto">
             {weekOptions.map((option) => {
               const isSelected = option.year === selectedWeek.year && option.month === selectedWeek.month && option.week === selectedWeek.week
               return (
                 <button
                   key={`${option.year}-${option.month}-${option.week}`}
                   onClick={() => { setSelectedWeek({ year: option.year, month: option.month, week: option.week }); setShowWeekPicker(false) }}
-                  className={`w-full text-left px-3 py-2.5 text-sm border-none cursor-pointer border-b border-gray-300 last:border-b-0 ${isSelected ? 'bg-primary-light text-primary font-medium' : 'bg-white hover:bg-gray-100'}`}
+                  className={`w-full text-left px-3 py-2.5 text-sm border-none cursor-pointer border-b border-gray-300 last:border-b-0 ${isSelected ? 'bg-primary-light text-primary font-medium' : 'bg-surface hover:bg-gray-100'}`}
                 >
                   {option.label}
                 </button>
@@ -301,7 +301,7 @@ export default function PrayerPageConnected() {
         <div className="px-5 mb-4">
           <div className="bg-danger-light rounded-2xl p-4">
             <p className="text-sm text-danger">{pageError}</p>
-            <button onClick={() => setReloadKey((prev) => prev + 1)} className="mt-3 text-xs text-danger bg-white px-4 py-2 rounded-full border-none cursor-pointer">다시 시도</button>
+            <button onClick={() => setReloadKey((prev) => prev + 1)} className="mt-3 text-xs text-danger bg-surface px-4 py-2 rounded-full border-none cursor-pointer">다시 시도</button>
           </div>
         </div>
       )}
@@ -315,7 +315,7 @@ export default function PrayerPageConnected() {
               {isLeaderOrAbove && (
                 <button
                   onClick={() => navigate(`/prayer/common/write?year=${selectedWeek.year}&month=${selectedWeek.month}${commonPrayer ? '&edit=true' : ''}`)}
-                  className="text-[11px] text-primary-hover bg-white px-2 py-1 rounded-full border border-primary-hover cursor-pointer hover:bg-white/80 transition-colors shrink-0 ml-2"
+                  className="text-[11px] text-primary-hover bg-surface px-2 py-1 rounded-full border border-primary-hover cursor-pointer hover:bg-surface/80 transition-colors shrink-0 ml-2"
                 >
                   {commonPrayer ? '수정하기' : '작성하기'}
                 </button>
@@ -381,7 +381,7 @@ export default function PrayerPageConnected() {
             }
             navigate(path)
           }}
-          className="w-full mt-4 py-2.5 border border-gray-300 rounded-lg text-[13px] text-primary bg-white cursor-pointer hover:bg-primary-light transition-colors"
+          className="w-full mt-4 py-2.5 border border-gray-300 rounded-lg text-[13px] text-primary bg-surface cursor-pointer hover:bg-primary-light transition-colors"
         >
           + 내 기도제목 작성하기
         </button>

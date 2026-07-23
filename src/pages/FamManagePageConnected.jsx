@@ -290,7 +290,7 @@ function MemberEditViewConnected({
             type="button"
             onClick={() => setAddMode('search')}
             className={`flex-1 text-xs py-2 rounded-full border transition-colors ${
-              addMode === 'search' ? 'bg-primary-light text-primary border-primary' : 'bg-white text-gray-500 border-gray-300'
+              addMode === 'search' ? 'bg-primary-light text-primary border-primary' : 'bg-surface text-gray-500 border-gray-300'
             }`}
           >
             기존 회원 검색
@@ -299,7 +299,7 @@ function MemberEditViewConnected({
             type="button"
             onClick={() => setAddMode('manual')}
             className={`flex-1 text-xs py-2 rounded-full border transition-colors ${
-              addMode === 'manual' ? 'bg-primary-light text-primary border-primary' : 'bg-white text-gray-500 border-gray-300'
+              addMode === 'manual' ? 'bg-primary-light text-primary border-primary' : 'bg-surface text-gray-500 border-gray-300'
             }`}
           >
             신규 등록
@@ -406,7 +406,7 @@ function MemberEditViewConnected({
                 className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                   form.role === role
                     ? 'bg-primary-light text-primary border-primary'
-                    : 'bg-white text-gray-500 border-gray-300'
+                    : 'bg-surface text-gray-500 border-gray-300'
                 } ${
                   isSubmitting || (!canChangeRole && !isNew)
                     ? 'cursor-not-allowed opacity-60'
@@ -428,7 +428,7 @@ function MemberEditViewConnected({
             value={form.fam}
             onChange={(e) => setForm((prev) => ({ ...prev, fam: e.target.value }))}
             disabled={isSubmitting || !isNew}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white disabled:bg-gray-100"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface disabled:bg-gray-100"
           >
             <option value="">선택</option>
             {famOptions.map((fam) => (
@@ -457,7 +457,7 @@ function MemberEditViewConnected({
         {error && <p className="text-xs text-danger">{error}</p>}
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         <button
           onClick={handleSave}
           disabled={isSubmitting}
@@ -694,7 +694,7 @@ export default function FamManagePageConnected() {
             <p className="text-xs text-danger">{pageError}</p>
             <button
               onClick={() => void loadData()}
-              className="mt-2 text-xs text-danger bg-white px-3 py-1.5 rounded-full border border-danger-light cursor-pointer"
+              className="mt-2 text-xs text-danger bg-surface px-3 py-1.5 rounded-full border border-danger-light cursor-pointer"
             >
               다시 시도
             </button>

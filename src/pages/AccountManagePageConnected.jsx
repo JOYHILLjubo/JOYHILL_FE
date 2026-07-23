@@ -306,7 +306,7 @@ function UserEditViewConnected({
             value={form.village}
             onChange={(event) => setForm((prev) => ({ ...prev, village: event.target.value, fam: '' }))}
             disabled={isSubmitting}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white disabled:bg-gray-100"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface disabled:bg-gray-100"
           >
             <option value="">선택 안 함</option>
             {villageOptions.map((village) => (
@@ -321,7 +321,7 @@ function UserEditViewConnected({
             value={form.fam}
             onChange={(event) => setForm((prev) => ({ ...prev, fam: event.target.value }))}
             disabled={isSubmitting}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-white disabled:bg-gray-100"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface disabled:bg-gray-100"
           >
             <option value="">선택 안 함</option>
             {filteredFams.map((fam) => (
@@ -342,7 +342,7 @@ function UserEditViewConnected({
                 className={`text-xs px-2.5 py-1.5 rounded-full border cursor-pointer transition-all ${
                   form.role === role
                     ? 'bg-primary-light text-primary border-primary'
-                    : 'bg-white text-gray-500 border-gray-300'
+                    : 'bg-surface text-gray-500 border-gray-300'
                 } ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 {ROLE_LABELS[role]}
@@ -365,7 +365,7 @@ function UserEditViewConnected({
                     className={`text-xs px-2.5 py-1.5 rounded-full border cursor-pointer transition-all ${
                       form.teams.includes(team)
                         ? 'bg-primary-light text-primary border-primary'
-                        : 'bg-white text-gray-500 border-gray-300'
+                        : 'bg-surface text-gray-500 border-gray-300'
                     } ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {team}
@@ -387,7 +387,7 @@ function UserEditViewConnected({
                       className={`text-xs px-2.5 py-1.5 rounded-full border cursor-pointer transition-all ${
                         form.teamRoles.includes(team)
                           ? 'bg-warning-light text-warning border-warning'
-                          : 'bg-white text-gray-500 border-gray-300'
+                          : 'bg-surface text-gray-500 border-gray-300'
                       } ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
                       {team} 리더
@@ -410,7 +410,7 @@ function UserEditViewConnected({
         {error && <p className="text-xs text-danger">{error}</p>}
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-white border-t border-gray-300">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}

@@ -538,7 +538,7 @@ export default function NewcomerPageConnected() {
             <p className="text-sm text-danger">{pageError}</p>
             <button
               onClick={handleRetry}
-              className="mt-3 text-xs text-danger bg-white px-4 py-2 rounded-full border-none cursor-pointer"
+              className="mt-3 text-xs text-danger bg-surface px-4 py-2 rounded-full border-none cursor-pointer"
             >
               다시 시도
             </button>
@@ -627,7 +627,7 @@ export default function NewcomerPageConnected() {
                           <div className="flex gap-1">
                             <button
                               onClick={() => openEditModal(newcomer)}
-                              className="text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
+                              className="text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-surface text-gray-600 cursor-pointer"
                             >
                               수정
                             </button>
@@ -635,7 +635,7 @@ export default function NewcomerPageConnected() {
                               <button
                                 onClick={() => deleteNewcomer(newcomer.id)}
                                 disabled={deletingId === newcomer.id}
-                                className={`text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
+                                className={`text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-surface ${
                                   deletingId === newcomer.id
                                     ? 'text-gray-400 cursor-not-allowed opacity-60'
                                     : 'text-danger cursor-pointer'
@@ -651,14 +651,14 @@ export default function NewcomerPageConnected() {
                       <div className="flex gap-1">
                         <button
                           onClick={() => openEditModal(newcomer)}
-                          className="text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 cursor-pointer"
+                          className="text-xs px-2.5 py-1.5 rounded-lg border border-gray-300 bg-surface text-gray-600 cursor-pointer"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => deleteNewcomer(newcomer.id)}
                           disabled={deletingId === newcomer.id}
-                          className={`text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-white ${
+                          className={`text-xs px-2.5 py-1.5 rounded-lg border border-danger bg-surface ${
                             deletingId === newcomer.id
                               ? 'text-gray-400 cursor-not-allowed opacity-60'
                               : 'text-danger cursor-pointer'
@@ -680,7 +680,7 @@ export default function NewcomerPageConnected() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setFamDropdown(null)} />
           <div
-            className="fixed bg-white border border-gray-300 rounded-xl shadow-xl z-50 w-44 max-h-56 overflow-y-auto"
+            className="fixed bg-surface border border-gray-300 rounded-xl shadow-xl z-50 w-44 max-h-56 overflow-y-auto"
             style={{ top: dropdownPos.top, right: dropdownPos.right }}
           >
             {assignableFams.map((fam) => (
@@ -713,7 +713,7 @@ export default function NewcomerPageConnected() {
           }}
         >
           <div
-            className="bg-white rounded-t-2xl w-full max-w-[430px] p-5 pb-10 mb-10"
+            className="bg-surface rounded-t-2xl w-full max-w-[430px] p-5 pb-10 mb-10"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">

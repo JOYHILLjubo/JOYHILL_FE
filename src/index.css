@@ -2,6 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * 테마 변수 (라이트/다크/세피아). 값은 전부 "R G B" 공백구분 트리플릿 —
+ * tailwind.config.js에서 rgb(var(--jh-xxx) / <alpha-value>) 형태로 참조해서
+ * bg-gray-100/50 같은 투명도 모디파이어도 그대로 동작한다.
+ * primary/success/warning/danger 메인색은 브랜드 일관성을 위해 3테마 공통(여기 없음, config에 고정값).
+ */
+:root {
+  --jh-page-bg: #F5F5F5;
+  --jh-surface: 255 255 255;
+  --jh-ink: 31 31 31;
+
+  --jh-gray-50: 250 250 250;
+  --jh-gray-100: 245 245 245;
+  --jh-gray-200: 229 229 229;
+  --jh-gray-300: 224 224 224;
+  --jh-gray-400: 176 176 176;
+  --jh-gray-500: 136 136 136;
+  --jh-gray-600: 112 112 112;
+  --jh-gray-700: 204 204 204;
+
+  --jh-primary-light: 232 240 254;
+  --jh-success-light: 230 244 234;
+  --jh-warning-light: 254 247 224;
+  --jh-danger-light: 252 232 230;
+}
+
+:root[data-theme="dark"] {
+  --jh-page-bg: #0D0F13;
+  --jh-surface: 27 30 36;
+  --jh-ink: 242 243 245;
+
+  --jh-gray-50: 21 23 27;
+  --jh-gray-100: 29 32 38;
+  --jh-gray-200: 38 42 49;
+  --jh-gray-300: 51 55 63;
+  --jh-gray-400: 86 91 102;
+  --jh-gray-500: 154 160 172;
+  --jh-gray-600: 183 188 198;
+  --jh-gray-700: 199 203 209;
+
+  --jh-primary-light: 30 42 68;
+  --jh-success-light: 22 53 36;
+  --jh-warning-light: 58 44 16;
+  --jh-danger-light: 58 24 21;
+}
+
+:root[data-theme="sepia"] {
+  --jh-page-bg: #F3ECDD;
+  --jh-surface: 251 246 234;
+  --jh-ink: 58 46 31;
+
+  --jh-gray-50: 247 241 228;
+  --jh-gray-100: 241 234 220;
+  --jh-gray-200: 233 224 204;
+  --jh-gray-300: 222 210 187;
+  --jh-gray-400: 184 169 140;
+  --jh-gray-500: 138 122 94;
+  --jh-gray-600: 110 96 71;
+  --jh-gray-700: 201 187 158;
+
+  --jh-primary-light: 230 237 251;
+  --jh-success-light: 233 240 222;
+  --jh-warning-light: 247 233 201;
+  --jh-danger-light: 247 224 213;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -11,11 +77,12 @@
 body {
   font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 18px;
-  background-color: #F5F5F5;
-  color: #1F1F1F;
+  background-color: var(--jh-page-bg);
+  color: rgb(var(--jh-ink));
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.03em;
   line-height: 1.5;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 #root {
@@ -29,8 +96,20 @@ body {
   width: 100%;
   max-width: 430px;
   min-height: 100vh;
-  background-color: #FFFFFF;
+  background-color: rgb(var(--jh-surface));
   position: relative;
+}
+
+/*
+ * input/textarea/select는 브라우저 기본값으로 흰 배경을 갖고 있어서, 각 페이지가
+ * 명시적으로 bg-* 클래스를 안 준 곳(95곳 넘게 흩어져 있음)이 다크/세피아 모드에서
+ * 흰 사각형으로 튀어보인다. 전부 하나씩 고치는 대신 기본값 자체를 투명 + 상속 텍스트색으로
+ * 바꿔서, 페이지든 카드든 부모 배경이 자연스럽게 비치게 한다. 명시적으로 배경/텍스트색
+ * 유틸리티 클래스를 준 요소는 그 클래스(우선순위 더 높음)가 그대로 이긴다.
+ */
+input, textarea, select {
+  background-color: transparent;
+  color: inherit;
 }
 
 /* 설교노트 리치 텍스트 에디터 placeholder */
