@@ -91,12 +91,17 @@ body {
   min-height: 100vh;
 }
 
-/* 모바일 컨테이너 */
+/*
+ * 모바일 컨테이너 — 배경은 카드색(surface)이 아니라 페이지 캔버스색(page-bg)으로 둔다.
+ * 홈 화면에서 카드가 그림자로 떠 보이는 건 카드(bg-surface)와 배경(page-bg)이 서로 다른 색이기
+ * 때문인데, 이 배경을 예전처럼 surface로 두면 다른 페이지의 카드는 배경과 같은 색이라
+ * shadow-sm만으로는 거의 구분이 안 된다. 여기서 한 번에 바꿔서 모든 페이지에 적용한다.
+ */
 .mobile-container {
   width: 100%;
   max-width: 430px;
   min-height: 100vh;
-  background-color: rgb(var(--jh-surface));
+  background-color: var(--jh-page-bg);
   position: relative;
 }
 
