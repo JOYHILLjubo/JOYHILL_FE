@@ -15,6 +15,8 @@
 - 인증 토큰: `accessToken`은 메모리(AuthContext state) + localStorage(`joyhill.auth`), `refreshToken`은 httpOnly 쿠키 + `X-Refresh-Token` 헤더 폴백(iOS PWA에서 쿠키 유지 안 되는 문제 대응).
 - 목록/작성 페이지 쌍은 라우터 state로 데이터를 주고받는 패턴(`navigate('/x/write', { state: { mode: 'edit', note } })`) — 별도 fetch-by-id 없이 목록에서 이미 받아온 객체를 그대로 넘김.
 - 폼 필수값 검증은 필드별 에러 상태(`fieldErrors` 객체)로 관리해서 어떤 항목이 비었는지 각 입력 바로 아래에 표시할 것 — 제출 버튼 하나 눌렀을 때 페이지 하단에 뭉뚱그린 에러 메시지 하나만 보여주는 방식은 지양 (`NoticeWritePageConnected.jsx` 참고, 2026-07-23).
+- **카드 스타일은 공유 컴포넌트를 쓴다(위 API 클라이언트 규칙의 예외, 2026-07-23 사용자 승인)**: `components/Card.jsx`(흰/서페이스 배경 + `rounded-2xl` + `shadow-sm`, 테두리 없음)와 `components/SectionLabel.jsx`(작은 회색 eyebrow 스타일 섹션 제목)를 홈 화면 리디자인 이후 앱 전체 표준으로 채택함. 예전 스타일(`border border-gray-300 rounded-xl`)은 새로 만드는 화면에 쓰지 말 것. 단, 역할별 색상 배지가 필요한 `MyPage.jsx`의 `SectionHeader`(primary/success/warning/danger 색상 구분)처럼 의미가 다른 경우는 `SectionLabel`로 획일화하지 말 것 — 그건 별개의 용도.
+- **`<input>`/`<textarea>`/`<select>`는 `index.css`에서 전역으로 `background: transparent; color: inherit;` 처리되어 있음** — 브라우저 기본 흰 배경이 다크/세피아 테마에서 흰 사각형으로 튀어보이는 문제 때문(2026-07-23). 특정 입력창에 명시적으로 다른 배경이 필요하면 그 요소에 직접 `bg-*` 유틸리티 클래스를 주면 됨(유틸리티 클래스가 이 전역 규칙보다 우선순위가 높음).
 
 ## contentEditable 리치 텍스트를 쓸 때 주의
 

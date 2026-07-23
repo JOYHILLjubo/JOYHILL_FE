@@ -146,7 +146,7 @@ function RateBar({ rate, type }) {
 
 function AvgCard({ label, worship, online, fam, year }) {
   return (
-    <div className="border border-gray-300 rounded-xl p-4 mb-4">
+    <div className="bg-surface rounded-2xl shadow-sm p-4 mb-4">
       <p className="text-xs text-gray-500 font-medium mb-3">
         {label} 평균 <span className="text-gray-400">({year}년)</span>
       </p>
@@ -178,7 +178,7 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
         const color = getColor(member.id)
         const weekRecord = weekAttendMap[member.id]
         return (
-          <div key={member.id} className="border border-gray-300 rounded-xl px-5 py-3 flex items-center gap-3">
+          <div key={member.id} className="bg-surface rounded-2xl shadow-sm px-5 py-3 flex items-center gap-3">
             {member.avatarKey
               ? <BibleAvatarIcon avatarKey={member.avatarKey} size={32} />
               : <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
@@ -293,7 +293,7 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
             const color = getColor(member.id)
             const record = attendMap[member.id]
             return (
-              <div key={member.id} className="border border-gray-300 rounded-xl px-5 py-3 flex items-center gap-3">
+              <div key={member.id} className="bg-surface rounded-2xl shadow-sm px-5 py-3 flex items-center gap-3">
                 {member.avatarKey
                   ? <BibleAvatarIcon avatarKey={member.avatarKey} size={32} />
                   : <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
@@ -342,7 +342,7 @@ function WeeklyView({ villages, famStatsMap, callAuthedApi, summaryStats, weekDa
       </div>
 
       {summaryStats && (
-        <div className="border border-gray-300 rounded-xl p-3 mb-4 flex gap-3">
+        <div className="bg-surface rounded-2xl shadow-sm p-3 mb-4 flex gap-3">
           <div className="flex-1 text-center">
             <p className="text-[11px] text-gray-500">전체 예배 출석률 ({selectedYear}년)</p>
             <p className="text-lg font-bold text-primary">{toRate(summaryStats.worshipRate)}%</p>
@@ -368,7 +368,7 @@ function WeeklyView({ villages, famStatsMap, callAuthedApi, summaryStats, weekDa
               <span className="text-xs text-success">{fams.length}개 팸 {expandedVillage === village ? '▲' : '▼'}</span>
             </button>
             {expandedVillage === village && (
-              <div className="border border-gray-300 rounded-xl overflow-hidden">
+              <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
                 {fams.map((fam, index) => (
                   <div key={fam} onClick={() => setSelectedFam(fam)}
                     className={`flex items-center justify-between px-4 py-3.5 cursor-pointer hover:bg-gray-100 transition-colors ${index < fams.length - 1 ? 'border-b border-gray-300' : ''}`}>
@@ -446,7 +446,7 @@ function VillageStatsView({
               <span className="text-xs text-success">{fams.length}개 팸 {expandedVillage === village ? '▲' : '▼'}</span>
             </button>
             {expandedVillage === village && (
-              <div className="border border-gray-300 rounded-xl overflow-hidden">
+              <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
                 {fams.map((fam, index) => {
                   const stats = famStatsMap[fam]
                   return (

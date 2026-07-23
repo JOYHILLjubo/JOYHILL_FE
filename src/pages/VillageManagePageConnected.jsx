@@ -752,7 +752,7 @@ export default function VillageManagePageConnected() {
                     </div>
 
                     {expandedVillage === villageName && (
-                      <div className="border border-gray-300 rounded-xl overflow-hidden">
+                      <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
                         {famNames.length === 0 ? (
                           <p className="text-xs text-gray-500 text-center py-4">등록된 팸이 없습니다.</p>
                         ) : (
@@ -791,7 +791,7 @@ export default function VillageManagePageConnected() {
                     <span className="text-xs text-gray-500">{unassignedMembers.length}명 {expandedUnassigned ? '▲' : '▼'}</span>
                   </button>
                   {expandedUnassigned && (
-                    <div className="border border-gray-300 rounded-xl overflow-hidden mt-2">
+                    <div className="bg-surface rounded-2xl shadow-sm overflow-hidden mt-2">
                       {unassignedMembers.map((member, index) => {
                         const color = getAvatarColor(member.id)
                         return (
@@ -829,7 +829,7 @@ export default function VillageManagePageConnected() {
           ) : teams.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-10">등록된 사역팀이 없습니다.</p>
           ) : (
-            <div className="border border-gray-300 rounded-xl overflow-hidden">
+            <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
               {teams.map((team, index) => (
                 <div key={team.teamName} className={`flex items-center justify-between px-4 py-3.5 ${index < teams.length - 1 ? 'border-b border-gray-300' : ''}`}>
                   <div className="flex items-center gap-2.5 min-w-0">

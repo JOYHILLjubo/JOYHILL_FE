@@ -946,7 +946,7 @@ export default function TeamManagePageConnected() {
                 </>
               ) : (
                 <>
-                  <div className="border border-gray-300 rounded-xl p-4 min-h-[120px]">
+                  <div className="bg-surface rounded-2xl shadow-sm p-4 min-h-[120px]">
                     <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                       {selectedTeamInfo.intro?.trim() ? selectedTeamInfo.intro : '등록된 팀 소개가 없습니다.'}
                     </p>

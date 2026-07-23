@@ -130,14 +130,14 @@ export default function MyPage() {
 
       {/* 내 활동 */}
       <div className="px-5 mb-3">
-        <div className="border border-gray-300 rounded-xl overflow-hidden">
+        <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
           <MenuItem label="설교노트" onPress={() => navigate('/sermon-note')} last />
         </div>
       </div>
 
       {isTeamMemberOnly && (
         <div className="px-5 mb-3">
-          <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
             <SectionHeader label="내 사역팀" color="success" />
             <MenuItem label="내 사역팀 보기" onPress={() => navigate('/my/team')} last />
           </div>
@@ -146,7 +146,7 @@ export default function MyPage() {
 
       {isTeamLeader && (
         <div className="px-5 mb-3">
-          <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
             <SectionHeader label="사역팀 관리" color="warning" />
             {isNewFamilyTeamLeader && (
               <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
@@ -162,7 +162,7 @@ export default function MyPage() {
 
       {isLeader && (
         <div className="px-5 mb-3">
-          <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
             <SectionHeader label="팸 관리" color="primary" />
             <MenuItem label="내 팸 관리" onPress={() => navigate('/fam/manage')} />
             <MenuItem label="출석 관리" onPress={() => navigate('/attendance/history')} />
@@ -174,7 +174,7 @@ export default function MyPage() {
 
       {isVillageLeader && (
         <div className="px-5 mb-3">
-          <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
             <SectionHeader label={`${user.village} 관리`} color="success" />
             <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
             <MenuItem label="내 마을 관리" onPress={() => navigate('/village/manage')} />
@@ -187,7 +187,7 @@ export default function MyPage() {
 
       {isPastorOrAbove && !isAdmin && (
         <div className="px-5 mb-3">
-          <div className="border border-gray-300 rounded-xl overflow-hidden">
+          <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
             <SectionHeader label="청년부 전체 관리" color="success" />
             <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
             <MenuItem label="청년부 전체 관리" onPress={() => navigate('/village/manage')} />
@@ -200,7 +200,7 @@ export default function MyPage() {
       {isAdmin && (
         <>
           <div className="px-5 mb-3">
-            <div className="border border-gray-300 rounded-xl overflow-hidden">
+            <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
               <SectionHeader label="청년부 전체 관리" color="success" />
               <MenuItem label="새가족 관리" onPress={() => navigate('/newcomer')} />
               <MenuItem label="청년부 전체 관리" onPress={() => navigate('/village/manage')} />
@@ -209,7 +209,7 @@ export default function MyPage() {
             </div>
           </div>
           <div className="px-5 mb-3">
-            <div className="border border-gray-300 rounded-xl overflow-hidden">
+            <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
               <SectionHeader label="시스템 관리" color="danger" />
               <MenuItem label="계정 관리" onPress={() => navigate('/account/manage')} />
               <MenuItem label="시스템 설정" last />
@@ -220,7 +220,7 @@ export default function MyPage() {
 
       {/* 계정 설정 */}
       <div className="px-5 mb-3">
-        <div className="border border-gray-300 rounded-xl overflow-hidden">
+        <div className="bg-surface rounded-2xl shadow-sm overflow-hidden">
           <MenuItem label="비밀번호 변경" onPress={() => navigate('/my/edit')} />
           <div className="flex justify-between items-center px-4 py-3.5 border-b border-gray-300">
             <span className="text-sm">화면 모드</span>

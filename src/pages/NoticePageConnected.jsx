@@ -346,8 +346,8 @@ export default function NoticePageConnected() {
               <div
                 key={notice.id}
                 onClick={() => openNotice(notice)}
-                className={`border border-gray-300 rounded-xl p-4 mb-2 cursor-pointer hover:bg-gray-100/60 transition-colors ${
-                  notice.pinned ? 'bg-gray-100/50' : ''
+                className={`rounded-2xl shadow-sm p-4 mb-2 cursor-pointer hover:bg-gray-100/60 transition-colors ${
+                  notice.pinned ? 'bg-gray-100/50' : 'bg-surface'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">

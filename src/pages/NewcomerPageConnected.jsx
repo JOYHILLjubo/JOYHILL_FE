@@ -562,7 +562,7 @@ export default function NewcomerPageConnected() {
             return (
               <div
                 key={newcomer.id}
-                className={`border border-gray-300 rounded-xl p-4 mb-3 transition-all duration-400 ${
+                className={`bg-surface rounded-2xl shadow-sm p-4 mb-3 transition-all duration-400 ${
                   hidingIds.has(newcomer.id) ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                 }`}
               >
