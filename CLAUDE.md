@@ -16,15 +16,29 @@
 - 목록/작성 페이지 쌍은 라우터 state로 데이터를 주고받는 패턴(`navigate('/x/write', { state: { mode: 'edit', note } })`) — 별도 fetch-by-id 없이 목록에서 이미 받아온 객체를 그대로 넘김.
 - 폼 필수값 검증은 필드별 에러 상태(`fieldErrors` 객체)로 관리해서 어떤 항목이 비었는지 각 입력 바로 아래에 표시할 것 — 제출 버튼 하나 눌렀을 때 페이지 하단에 뭉뚱그린 에러 메시지 하나만 보여주는 방식은 지양 (`NoticeWritePageConnected.jsx` 참고, 2026-07-23).
 - **카드 스타일은 공유 컴포넌트를 쓴다(위 API 클라이언트 규칙의 예외, 2026-07-23 사용자 승인)**: `components/Card.jsx`(흰/서페이스 배경 + `rounded-2xl` + `shadow-sm`, 테두리 없음)와 `components/SectionLabel.jsx`(작은 회색 eyebrow 스타일 섹션 제목)를 홈 화면 리디자인 이후 앱 전체 표준으로 채택함. 예전 스타일(`border border-gray-300 rounded-xl`)은 새로 만드는 화면에 쓰지 말 것. 단, 역할별 색상 배지가 필요한 `MyPage.jsx`의 `SectionHeader`(primary/success/warning/danger 색상 구분)처럼 의미가 다른 경우는 `SectionLabel`로 획일화하지 말 것 — 그건 별개의 용도.
-- **`<input>`/`<textarea>`/`<select>`는 `index.css`에서 전역으로 `background: transparent; color: inherit;` 처리되어 있음** — 브라우저 기본 흰 배경이 다크/세피아 테마에서 흰 사각형으로 튀어보이는 문제 때문(2026-07-23). 특정 입력창에 명시적으로 다른 배경이 필요하면 그 요소에 직접 `bg-*` 유틸리티 클래스를 주면 됨(유틸리티 클래스가 이 전역 규칙보다 우선순위가 높음).
+- 화면 시각 스타일(카드/배경/보더)을 바꿀 땐 기본적으로 앱 전체 적용을 전제로 할 것 — 자세한 배경은 아래 "테마 시스템" 절 참고.
 
 ## contentEditable 리치 텍스트를 쓸 때 주의
 
-`SermonNoteWritePage.jsx`의 에디터가 유일한 contentEditable 사용처. **네이티브 Enter 키 동작에 의존하면 안 됨** — 실사용자 환경에서 Enter를 눌러도 줄바꿈이 아예 안 생기는 경우가 있어(모바일 웹뷰 계열 추정), `onKeyDown`에서 Enter를 가로채 `execCommand('insertLineBreak')`(리스트 안이면 `insertParagraph`)로 명시적으로 처리해야 함. 목록 자동 서식(`- `/`1. ` 트리거), 하이라이트 토글(DOM 직접 확인 후 적용/제거) 패턴도 이 파일 참고. 다른 작성 화면(공지/기도)은 전부 네이티브 `<textarea>`라 이 문제가 없음 — 앞으로도 멀티라인 입력은 특별한 이유 없으면 `<textarea>`를 쓰고, contentEditable은 서식(굵게/색상 등)이 꼭 필요할 때만 쓸 것.
+`SermonNoteWritePage.jsx`의 에디터가 유일한 contentEditable 사용처. **네이티브 Enter 키 동작에 의존하면 안 됨** — 실사용자 환경에서 Enter를 눌러도 줄바꿈이 아예 안 생기는 경우가 있어(모바일 웹뷰 계열 추정), `onKeyDown`에서 Enter를 가로채 `execCommand('insertLineBreak')`(리스트 안이면 `insertParagraph`)로 명시적으로 처리해야 함. 목록 자동 서식(`- `/`1. ` 트리거) 패턴도 이 파일 참고. 다른 작성 화면(공지/기도)은 전부 네이티브 `<textarea>`라 이 문제가 없음 — 앞으로도 멀티라인 입력은 특별한 이유 없으면 `<textarea>`를 쓰고, contentEditable은 서식(굵게/색상 등)이 꼭 필요할 때만 쓸 것.
+
+**서식 토글 버튼(Bold/하이라이트)은 선택 영역이 없으면 아무것도 하지 않아야 함(2026-07-24)**: `applyBold`/`applyHighlight` 둘 다 순수 `document.execCommand(...)` 호출만 하고 커스텀 DOM 조작이 없음 — 이게 의도된 동작. 과거에 "커서만 놓고 하이라이트 버튼을 누르면 반응이 없다"는 걸 버그로 보고 조상 span을 직접 찾아 지우는 커스텀 로직을 넣었다가, 커서가 걸친 하이라이트 전체(문장 전체일 수도 있음)가 통째로 사라지는 훨씬 심각한 회귀를 만든 적 있음. 서식 버튼은 새로 추가하든 고치든 항상 이 방식(선택 영역 있을 때만 동작, 없으면 no-op)을 유지할 것 — Word/Google Docs 등 모든 리치에디터의 표준 동작과 같음.
 
 ## textarea로 받은 멀티라인 텍스트를 표시할 때 `whitespace-pre-wrap`/`whitespace-pre-line` 빠뜨리지 말 것
 
 `<textarea>`는 개행문자(`\n`)를 그대로 저장하지만, 화면에 표시하는 `<p>`/`<span>`은 기본 CSS(`white-space: normal`)가 개행을 무시해버려서 줄바꿈이 사라진 것처럼 보임. `NoticeDetailPageConnected.jsx`(공지 상세)는 처음부터 `whitespace-pre-line`이 붙어있었지만 `PrayerPageConnected.jsx`(개인/공동 기도제목 표시)엔 빠져있어서 실제 버그로 나타났다가 2026-07-23에 수정됨. 새로 textarea 기반 컨텐츠를 표시하는 화면을 만들 때마다 이 클래스가 있는지 확인할 것.
+
+## 테마 시스템 (라이트/다크/세피아, 2026-07-24 추가)
+
+`ThemeContext.jsx`가 `document.documentElement`에 `data-theme` 속성을 설정하고 `localStorage`(`joyhill.theme`)에 저장함. 전환 UI는 `MyPage.jsx` 계정설정 섹션의 3단 버튼.
+
+색상 토큰 구조(`tailwind.config.js` + `index.css`):
+- `primary`/`success`/`warning`/`danger`의 **DEFAULT·hover·bar는 3테마 공통 고정값**(브랜드 일관성). 테마별로 바뀌는 건 각 색의 `-light`, `gray`(50~700만, `800`/`900`은 제외), 새로 추가된 `surface`(카드 배경)와 `ink`(진한 본문 텍스트) 토큰뿐.
+- 값은 전부 `index.css`의 `:root`/`:root[data-theme="dark"]`/`:root[data-theme="sepia"]`에 "R G B" 공백구분 트리플릿으로 정의하고, config에서 `rgb(var(--jh-xxx) / <alpha-value>)`로 참조함 — 이래야 `bg-gray-100/50` 같은 투명도 모디파이어가 정상 동작함. 새 테마 토큰을 추가할 땐 반드시 이 트리플릿 형식을 지킬 것(단순 hex 문자열로 넣으면 `/alpha` 모디파이어가 깨짐).
+- **`gray-800`/`gray-900`은 의도적으로 테마 미적용** — 영상 썸네일 placeholder 같은 "항상 어두운 배경" 용도로도 같이 쓰여서, 테마 반응시키면 다크모드에서 그 배경이 하얗게 뒤집히는 충돌이 생김. 진한 텍스트가 필요하면 `gray-900`이 아니라 `text-ink`를 쓸 것.
+- **`white`도 의도적으로 안 건드림** — `text-white`(컬러 버튼 위 흰 글자)는 테마 불문 항상 흰색이어야 해서, 카드 배경(예전 `bg-white`)은 `bg-surface`를 대신 씀.
+- **`.mobile-container`(앱 루트) 배경은 반드시 `page-bg`여야 하고 `surface`면 안 됨** — 카드(`bg-surface`+`shadow-sm`)가 배경과 같은 색이면 그림자만으로는 거의 안 보임. 새 최상위 레이아웃을 만들 때도 이 구분을 유지할 것.
+- `<input>`/`<textarea>`/`<select>`는 `index.css`에서 전역으로 `background: transparent; color: inherit;` 처리됨(브라우저 기본 흰 배경이 다크/세피아에서 튀어보이는 문제 대응). 특정 입력창에 명시적 배경이 필요하면 그 요소에 직접 `bg-*` 클래스를 주면 우선 적용됨.
 
 ## PWA 업데이트 범위 — 뭐가 자동 반영되고 뭐가 "홈 화면에 추가"를 다시 해야 하는지
 
