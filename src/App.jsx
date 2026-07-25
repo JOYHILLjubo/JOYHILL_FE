@@ -20,6 +20,7 @@ import VillageManagePageConnected from './pages/VillageManagePageConnected'
 import SermonUploadPageConnected from './pages/SermonUploadPageConnected'
 import AccountManagePageConnected from './pages/AccountManagePageConnected'
 import MyTeamPage from './pages/MyTeamPage'
+import SermonNoteFolderListPage from './pages/SermonNoteFolderListPage'
 import SermonNoteListPage from './pages/SermonNoteListPage'
 import SermonNoteWritePage from './pages/SermonNoteWritePage'
 
@@ -90,7 +91,8 @@ export default function App() {
           <Route path="/fam/manage" element={<FamManagePageConnected />} />
           <Route path="/village/manage" element={<VillageManagePageConnected />} />
           <Route path="/sermon/upload" element={<SermonUploadPageConnected />} />
-          <Route path="/sermon-note" element={<SermonNoteListPage />} />
+          <Route path="/sermon-note" element={<SermonNoteFolderListPage />} />
+          <Route path="/sermon-note/notes" element={<SermonNoteListPage />} />
           <Route path="/sermon-note/write" element={<SermonNoteWritePage />} />
           <Route path="/account/manage" element={<AccountManagePageConnected />} />
           <Route path="/my/team" element={<MyTeamPage />} />
