@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FolderPlus, Plus, Folder, Inbox, Library, Pencil, X } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
 
@@ -185,16 +186,16 @@ export default function SermonNoteFolderListPage() {
         <button
           onClick={openCreateModal}
           title="폴더 추가"
-          className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-sm border-none cursor-pointer"
+          className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center border-none cursor-pointer"
         >
-          📁+
+          <FolderPlus size={18} strokeWidth={2} />
         </button>
         <button
           onClick={() => navigate('/sermon-note/write')}
           title="노트 추가"
-          className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-base font-semibold border-none cursor-pointer shadow-[0_4px_10px_rgba(66,133,244,0.35)]"
+          className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center border-none cursor-pointer shadow-[0_4px_10px_rgba(66,133,244,0.35)]"
         >
-          +
+          <Plus size={20} strokeWidth={2.5} />
         </button>
       </div>
 
@@ -221,8 +222,10 @@ export default function SermonNoteFolderListPage() {
               onClick={() => goToNotes({})}
               className="bg-surface rounded-2xl p-4 mb-2.5 cursor-pointer shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)] flex items-center justify-between"
             >
-              <div className="flex items-center gap-2.5">
-                <span className="text-lg">📚</span>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
+                  <Library size={17} strokeWidth={2} className="text-primary" />
+                </div>
                 <span className="text-sm font-bold">전체</span>
               </div>
               <span className="text-xs text-gray-400">{totalCount}개</span>
@@ -234,23 +237,25 @@ export default function SermonNoteFolderListPage() {
                 onClick={() => goToNotes({ folderId: folder.id, folderName: folder.name })}
                 className="bg-surface rounded-2xl p-4 mb-2.5 cursor-pointer shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)] flex items-center justify-between"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-lg shrink-0">📁</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
+                    <Folder size={17} strokeWidth={2} className="text-primary" />
+                  </div>
                   <span className="text-sm font-bold truncate">{folder.name}</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-gray-400">{folder.noteCount}개</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-xs text-gray-400 mr-1">{folder.noteCount}개</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); openEditModal(folder) }}
-                    className="bg-transparent border-none cursor-pointer text-gray-300 text-xs px-1"
+                    className="w-7 h-7 rounded-full bg-transparent border-none cursor-pointer text-gray-300 flex items-center justify-center hover:bg-gray-100"
                   >
-                    ✏️
+                    <Pencil size={14} strokeWidth={2} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder) }}
-                    className="bg-transparent border-none cursor-pointer text-gray-300 text-xs px-1"
+                    className="w-7 h-7 rounded-full bg-transparent border-none cursor-pointer text-gray-300 flex items-center justify-center hover:bg-gray-100"
                   >
-                    ✕
+                    <X size={14} strokeWidth={2} />
                   </button>
                 </div>
               </div>
@@ -260,15 +265,19 @@ export default function SermonNoteFolderListPage() {
               onClick={() => goToNotes({ unclassified: true, folderName: '미분류' })}
               className="bg-surface rounded-2xl p-4 mb-2.5 cursor-pointer shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)] flex items-center justify-between"
             >
-              <div className="flex items-center gap-2.5">
-                <span className="text-lg">🗂️</span>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                  <Inbox size={17} strokeWidth={2} className="text-gray-400" />
+                </div>
                 <span className="text-sm font-bold text-gray-500">미분류</span>
               </div>
               <span className="text-xs text-gray-400">{unclassifiedCount}개</span>
             </div>
 
             {folders.length === 0 && (
-              <p className="text-xs text-gray-400 text-center mt-4">폴더 추가 버튼(📁+)으로 노트를 정리해보세요.</p>
+              <p className="text-xs text-gray-400 text-center mt-4 flex items-center justify-center gap-1">
+                <FolderPlus size={13} strokeWidth={2} className="inline" /> 버튼으로 노트를 정리해보세요.
+              </p>
             )}
           </>
         )}
