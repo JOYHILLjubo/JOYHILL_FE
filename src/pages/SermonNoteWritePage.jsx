@@ -107,6 +107,24 @@ export default function SermonNoteWritePage() {
   )
   const isEdit = Boolean(editingNote?.id)
 
+  // 어느 폴더 화면에서 들어왔는지(있다면) — 저장/삭제 후 그 화면으로 돌아가기 위해 기억해둠
+  const hasFolderContext = Boolean(location.state?.folderId) || Boolean(location.state?.unclassified)
+  const returnState = {
+    folderId: location.state?.folderId ?? null,
+    unclassified: Boolean(location.state?.unclassified),
+    folderName: location.state?.folderName ?? null,
+  }
+  const goBackToList = () => {
+    if (hasFolderContext) navigate('/sermon-note/notes', { state: returnState })
+    else navigate('/sermon-note')
+  }
+
+  const [folders, setFolders] = useState([])
+  const [selectedFolderId, setSelectedFolderId] = useState(() => {
+    const initial = isEdit ? editingNote?.folderId : location.state?.folderId
+    return initial ?? ''
+  })
+
   const [title, setTitle] = useState(editingNote?.title ?? '')
   const [noteDate, setNoteDate] = useState(editingNote?.noteDate ?? todayDateString())
   const [verseTags, setVerseTags] = useState(() =>
@@ -148,6 +166,13 @@ export default function SermonNoteWritePage() {
     if (!result.response.ok || !result.payload?.success) throw new Error(getApiErrorMessage(result, '요청을 처리하지 못했습니다.'))
     return result.payload.data
   }
+
+  useEffect(() => {
+    callAuthedApi('/api/sermon-note-folders')
+      .then((data) => { if (Array.isArray(data)) setFolders(data) })
+      .catch(() => { /* 폴더 선택 없이도 저장 가능하므로 조용히 무시 */ })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const focusEditor = () => editorRef.current?.focus()
 
@@ -200,7 +225,12 @@ export default function SermonNoteWritePage() {
     autoFormatListIfTriggered()
   }
 
-  // 워드처럼 "1. " / "- " / "* "를 줄 맨 앞에 치면 자동으로 번호/글머리 목록으로 전환
+  // 워드처럼 "- " / "* "를 줄 맨 앞에 치면 자동으로 글머리 목록으로 전환.
+  // 번호("1. " 등)는 자동 변환하지 않음 — 브라우저 네이티브 <ol>로 바꾸면 항목마다
+  // 번호를 브라우저가 직접 매기기 때문에, 사용자가 실제로 타이핑한 숫자(예: "5.")를 무시하고
+  // 새 목록마다 1부터 다시 매기거나(줄바꿈 두 번 이상 후 목록이 끊기는 경우), Enter로 새 항목을
+  // 만드는 처리(insertParagraph)가 얽히면서 뒤 문단과 내용이 합쳐지는 문제가 있었음.
+  // 번호는 그냥 사용자가 입력한 텍스트 그대로 둔다.
   const autoFormatListIfTriggered = () => {
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return
@@ -210,8 +240,7 @@ export default function SermonNoteWritePage() {
 
     const textBeforeCursor = node.textContent.slice(0, range.startOffset)
     const isBullet = /^[-*]\s$/.test(textBeforeCursor)
-    const isNumbered = /^\d+\.\s$/.test(textBeforeCursor)
-    if (!isBullet && !isNumbered) return
+    if (!isBullet) return
 
     node.textContent = node.textContent.slice(range.startOffset)
     const newRange = document.createRange()
@@ -220,7 +249,7 @@ export default function SermonNoteWritePage() {
     sel.removeAllRanges()
     sel.addRange(newRange)
 
-    document.execCommand(isBullet ? 'insertUnorderedList' : 'insertOrderedList')
+    document.execCommand('insertUnorderedList')
   }
 
   const isCursorInList = () =>
@@ -272,7 +301,7 @@ export default function SermonNoteWritePage() {
     setChecklist((prev) => prev.filter((item) => item.id !== id))
   }
 
-  const handleBack = () => navigate('/sermon-note')
+  const handleBack = () => goBackToList()
 
   const handleDelete = async () => {
     if (!isEdit || isSubmitting) return
@@ -280,7 +309,8 @@ export default function SermonNoteWritePage() {
     setIsSubmitting(true)
     try {
       await callAuthedApi(`/api/sermon-notes/${editingNote.id}`, { method: 'DELETE' })
-      navigate('/sermon-note', { replace: true })
+      if (hasFolderContext) navigate('/sermon-note/notes', { state: returnState, replace: true })
+      else navigate('/sermon-note', { replace: true })
     } catch (error) {
       const message = error instanceof Error ? error.message : '삭제에 실패했습니다.'
       if (isSessionError(message)) { handleExpiredSession(); return }
@@ -304,6 +334,7 @@ export default function SermonNoteWritePage() {
       content,
       verseTags: verseTags.length ? verseTags.join(',') : null,
       checklistJson: checklist.length ? JSON.stringify(checklist.map(({ text, done }) => ({ text, done }))) : null,
+      folderId: selectedFolderId === '' ? null : Number(selectedFolderId),
     }
 
     try {
@@ -315,7 +346,13 @@ export default function SermonNoteWritePage() {
         await callAuthedApi(`/api/sermon-notes/${savedNote.id}/favorite`, { method: 'PATCH' })
       }
 
-      navigate('/sermon-note', { replace: true })
+      // 저장된 노트가 실제로 속하게 된 폴더 화면으로 돌아간다(중간에 폴더를 바꿨을 수도 있으므로).
+      if (requestBody.folderId == null) {
+        navigate('/sermon-note/notes', { state: { unclassified: true, folderName: '미분류' }, replace: true })
+      } else {
+        const matchedFolder = folders.find((f) => f.id === requestBody.folderId)
+        navigate('/sermon-note/notes', { state: { folderId: requestBody.folderId, folderName: matchedFolder?.name ?? null }, replace: true })
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : '노트 저장에 실패했습니다.'
       if (isSessionError(message)) { handleExpiredSession(); return }
@@ -362,6 +399,19 @@ export default function SermonNoteWritePage() {
               + 말씀구절
             </button>
           )}
+        </div>
+
+        <div className="mb-3">
+          <select
+            value={selectedFolderId}
+            onChange={(e) => setSelectedFolderId(e.target.value)}
+            className="text-xs font-semibold bg-gray-100 rounded-full pl-3.5 pr-2.5 py-2 outline-none border-none"
+          >
+            <option value="">📁 미분류</option>
+            {folders.map((folder) => (
+              <option key={folder.id} value={folder.id}>📁 {folder.name}</option>
+            ))}
+          </select>
         </div>
 
         {showVerseInput && (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
 
@@ -106,7 +106,13 @@ function isSessionError(message) {
 
 export default function SermonNoteListPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { accessToken, setAccessToken, logout } = useAuth()
+
+  const folderId = location.state?.folderId ?? null
+  const unclassified = Boolean(location.state?.unclassified)
+  const folderName = location.state?.folderName ?? null
+  const pageTitle = unclassified ? '미분류' : folderName ? folderName : '전체 노트'
 
   const [notes, setNotes] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -140,7 +146,11 @@ export default function SermonNoteListPage() {
       setIsLoading(true)
       setLoadError('')
       try {
-        const data = await callAuthedApi('/api/sermon-notes')
+        const params = new URLSearchParams()
+        if (unclassified) params.set('unclassified', 'true')
+        else if (folderId) params.set('folderId', String(folderId))
+        const query = params.toString()
+        const data = await callAuthedApi(`/api/sermon-notes${query ? `?${query}` : ''}`)
         if (cancelled) return
         setNotes(Array.isArray(data) ? data.map(mapNote) : [])
       } catch (error) {
@@ -153,7 +163,8 @@ export default function SermonNoteListPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [reloadKey])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadKey, folderId, unclassified])
 
   const handleToggleFavorite = async (event, note) => {
     event.stopPropagation()
@@ -185,10 +196,10 @@ export default function SermonNoteListPage() {
   return (
     <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
-        <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-semibold flex-1">설교노트</p>
+        <button onClick={() => navigate('/sermon-note')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
+        <p className="text-base font-semibold flex-1">{pageTitle}</p>
         <button
-          onClick={() => navigate('/sermon-note/write')}
+          onClick={() => navigate('/sermon-note/write', { state: { folderId, unclassified, folderName } })}
           className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-base font-semibold border-none cursor-pointer shadow-[0_4px_10px_rgba(66,133,244,0.35)]"
         >
           +
@@ -249,7 +260,7 @@ export default function SermonNoteListPage() {
             </p>
             {notes.length === 0 && (
               <button
-                onClick={() => navigate('/sermon-note/write')}
+                onClick={() => navigate('/sermon-note/write', { state: { folderId, unclassified, folderName } })}
                 className="mt-3 text-xs text-primary bg-primary-light px-4 py-2 rounded-full border-none cursor-pointer"
               >
                 첫 노트 쓰기
@@ -266,7 +277,7 @@ export default function SermonNoteListPage() {
             return (
               <div
                 key={note.id}
-                onClick={() => navigate('/sermon-note/write', { state: { mode: 'edit', note } })}
+                onClick={() => navigate('/sermon-note/write', { state: { mode: 'edit', note, folderId, unclassified, folderName } })}
                 className="bg-surface rounded-2xl p-4 mb-2.5 cursor-pointer shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]"
               >
                 <div className="flex items-center justify-between mb-1.5">
