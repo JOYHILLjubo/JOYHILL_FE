@@ -42,6 +42,7 @@ function parseChecklist(json) {
 function mapNote(item) {
   return {
     id: item?.id ?? null,
+    folderId: item?.folderId ?? null,
     noteDate: item?.noteDate ?? '',
     title: item?.title ?? '',
     content: item?.content ?? '',
