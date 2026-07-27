@@ -243,53 +243,57 @@ export default function SermonNoteWritePage() {
     const isNumbered = Boolean(numberedMatch)
     if (!isBullet && !isNumbered) return
 
-    // 이미 그 종류의 목록 안에 있는데 트리거 문자를 또 치면(예: 번호 목록 항목에서 다음 줄에
-    // "1. "을 또 타이핑) execCommand는 "다시 켜기"가 아니라 "꺼버리기"로 동작해서, 그 항목이
-    // 목록 밖으로 튕겨나가고 빈 <li>만 남는 DOM 손상이 생겼다(실제 재현 확인함, 이게 "줄이
-    // 합쳐진다"로 보고된 버그의 진짜 원인). 이미 같은 종류 목록 안이면 트리거 문자만 지우고
-    // execCommand는 다시 부르지 않는다.
-    const alreadyBulleted = document.queryCommandState('insertUnorderedList')
-    const alreadyNumbered = document.queryCommandState('insertOrderedList')
-    const wasAlreadyInAnyList = alreadyBulleted || alreadyNumbered
-
     node.textContent = node.textContent.slice(range.startOffset)
+
+    // 이미 그 종류의 목록 항목 안이면(예: 번호 목록에서 다음 줄에 "1. "을 또 타이핑) 트리거
+    // 문자만 지우고 끝 — 이미 목록 항목이라 번호/글머리는 브라우저가 알아서 붙여준다.
+    if (document.queryCommandState(isBullet ? 'insertUnorderedList' : 'insertOrderedList')) {
+      const newRange = document.createRange()
+      newRange.setStart(node, 0)
+      newRange.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(newRange)
+      return
+    }
+
+    // execCommand('insertOrderedList'/'insertUnorderedList')는 새 목록을 만들 때 (a) <br>로만
+    // 구분된 민 텍스트 상태에서 "현재 줄"의 블록 경계를 못 찾아 윗줄까지 통째로 삼키거나
+    // (b) 근처의 무관한 기존 목록에 자동으로 합쳐버리는(둘 다 실제 재현 확인함 — "줄이
+    // 합쳐진다"로 보고된 버그들의 진짜 원인) 신뢰할 수 없는 동작을 보인다. execCommand를 아예
+    // 쓰지 않고 <ul>/<ol><li>를 직접 만들어서 이 줄의 내용만 정확히 옮긴다. (목록 안에서 Enter로
+    // 다음 항목을 만드는 건 별개로 handleEditorKeyDown의 insertParagraph가 처리하고, 거긴 이
+    // 문제가 없어서 그대로 둔다.)
+    const list = document.createElement(isBullet ? 'ul' : 'ol')
+    const li = document.createElement('li')
+    list.appendChild(li)
+    if (isNumbered) list.start = Number(numberedMatch[1])
+
+    // "이 줄"은 node의 부모 컨테이너(에디터 루트 자신일 수도, 목록에서 빠져나온 뒤 생긴 <div>
+    // 같은 중간 블록일 수도 있음) 안에서 앞뒤로 가장 가까운 <br> 사이 구간이다 — 컨테이너가
+    // 뭐든 이 규칙 하나로 통일해서 처리한다(안 그러면 중간 블록 안에서도 <br>로만 줄이 나뉘어
+    // 있을 때 그 블록 전체를 통째로 옮기다가 위 줄까지 같이 삼켜버리는 문제가 생김).
+    const container = node.parentElement
+    const siblings = Array.from(container.childNodes)
+    const idx = siblings.indexOf(node)
+    let start = idx
+    while (start > 0 && siblings[start - 1].nodeName !== 'BR') start -= 1
+    let end = idx
+    while (end < siblings.length - 1 && siblings[end + 1].nodeName !== 'BR') end += 1
+    const lineNodes = siblings.slice(start, end + 1)
+
+    container.insertBefore(list, siblings[start])
+    lineNodes.forEach((n) => li.appendChild(n))
+    // list가 이제 블록 경계 역할을 하므로, 양옆의 <br>은 더 이상 필요 없다(남겨두면 빈 줄이 하나 더 생김).
+    if (list.previousSibling?.nodeName === 'BR') list.previousSibling.remove()
+    if (list.nextSibling?.nodeName === 'BR') list.nextSibling.remove()
+    // container가 중간 블록(예: 목록에서 빠져나온 뒤 생긴 <div>)이었고 이제 텅 비었으면 정리한다.
+    if (container !== editorRef.current && container.childNodes.length === 0) container.remove()
+
     const newRange = document.createRange()
     newRange.setStart(node, 0)
     newRange.collapse(true)
     sel.removeAllRanges()
     sel.addRange(newRange)
-
-    if ((isBullet && alreadyBulleted) || (isNumbered && alreadyNumbered)) return
-
-    document.execCommand(isBullet ? 'insertUnorderedList' : 'insertOrderedList')
-
-    let liEl = window.getSelection()?.anchorNode
-    if (liEl && liEl.nodeType === Node.TEXT_NODE) liEl = liEl.parentElement
-    const li = liEl?.closest('li')
-    const list = li?.closest(isBullet ? 'ul' : 'ol')
-    if (!li || !list) return
-
-    // 목록 밖의 줄이었는데도, execCommand가 근처에 있던 무관한 기존 목록과 자동으로 합쳐버리는
-    // 경우가 있다(브라우저의 "인접한 같은 종류 목록과 병합" 동작 — 실제 재현 확인함: 목록을
-    // 빠져나와서 쓴 문단이 나중에 "5. "를 치면 그 이전 목록에 흡수되면서 이전 항목 번호까지
-    // 같이 틀어짐). 방금 만든 항목만 떼어내 새 목록으로 분리한다.
-    if (!wasAlreadyInAnyList && list.children.length > 1) {
-      const freshList = document.createElement(isBullet ? 'ul' : 'ol')
-      freshList.appendChild(li) // 기존 목록에서 li를 이 새 목록으로 옮김
-      list.parentNode.insertBefore(freshList, list.nextSibling)
-      if (list.children.length === 0) list.remove()
-      if (isNumbered) freshList.start = Number(numberedMatch[1])
-      const restoreRange = document.createRange()
-      restoreRange.selectNodeContents(li)
-      restoreRange.collapse(false)
-      const restoreSel = window.getSelection()
-      restoreSel.removeAllRanges()
-      restoreSel.addRange(restoreRange)
-    } else if (isNumbered) {
-      // 사용자가 실제로 타이핑한 숫자를 목록의 시작 번호로 반영 — 안 하면 새 <ol>이 생길 때마다
-      // 브라우저가 무조건 1부터 다시 매겨서, 빈 줄 몇 개 두고 "5."를 쳐도 "1."로 보이는 버그가 있었음.
-      list.start = Number(numberedMatch[1])
-    }
   }
 
   const isCursorInList = () =>
