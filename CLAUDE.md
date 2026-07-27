@@ -17,10 +17,19 @@
 - 폼 필수값 검증은 필드별 에러 상태(`fieldErrors` 객체)로 관리해서 어떤 항목이 비었는지 각 입력 바로 아래에 표시할 것 — 제출 버튼 하나 눌렀을 때 페이지 하단에 뭉뚱그린 에러 메시지 하나만 보여주는 방식은 지양 (`NoticeWritePageConnected.jsx` 참고, 2026-07-23).
 - **카드 스타일은 공유 컴포넌트를 쓴다(위 API 클라이언트 규칙의 예외, 2026-07-23 사용자 승인)**: `components/Card.jsx`(흰/서페이스 배경 + `rounded-2xl` + `shadow-sm`, 테두리 없음)와 `components/SectionLabel.jsx`(작은 회색 eyebrow 스타일 섹션 제목)를 홈 화면 리디자인 이후 앱 전체 표준으로 채택함. 예전 스타일(`border border-gray-300 rounded-xl`)은 새로 만드는 화면에 쓰지 말 것. 단, 역할별 색상 배지가 필요한 `MyPage.jsx`의 `SectionHeader`(primary/success/warning/danger 색상 구분)처럼 의미가 다른 경우는 `SectionLabel`로 획일화하지 말 것 — 그건 별개의 용도.
 - 화면 시각 스타일(카드/배경/보더)을 바꿀 땐 기본적으로 앱 전체 적용을 전제로 할 것 — 자세한 배경은 아래 "테마 시스템" 절 참고.
+- **아이콘은 이모지 대신 `lucide-react`를 쓸 것**(이미 설치돼 있고 `BottomNav.jsx`에서 사용 중). 이모지는 폰트/OS마다 렌더링이 달라 조잡해 보이고, 이 프로젝트 안에서도 두 아이콘 언어가 섞이면 통일감이 깨짐(2026-07-25, 설교노트 폴더 화면을 이모지→lucide 아이콘으로 교체하며 확정). `<select>`의 `<option>`처럼 React 컴포넌트를 못 넣는 자리는 예외.
 
 ## contentEditable 리치 텍스트를 쓸 때 주의
 
-`SermonNoteWritePage.jsx`의 에디터가 유일한 contentEditable 사용처. **네이티브 Enter 키 동작에 의존하면 안 됨** — 실사용자 환경에서 Enter를 눌러도 줄바꿈이 아예 안 생기는 경우가 있어(모바일 웹뷰 계열 추정), `onKeyDown`에서 Enter를 가로채 `execCommand('insertLineBreak')`(리스트 안이면 `insertParagraph`)로 명시적으로 처리해야 함. 목록 자동 서식(`- `/`1. ` 트리거) 패턴도 이 파일 참고. 다른 작성 화면(공지/기도)은 전부 네이티브 `<textarea>`라 이 문제가 없음 — 앞으로도 멀티라인 입력은 특별한 이유 없으면 `<textarea>`를 쓰고, contentEditable은 서식(굵게/색상 등)이 꼭 필요할 때만 쓸 것.
+`SermonNoteWritePage.jsx`의 에디터가 유일한 contentEditable 사용처. **네이티브 Enter 키 동작에 의존하면 안 됨** — 실사용자 환경에서 Enter를 눌러도 줄바꿈이 아예 안 생기는 경우가 있어(모바일 웹뷰 계열 추정), `onKeyDown`에서 Enter를 가로채 `execCommand('insertLineBreak')`(리스트 안이면 `insertParagraph`)로 명시적으로 처리해야 함. 다른 작성 화면(공지/기도)은 전부 네이티브 `<textarea>`라 이 문제가 없음 — 앞으로도 멀티라인 입력은 특별한 이유 없으면 `<textarea>`를 쓰고, contentEditable은 서식(굵게/색상 등)이 꼭 필요할 때만 쓸 것.
+
+**목록 자동 서식(`autoFormatListIfTriggered`)은 네이티브 `execCommand('insertOrderedList'/'insertUnorderedList')`의 두 가지 함정을 직접 방어해야 동작함(2026-07-25, 두 차례 버그 재현 후 확정)**:
+1. **이미 그 종류의 목록 안에 있는데 트리거 문자를 또 치면 execCommand가 "켜기"가 아니라 "꺼버리기"로 동작함** — 목록 항목에서 다음 줄에 "- "나 "1. "을 또 타이핑하면(습관적으로), 그 항목이 목록 밖으로 튕겨나가고 빈 `<li>`만 남는 DOM 손상이 생김. 이게 "줄이 합쳐진다"고 보고된 버그의 진짜 원인이었음. 방어: `document.queryCommandState('insertOrderedList'/'insertUnorderedList')`로 이미 같은 종류 목록 안인지 먼저 확인하고, 맞으면 트리거 문자만 지우고 `execCommand`는 다시 부르지 않음.
+2. **목록을 빠져나와서 쓴 문단이 나중에 다시 번호를 치면, 근처의 무관한 기존 목록에 execCommand가 자동으로 합쳐버림**(브라우저의 "인접한 같은 종류 목록과 병합" 동작) — 이전 목록 항목의 번호까지 같이 틀어짐. 방어: 트리거 전에 "원래 목록 안이 아니었는지" 기록해두고, `execCommand` 후 결과 `<ol>`/`<ul>`에 항목이 2개 이상이면(=원치 않게 합쳐진 것) 방금 만든 `<li>`만 떼어내 새 목록으로 분리.
+3. **번호는 항상 사용자가 실제로 타이핑한 숫자를 목록의 `start` 속성에 반영함** — 안 하면 새 `<ol>`이 생길 때마다 브라우저가 무조건 1부터 매겨서, 빈 줄 몇 개 두고 "5."를 쳐도 "1."로 보이는 버그가 있었음.
+4. **`onInput`에서 `e.nativeEvent.inputType`이 `delete`로 시작하면 자동 서식 로직을 아예 건너뜀** — 백스페이스로 텍스트를 지우다가 우연히 "- "/"1. "과 정확히 같은 모양이 남는 순간에도 input 이벤트는 뜨는데, 이때 트리거되면 사용자가 지우고 있는데 목록이 갑자기 생겨버림(신고된 "백스페이스하면 이상한 게 생긴다" 버그). `InputEvent.dispatchEvent`로 `inputType: 'deleteContentBackward'`를 직접 재현해서 확인함.
+
+이 네 가지를 다 지키지 않고 단순히 `execCommand('insertOrderedList')`만 부르는 식으로 되돌리면 같은 버그들이 재발함 — "그냥 없애버리기"는 정답이 아니었고(한 번 그렇게 했다가 사용자가 "버그만 고치고 정렬 기능은 살려달라"고 되돌림), 위 네 가지 방어 로직이 실제 정답이었음.
 
 **서식 토글 버튼(Bold/하이라이트)은 선택 영역이 없으면 아무것도 하지 않아야 함(2026-07-24)**: `applyBold`/`applyHighlight` 둘 다 순수 `document.execCommand(...)` 호출만 하고 커스텀 DOM 조작이 없음 — 이게 의도된 동작. 과거에 "커서만 놓고 하이라이트 버튼을 누르면 반응이 없다"는 걸 버그로 보고 조상 span을 직접 찾아 지우는 커스텀 로직을 넣었다가, 커서가 걸친 하이라이트 전체(문장 전체일 수도 있음)가 통째로 사라지는 훨씬 심각한 회귀를 만든 적 있음. 서식 버튼은 새로 추가하든 고치든 항상 이 방식(선택 영역 있을 때만 동작, 없으면 no-op)을 유지할 것 — Word/Google Docs 등 모든 리치에디터의 표준 동작과 같음.
 
