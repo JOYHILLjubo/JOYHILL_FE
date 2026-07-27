@@ -220,17 +220,16 @@ export default function SermonNoteWritePage() {
 
   const applyColor = (color) => { focusEditor(); document.execCommand('foreColor', false, color) }
 
-  const handleEditorInput = () => {
+  const handleEditorInput = (e) => {
     setCharCount((editorRef.current?.textContent || '').length)
+    // 백스페이스/삭제로 텍스트가 줄어들다가 우연히 "- "나 "1. "과 똑같은 모양이 남는 순간에도
+    // input 이벤트는 뜬다 — 이때 트리거되면 사용자가 지우고 있는데 목록이 갑자기 생겨버린다
+    // (신고된 "백스페이스하면 이상한 게 생긴다" 버그). inputType이 삭제 계열이면 건너뛴다.
+    if (e?.nativeEvent?.inputType?.startsWith('delete')) return
     autoFormatListIfTriggered()
   }
 
-  // 워드처럼 "- " / "* "를 줄 맨 앞에 치면 자동으로 글머리 목록으로 전환.
-  // 번호("1. " 등)는 자동 변환하지 않음 — 브라우저 네이티브 <ol>로 바꾸면 항목마다
-  // 번호를 브라우저가 직접 매기기 때문에, 사용자가 실제로 타이핑한 숫자(예: "5.")를 무시하고
-  // 새 목록마다 1부터 다시 매기거나(줄바꿈 두 번 이상 후 목록이 끊기는 경우), Enter로 새 항목을
-  // 만드는 처리(insertParagraph)가 얽히면서 뒤 문단과 내용이 합쳐지는 문제가 있었음.
-  // 번호는 그냥 사용자가 입력한 텍스트 그대로 둔다.
+  // 워드처럼 "- "/"* "/"1. "을 줄 맨 앞에 치면 자동으로 글머리·번호 목록으로 전환.
   const autoFormatListIfTriggered = () => {
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return
@@ -240,7 +239,18 @@ export default function SermonNoteWritePage() {
 
     const textBeforeCursor = node.textContent.slice(0, range.startOffset)
     const isBullet = /^[-*]\s$/.test(textBeforeCursor)
-    if (!isBullet) return
+    const numberedMatch = textBeforeCursor.match(/^(\d+)\.\s$/)
+    const isNumbered = Boolean(numberedMatch)
+    if (!isBullet && !isNumbered) return
+
+    // 이미 그 종류의 목록 안에 있는데 트리거 문자를 또 치면(예: 번호 목록 항목에서 다음 줄에
+    // "1. "을 또 타이핑) execCommand는 "다시 켜기"가 아니라 "꺼버리기"로 동작해서, 그 항목이
+    // 목록 밖으로 튕겨나가고 빈 <li>만 남는 DOM 손상이 생겼다(실제 재현 확인함, 이게 "줄이
+    // 합쳐진다"로 보고된 버그의 진짜 원인). 이미 같은 종류 목록 안이면 트리거 문자만 지우고
+    // execCommand는 다시 부르지 않는다.
+    const alreadyBulleted = document.queryCommandState('insertUnorderedList')
+    const alreadyNumbered = document.queryCommandState('insertOrderedList')
+    const wasAlreadyInAnyList = alreadyBulleted || alreadyNumbered
 
     node.textContent = node.textContent.slice(range.startOffset)
     const newRange = document.createRange()
@@ -249,7 +259,37 @@ export default function SermonNoteWritePage() {
     sel.removeAllRanges()
     sel.addRange(newRange)
 
-    document.execCommand('insertUnorderedList')
+    if ((isBullet && alreadyBulleted) || (isNumbered && alreadyNumbered)) return
+
+    document.execCommand(isBullet ? 'insertUnorderedList' : 'insertOrderedList')
+
+    let liEl = window.getSelection()?.anchorNode
+    if (liEl && liEl.nodeType === Node.TEXT_NODE) liEl = liEl.parentElement
+    const li = liEl?.closest('li')
+    const list = li?.closest(isBullet ? 'ul' : 'ol')
+    if (!li || !list) return
+
+    // 목록 밖의 줄이었는데도, execCommand가 근처에 있던 무관한 기존 목록과 자동으로 합쳐버리는
+    // 경우가 있다(브라우저의 "인접한 같은 종류 목록과 병합" 동작 — 실제 재현 확인함: 목록을
+    // 빠져나와서 쓴 문단이 나중에 "5. "를 치면 그 이전 목록에 흡수되면서 이전 항목 번호까지
+    // 같이 틀어짐). 방금 만든 항목만 떼어내 새 목록으로 분리한다.
+    if (!wasAlreadyInAnyList && list.children.length > 1) {
+      const freshList = document.createElement(isBullet ? 'ul' : 'ol')
+      freshList.appendChild(li) // 기존 목록에서 li를 이 새 목록으로 옮김
+      list.parentNode.insertBefore(freshList, list.nextSibling)
+      if (list.children.length === 0) list.remove()
+      if (isNumbered) freshList.start = Number(numberedMatch[1])
+      const restoreRange = document.createRange()
+      restoreRange.selectNodeContents(li)
+      restoreRange.collapse(false)
+      const restoreSel = window.getSelection()
+      restoreSel.removeAllRanges()
+      restoreSel.addRange(restoreRange)
+    } else if (isNumbered) {
+      // 사용자가 실제로 타이핑한 숫자를 목록의 시작 번호로 반영 — 안 하면 새 <ol>이 생길 때마다
+      // 브라우저가 무조건 1부터 다시 매겨서, 빈 줄 몇 개 두고 "5."를 쳐도 "1."로 보이는 버그가 있었음.
+      list.start = Number(numberedMatch[1])
+    }
   }
 
   const isCursorInList = () =>
