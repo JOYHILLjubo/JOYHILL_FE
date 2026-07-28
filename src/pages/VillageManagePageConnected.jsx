@@ -119,7 +119,7 @@ async function requestTokenRefresh() {
 
 function RateChip({ rate, type }) {
   return (
-    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 9, background: type === 'worship' ? '#E8F0FE' : '#FEF7E0', color: type === 'worship' ? '#4285F4' : '#F9AB00' }}>
+    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 9, background: type === 'worship' ? 'rgb(var(--jh-primary-light))' : 'rgb(var(--jh-warning-light))', color: type === 'worship' ? '#4285F4' : '#F9AB00' }}>
       {Math.round(Number(rate) || 0)}%
     </span>
   )
@@ -245,7 +245,7 @@ function VillageMemberEditViewConnected({ member, currentFam, isNew = false, can
               disabled={isSubmitting}
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary bg-surface disabled:bg-gray-100"
             >
-              <option value="">소속 팸 없음</option>
+              <option value="">미배정</option>
               {famOptions.map((f) => (
                 <option key={f} value={f}>{f}</option>
               ))}
@@ -313,7 +313,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canCh
             })
           } else {
             await callAuthedApi(`/api/fam-members/${currentMember.id}`, '팸원 수정에 실패했습니다.', {
-              method: 'PUT', body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note), famName: nullIfBlank(form.fam) || null },
+              method: 'PUT', body: { name: form.name, phone: nullIfBlank(form.phone), birth: nullIfBlank(form.birth), note: nullIfBlank(form.note), famName: canChangeFam ? form.fam : null },
             })
             if (canChangeRole && form.role !== currentMember.role) {
               await callAuthedApi(`/api/fam-members/${currentMember.id}/role`, '역할 변경에 실패했습니다.', {

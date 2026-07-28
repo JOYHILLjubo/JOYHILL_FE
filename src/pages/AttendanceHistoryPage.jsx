@@ -69,9 +69,9 @@ const btnStyle = (checked, type) => ({
   width: BTN_SIZE, height: BTN_SIZE, borderRadius: '50%',
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
   fontSize: 10, cursor: 'pointer',
-  border: checked ? 'none' : '1.5px solid #CCCCCC',
+  border: checked ? 'none' : '1.5px solid rgb(var(--jh-gray-700))',
   background: checked
-    ? (type === 'worship' ? '#E8F0FE' : type === 'online' ? '#E6F4EA' : '#FEF7E0')
+    ? (type === 'worship' ? 'rgb(var(--jh-primary-light))' : type === 'online' ? 'rgb(var(--jh-success-light))' : 'rgb(var(--jh-warning-light))')
     : 'transparent',
   color: checked
     ? (type === 'worship' ? '#4285F4' : type === 'online' ? '#34A853' : '#F9AB00')
@@ -320,16 +320,16 @@ export default function AttendanceHistoryPage() {
             ))}
           </colgroup>
           <thead>
-            <tr style={{ borderBottom: '1px solid #E0E0E0', background: '#fff' }}>
-              <th rowSpan={2} style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 2, textAlign: 'left', fontSize: 11, color: '#888', fontWeight: 500, padding: '8px 0 8px 12px', borderRight: '1px solid #E0E0E0' }}>이름</th>
+            <tr style={{ borderBottom: '1px solid rgb(var(--jh-gray-300))', background: 'rgb(var(--jh-surface))' }}>
+              <th rowSpan={2} style={{ position: 'sticky', left: 0, background: 'rgb(var(--jh-surface))', zIndex: 2, textAlign: 'left', fontSize: 11, color: 'rgb(var(--jh-gray-500))', fontWeight: 500, padding: '8px 0 8px 12px', borderRight: '1px solid rgb(var(--jh-gray-300))' }}>이름</th>
               {sundays.map((s) => (
-                <th key={toKey(s)} colSpan={3} style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#333', padding: '8px 0', borderLeft: '1px solid #E0E0E0' }}>{formatDate(s)}</th>
+                <th key={toKey(s)} colSpan={3} style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: 'rgb(var(--jh-ink))', padding: '8px 0', borderLeft: '1px solid rgb(var(--jh-gray-300))' }}>{formatDate(s)}</th>
               ))}
             </tr>
-            <tr style={{ borderBottom: '1px solid #E0E0E0', background: '#FAFAFA' }}>
+            <tr style={{ borderBottom: '1px solid rgb(var(--jh-gray-300))', background: 'rgb(var(--jh-gray-50))' }}>
               {sundays.map((s) => (
                 <Fragment key={toKey(s)}>
-                  <th style={{ textAlign: 'center', fontSize: 10, color: '#4285F4', fontWeight: 500, padding: '5px 0', borderLeft: '1px solid #E0E0E0' }}>예배</th>
+                  <th style={{ textAlign: 'center', fontSize: 10, color: '#4285F4', fontWeight: 500, padding: '5px 0', borderLeft: '1px solid rgb(var(--jh-gray-300))' }}>예배</th>
                   <th style={{ textAlign: 'center', fontSize: 10, color: '#34A853', fontWeight: 500, padding: '5px 0' }}>온라인</th>
                   <th style={{ textAlign: 'center', fontSize: 10, color: '#F9AB00', fontWeight: 500, padding: '5px 0' }}>팸</th>
                 </Fragment>
@@ -338,17 +338,17 @@ export default function AttendanceHistoryPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={1 + sundays.length * 3} style={{ textAlign: 'center', padding: '32px 12px', color: '#888', fontSize: 13 }}>출석 정보를 불러오는 중입니다.</td></tr>
+              <tr><td colSpan={1 + sundays.length * 3} style={{ textAlign: 'center', padding: '32px 12px', color: 'rgb(var(--jh-gray-500))', fontSize: 13 }}>출석 정보를 불러오는 중입니다.</td></tr>
             ) : famMembers.length === 0 ? (
-              <tr><td colSpan={1 + sundays.length * 3} style={{ textAlign: 'center', padding: '32px 12px', color: '#888', fontSize: 13 }}>등록된 팸원이 없습니다.</td></tr>
+              <tr><td colSpan={1 + sundays.length * 3} style={{ textAlign: 'center', padding: '32px 12px', color: 'rgb(var(--jh-gray-500))', fontSize: 13 }}>등록된 팸원이 없습니다.</td></tr>
             ) : (
               famMembers.map((member, rowIndex) => {
-                const rowBg = rowIndex % 2 === 0 ? '#fff' : '#FAFAFA'
+                const rowBg = rowIndex % 2 === 0 ? 'rgb(var(--jh-surface))' : 'rgb(var(--jh-gray-50))'
                 return (
-                  <tr key={member.id} style={{ borderBottom: '1px solid #E0E0E0', background: rowBg }}>
-                    <td style={{ position: 'sticky', left: 0, background: rowBg, zIndex: 1, borderRight: '1px solid #E0E0E0', padding: '10px 0 10px 12px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      <span style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#333' }}>{member.name}</span>
-                      <span style={{ display: 'block', fontSize: 10, color: '#888', marginTop: 2 }}>{FAM_ROLE_LABELS[member.role] ?? member.role}</span>
+                  <tr key={member.id} style={{ borderBottom: '1px solid rgb(var(--jh-gray-300))', background: rowBg }}>
+                    <td style={{ position: 'sticky', left: 0, background: rowBg, zIndex: 1, borderRight: '1px solid rgb(var(--jh-gray-300))', padding: '10px 0 10px 12px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                      <span style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgb(var(--jh-ink))' }}>{member.name}</span>
+                      <span style={{ display: 'block', fontSize: 10, color: 'rgb(var(--jh-gray-500))', marginTop: 2 }}>{FAM_ROLE_LABELS[member.role] ?? member.role}</span>
                     </td>
                     {sundays.map((sunday) => {
                       const dateKey = toKey(sunday)
@@ -375,24 +375,24 @@ export default function AttendanceHistoryPage() {
         </table>
       </div>
 
-      <div style={{ display: 'flex', gap: 14, justifyContent: 'center', padding: '10px 0', borderTop: '1px solid #E0E0E0', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 14, justifyContent: 'center', padding: '10px 0', borderTop: '1px solid rgb(var(--jh-gray-300))', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E8F0FE', border: '1.5px solid #4285F4' }} />
-          <span style={{ fontSize: 11, color: '#888' }}>예배 출석</span>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgb(var(--jh-primary-light))', border: '1.5px solid #4285F4' }} />
+          <span style={{ fontSize: 11, color: 'rgb(var(--jh-gray-500))' }}>예배 출석</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FEF7E0', border: '1.5px solid #F9AB00' }} />
-          <span style={{ fontSize: 11, color: '#888' }}>팸모임 출석</span>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgb(var(--jh-warning-light))', border: '1.5px solid #F9AB00' }} />
+          <span style={{ fontSize: 11, color: 'rgb(var(--jh-gray-500))' }}>팸모임 출석</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E6F4EA', border: '1.5px solid #34A853' }} />
-          <span style={{ fontSize: 11, color: '#888' }}>온라인 출석</span>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgb(var(--jh-success-light))', border: '1.5px solid #34A853' }} />
+          <span style={{ fontSize: 11, color: 'rgb(var(--jh-gray-500))' }}>온라인 출석</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid #CCCCCC' }} />
-          <span style={{ fontSize: 11, color: '#888' }}>결석</span>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid rgb(var(--jh-gray-700))' }} />
+          <span style={{ fontSize: 11, color: 'rgb(var(--jh-gray-500))' }}>결석</span>
         </div>
-        <span style={{ fontSize: 11, color: '#888' }}>· 탭하면 변경</span>
+        <span style={{ fontSize: 11, color: 'rgb(var(--jh-gray-500))' }}>· 탭하면 변경</span>
       </div>
 
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
