@@ -401,7 +401,8 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canCh
 
 export default function VillageManagePageConnected() {
   const navigate = useNavigate()
-  const { user, accessToken, setAccessToken, logout, isVillageLeaderOrAbove, isPastorOrAbove } = useAuth()
+  const { user, accessToken, setAccessToken, logout, isVillageLeaderOrAbove, isPastorOrAbove, isAdmin } = useAuth()
+  const [isSyncingSheet, setIsSyncingSheet] = useState(false)
 
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('village')
@@ -655,6 +656,25 @@ export default function VillageManagePageConnected() {
             <p className="text-xs text-gray-500 mt-0.5">청년부 전체 재적 <span className="font-medium text-primary">{totalHeadcount}명</span></p>
           )}
         </div>
+        {isAdmin && (
+          <button
+            onClick={async () => {
+              setIsSyncingSheet(true)
+              try {
+                await callAuthedApi('/api/users/sync-sheet', '구글시트 백업에 실패했습니다.', { method: 'POST' })
+                alert('구글시트로 백업을 완료했습니다.')
+              } catch (err) {
+                alert(err instanceof Error ? err.message : '구글시트 백업에 실패했습니다.')
+              } finally {
+                setIsSyncingSheet(false)
+              }
+            }}
+            disabled={isSyncingSheet}
+            className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-50 shrink-0"
+          >
+            {isSyncingSheet ? '백업 중...' : '구글시트로 백업'}
+          </button>
+        )}
       </div>
 
       {isPastorOrAbove && (
