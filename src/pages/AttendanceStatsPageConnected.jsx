@@ -122,9 +122,9 @@ async function requestTokenRefresh() {
 
 function AttendBadge({ present, label }) {
   let bg, color
-  if (label === '예배') { bg = present ? '#E8F0FE' : '#F5F5F5'; color = present ? '#4285F4' : '#AAAAAA' }
-  else if (label === '온라인') { bg = present ? '#E6F4EA' : '#F5F5F5'; color = present ? '#34A853' : '#AAAAAA' }
-  else { bg = present ? '#FEF7E0' : '#F5F5F5'; color = present ? '#F9AB00' : '#AAAAAA' }
+  if (label === '예배') { bg = present ? 'rgb(var(--jh-primary-light))' : 'rgb(var(--jh-gray-100))'; color = present ? '#4285F4' : 'rgb(var(--jh-gray-500))' }
+  else if (label === '온라인') { bg = present ? 'rgb(var(--jh-success-light))' : 'rgb(var(--jh-gray-100))'; color = present ? '#34A853' : 'rgb(var(--jh-gray-500))' }
+  else { bg = present ? 'rgb(var(--jh-warning-light))' : 'rgb(var(--jh-gray-100))'; color = present ? '#F9AB00' : 'rgb(var(--jh-gray-500))' }
   return (
     <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 5px', borderRadius: 6, background: bg, color }}>
       {label} {present ? '✓' : '✗'}
@@ -136,7 +136,7 @@ function RateBar({ rate, type }) {
   const barColor = type === 'worship' ? '#4285F4' : type === 'online' ? '#34A853' : '#F9AB00'
   return (
     <div className="flex items-center gap-2">
-      <div style={{ flex: 1, height: 6, borderRadius: 3, background: '#F0F0F0', overflow: 'hidden' }}>
+      <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'rgb(var(--jh-gray-200))', overflow: 'hidden' }}>
         <div style={{ width: `${rate}%`, height: '100%', background: barColor, borderRadius: 3, transition: 'width 0.4s' }} />
       </div>
       <span style={{ fontSize: 12, fontWeight: 600, color: barColor, minWidth: 34, textAlign: 'right' }}>{rate}%</span>
@@ -155,9 +155,9 @@ function AvgCard({ label, worship, online, fam, year }) {
           <p className="text-[11px] text-primary mb-1">예배 출석률</p>
           <p className="text-xl font-bold text-primary">{toRate(worship)}%</p>
         </div>
-        <div className="flex-1 rounded-lg p-3 text-center" style={{background:'#E6F4EA'}}>
-          <p className="text-[11px] mb-1" style={{color:'#34A853'}}>온라인 출석률</p>
-          <p className="text-xl font-bold" style={{color:'#34A853'}}>{toRate(online)}%</p>
+        <div className="flex-1 bg-success-light rounded-lg p-3 text-center">
+          <p className="text-[11px] text-success mb-1">온라인 출석률</p>
+          <p className="text-xl font-bold text-success">{toRate(online)}%</p>
         </div>
         <div className="flex-1 bg-warning-light rounded-lg p-3 text-center">
           <p className="text-[11px] text-warning mb-1">팸모임 출석률</p>
@@ -280,7 +280,7 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
       <div className="flex gap-2 mb-3">
         <span className="text-xs bg-primary-light text-primary px-2.5 py-1 rounded-full">재적 {members.length}명</span>
         <span className="text-xs bg-primary-light text-primary px-2.5 py-1 rounded-full">예배 {worshipCount}명</span>
-        <span className="text-xs px-2.5 py-1 rounded-full" style={{background:'#E6F4EA',color:'#34A853'}}>온라인 {onlineCount}명</span>
+        <span className="text-xs bg-success-light text-success px-2.5 py-1 rounded-full">온라인 {onlineCount}명</span>
         <span className="text-xs bg-warning-light text-warning px-2.5 py-1 rounded-full">팸 {famCount}명</span>
       </div>
       {isLoading ? (
@@ -455,14 +455,14 @@ function VillageStatsView({
                       <div className="flex items-center gap-1.5">
                         <p className="text-sm font-medium">{fam}</p>
                         {isPastorOrAbove && famCheckStatusMap[fam] === false && (
-                          <span style={{ fontSize: 10, fontWeight: 600, color: '#EA4335', background: '#FDECEA', padding: '1px 6px', borderRadius: 20 }}>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: '#EA4335', background: 'rgb(var(--jh-danger-light))', padding: '1px 6px', borderRadius: 20 }}>
                             미입력
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-semibold text-primary bg-primary-light px-2 py-0.5 rounded-full">예배 {toRate(stats?.worshipRate)}%</span>
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{color:'#34A853',background:'#E6F4EA'}}>온라인 {toRate(stats?.onlineRate)}%</span>
+                        <span className="text-[11px] font-semibold bg-success-light text-success px-2 py-0.5 rounded-full">온라인 {toRate(stats?.onlineRate)}%</span>
                         <span className="text-[11px] font-semibold text-warning bg-warning-light px-2 py-0.5 rounded-full">팸 {toRate(stats?.famRate)}%</span>
                         <span className="text-gray-500 text-[1rem]">→</span>
                       </div>

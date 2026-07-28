@@ -279,17 +279,17 @@ export default function AttendancePage() {
                 <div className="w-[52px] flex justify-center">
                   <button onClick={() => toggleCheck(member.id, 'worship')}
                     className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${worshipChecked ? 'bg-primary-light text-primary' : 'bg-transparent text-transparent'}`}
-                    style={!worshipChecked ? { border: '1.5px solid #CCCCCC' } : {}}>✓</button>
+                    style={!worshipChecked ? { border: '1.5px solid rgb(var(--jh-gray-700))' } : {}}>✓</button>
                 </div>
                 <div className="w-[52px] flex justify-center">
                   <button onClick={() => toggleCheck(member.id, 'online')}
                     className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all`}
-                    style={onlineChecked ? { background: '#E6F4EA', color: '#34A853' } : { border: '1.5px solid #CCCCCC', background: 'transparent', color: 'transparent' }}>✓</button>
+                    style={onlineChecked ? { background: 'rgb(var(--jh-success-light))', color: '#34A853' } : { border: '1.5px solid rgb(var(--jh-gray-700))', background: 'transparent', color: 'transparent' }}>✓</button>
                 </div>
                 <div className="w-[52px] flex justify-center">
                   <button onClick={() => toggleCheck(member.id, 'fam')}
                     className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs border-none cursor-pointer transition-all ${famChecked ? 'bg-warning-light text-warning' : 'bg-transparent text-transparent'}`}
-                    style={!famChecked ? { border: '1.5px solid #CCCCCC' } : {}}>✓</button>
+                    style={!famChecked ? { border: '1.5px solid rgb(var(--jh-gray-700))' } : {}}>✓</button>
                 </div>
               </div>
             )
@@ -299,7 +299,7 @@ export default function AttendancePage() {
 
       <div className="flex gap-3 justify-center py-3 border-t border-gray-300">
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-primary-light" /><span className="text-[11px] text-gray-500">예배 출석</span></div>
-        <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full" style={{background:'#E6F4EA'}} /><span className="text-[11px] text-gray-500">온라인 출석</span></div>
+        <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-success-light" /><span className="text-[11px] text-gray-500">온라인 출석</span></div>
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-warning-light" /><span className="text-[11px] text-gray-500">팸모임 출석</span></div>
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full border border-gray-300" /><span className="text-[11px] text-gray-500">결석</span></div>
       </div>
