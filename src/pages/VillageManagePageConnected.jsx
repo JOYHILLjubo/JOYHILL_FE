@@ -401,7 +401,7 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canCh
 
 export default function VillageManagePageConnected() {
   const navigate = useNavigate()
-  const { user, accessToken, setAccessToken, logout, isVillageLeaderOrAbove, isPastorOrAbove, isAdmin } = useAuth()
+  const { user, accessToken, setAccessToken, logout, isVillageLeaderOrAbove, isPastorOrAbove } = useAuth()
   const [isSyncingSheet, setIsSyncingSheet] = useState(false)
 
   const [search, setSearch] = useState('')
@@ -656,7 +656,7 @@ export default function VillageManagePageConnected() {
             <p className="text-xs text-gray-500 mt-0.5">청년부 전체 재적 <span className="font-medium text-primary">{totalHeadcount}명</span></p>
           )}
         </div>
-        {isAdmin && (
+        {isPastorOrAbove && (
           <button
             onClick={async () => {
               setIsSyncingSheet(true)
