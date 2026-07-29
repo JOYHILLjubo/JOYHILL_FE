@@ -274,7 +274,7 @@ export default function PrayerPageConnected() {
       <div className="px-5 mb-3">
         <button
           onClick={() => setShowWeekPicker((prev) => !prev)}
-          className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm border-none cursor-pointer w-full justify-between"
+          className="flex items-center gap-2 px-3 py-2 bg-surface shadow-sm rounded-lg text-sm border-none cursor-pointer w-full justify-between"
         >
           <span className="font-medium">{selectedWeek.month}월 {selectedWeek.week}주차</span>
           <span className="text-gray-500 text-xs">{showWeekPicker ? '닫기' : '선택'}</span>
