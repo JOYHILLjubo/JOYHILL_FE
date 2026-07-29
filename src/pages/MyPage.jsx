@@ -82,7 +82,7 @@ export default function MyPage() {
 
       {/* 프로필 카드 */}
       <div className="px-5 mb-5">
-        <div className="flex items-center gap-3 p-4 bg-gray-100 rounded-xl">
+        <div className="flex items-center gap-3 p-4 bg-surface rounded-2xl shadow-sm">
           {/* 아바타 — 클릭하면 모달 */}
           <button
             onClick={openModal}

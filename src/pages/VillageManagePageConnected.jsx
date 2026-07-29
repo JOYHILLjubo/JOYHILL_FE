@@ -806,7 +806,7 @@ export default function VillageManagePageConnected() {
                 <div className="mb-3">
                   <button
                     onClick={() => setExpandedUnassigned((p) => !p)}
-                    className="w-full flex items-center justify-between py-2.5 px-3 bg-gray-100 rounded-xl border-none cursor-pointer">
+                    className="w-full flex items-center justify-between py-2.5 px-3 bg-surface shadow-sm rounded-xl border-none cursor-pointer">
                     <span className="text-sm font-medium text-gray-600">미배정</span>
                     <span className="text-xs text-gray-500">{unassignedMembers.length}명 {expandedUnassigned ? '▲' : '▼'}</span>
                   </button>

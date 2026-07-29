@@ -285,11 +285,12 @@ export default function SermonNoteFolderListPage() {
 
       {modalMode && (
         <div
-          className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center"
+          className="fixed inset-0 bg-black/40 z-[60] flex items-end justify-center"
           onClick={closeModal}
         >
           <div
-            className="bg-surface rounded-t-2xl w-full max-w-[430px] p-5 pb-10 mb-10"
+            className="bg-surface rounded-t-2xl w-full max-w-[430px] p-5"
+            style={{ paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' }}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">

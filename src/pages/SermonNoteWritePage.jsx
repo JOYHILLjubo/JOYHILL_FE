@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Folder } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
+// '기본'은 고정 색상이 아니라 테마 기본 텍스트색으로 리셋하는 항목이라 value가 없다
+// (라이트 전용 hex를 박아두면 다크모드에서 어두운 배경 위에 어두운 글자가 겹쳐 안 보이게 됨).
 const COLOR_SWATCHES = [
-  { label: '기본', value: '#14162A' },
+  { label: '기본', value: null },
   { label: '블루', value: '#3D5AFE' },
   { label: '레드', value: '#E5484D' },
   { label: '그린', value: '#12A150' },
@@ -174,9 +177,11 @@ export default function SermonNoteWritePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const [activeFormats, setActiveFormats] = useState({ bold: false, highlighted: false, color: null })
+
   const focusEditor = () => editorRef.current?.focus()
 
-  const applyBold = () => { focusEditor(); document.execCommand('bold') }
+  const applyBold = () => { focusEditor(); document.execCommand('bold'); updateActiveFormats() }
 
   // 브라우저 색상 표기(hex/rgb 등)가 달라도 같은 색인지 비교하기 위해 표준 rgb 문자열로 정규화
   const colorsEqual = (a, b) => {
@@ -216,9 +221,42 @@ export default function SermonNoteWritePage() {
     focusEditor()
     const isHighlighted = selectionHasHighlight()
     document.execCommand('hiliteColor', false, isHighlighted ? 'inherit' : HIGHLIGHT_COLOR)
+    updateActiveFormats()
   }
 
-  const applyColor = (color) => { focusEditor(); document.execCommand('foreColor', false, color) }
+  // execCommand('foreColor', ..., 'inherit')는 표준 CSS 색상값이 아니라서 브라우저가 파싱에 실패해
+  // 글자를 투명(rgba(0,0,0,0))으로 만들어버린다(하이라이트 끄기에 쓰는 'inherit'과 달리 foreColor에선 안 통함).
+  // 그래서 '기본'은 지금 테마의 실제 계산된 텍스트색을 그대로 값으로 넘겨 적용한다.
+  const applyColor = (color) => {
+    focusEditor()
+    const resolvedColor = color ?? getComputedStyle(editorRef.current).color
+    document.execCommand('foreColor', false, resolvedColor)
+    updateActiveFormats()
+  }
+
+  // 툴바 버튼(B/H/색상)에 "현재 커서 위치에 적용된 서식"을 표시하기 위해 선택 영역이 바뀔 때마다 상태를 다시 계산한다.
+  const updateActiveFormats = () => {
+    const editor = editorRef.current
+    const sel = window.getSelection()
+    if (!editor || !sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode)) {
+      setActiveFormats({ bold: false, highlighted: false, color: null })
+      return
+    }
+    const bold = document.queryCommandState('bold')
+    const highlighted = selectionHasHighlight()
+    const currentColor = document.queryCommandValue('foreColor')
+    const inkColor = getComputedStyle(editor).color
+    const matchedSwatch = COLOR_SWATCHES.find((swatch) =>
+      swatch.value ? colorsEqual(currentColor, swatch.value) : colorsEqual(currentColor, inkColor),
+    )
+    setActiveFormats({ bold, highlighted, color: matchedSwatch ? (matchedSwatch.value ?? 'default') : undefined })
+  }
+
+  useEffect(() => {
+    document.addEventListener('selectionchange', updateActiveFormats)
+    return () => document.removeEventListener('selectionchange', updateActiveFormats)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleEditorInput = (e) => {
     setCharCount((editorRef.current?.textContent || '').length)
@@ -432,8 +470,7 @@ export default function SermonNoteWritePage() {
             type="date"
             value={noteDate}
             onChange={(e) => setNoteDate(e.target.value)}
-            className="text-xs font-semibold bg-gray-100 rounded-full px-3.5 py-2 outline-none border-none"
-            style={{ colorScheme: 'light' }}
+            className="text-xs font-semibold bg-surface shadow-sm rounded-full px-3.5 py-2 outline-none border-none"
           />
           {!showVerseInput && (
             <button
@@ -445,15 +482,16 @@ export default function SermonNoteWritePage() {
           )}
         </div>
 
-        <div className="mb-3">
+        <div className="mb-3 relative inline-flex items-center">
+          <Folder size={13} strokeWidth={2} className="absolute left-3.5 text-gray-400 pointer-events-none" />
           <select
             value={selectedFolderId}
             onChange={(e) => setSelectedFolderId(e.target.value)}
-            className="text-xs font-semibold bg-gray-100 rounded-full pl-3.5 pr-2.5 py-2 outline-none border-none"
+            className="text-xs font-semibold bg-surface shadow-sm rounded-full pl-8 pr-2.5 py-2 outline-none border-none appearance-none"
           >
-            <option value="">📁 미분류</option>
+            <option value="">미분류</option>
             {folders.map((folder) => (
-              <option key={folder.id} value={folder.id}>📁 {folder.name}</option>
+              <option key={folder.id} value={folder.id}>{folder.name}</option>
             ))}
           </select>
         </div>
@@ -484,16 +522,29 @@ export default function SermonNoteWritePage() {
         )}
 
         <div className="flex items-center gap-1.5 bg-surface rounded-2xl p-2 mb-2.5 shadow-[0_1px_1px_rgba(20,22,42,0.03),0_4px_12px_rgba(20,22,42,0.05)]">
-          <button onClick={applyBold} className="w-8 h-8 rounded-lg bg-gray-100 border-none cursor-pointer font-extrabold text-[13px]">B</button>
-          <button onClick={applyHighlight} className="w-8 h-8 rounded-lg bg-gray-100 border-none cursor-pointer font-bold text-[13px]">H</button>
+          <button
+            onClick={applyBold}
+            className={`w-8 h-8 rounded-lg border-none cursor-pointer font-extrabold text-[13px] transition-colors ${
+              activeFormats.bold ? 'bg-primary text-white' : 'bg-gray-100'
+            }`}
+          >B</button>
+          <button
+            onClick={applyHighlight}
+            className="w-8 h-8 rounded-lg border-none cursor-pointer font-bold text-[13px] transition-colors bg-gray-100"
+            style={activeFormats.highlighted ? { backgroundColor: HIGHLIGHT_COLOR } : undefined}
+          >H</button>
           <div className="w-px h-4 bg-gray-200 mx-1" />
           {COLOR_SWATCHES.map((swatch) => (
             <button
-              key={swatch.value}
+              key={swatch.label}
               onClick={() => applyColor(swatch.value)}
               title={swatch.label}
-              className="w-[18px] h-[18px] rounded-full border-none cursor-pointer"
-              style={{ backgroundColor: swatch.value }}
+              className="w-[18px] h-[18px] rounded-full border-none cursor-pointer transition-[outline]"
+              style={{
+                backgroundColor: swatch.value ?? 'rgb(var(--jh-ink))',
+                outline: activeFormats.color === (swatch.value ?? 'default') ? '2px solid #4285F4' : '2px solid transparent',
+                outlineOffset: 2,
+              }}
             />
           ))}
         </div>
