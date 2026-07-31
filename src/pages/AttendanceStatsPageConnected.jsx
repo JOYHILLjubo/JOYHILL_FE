@@ -499,6 +499,7 @@ export default function AttendanceStatsPageConnected() {
   const [expandedVillage, setExpandedVillage] = useState(null)
   const [weekAttendMap, setWeekAttendMap] = useState({})
   const [famCheckStatusMap, setFamCheckStatusMap] = useState({})
+  const [isSyncingSheet, setIsSyncingSheet] = useState(false)
 
   const handleExpiredSession = () => { logout(); navigate('/login', { replace: true }) }
 
@@ -619,6 +620,25 @@ export default function AttendanceStatsPageConnected() {
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-semibold flex-1">출석 통계</p>
+        {isPastorOrAbove && (
+          <button
+            onClick={async () => {
+              setIsSyncingSheet(true)
+              try {
+                await callAuthedApi('/api/attendance/sync-sheet', { method: 'POST' })
+                alert('구글시트로 백업을 완료했습니다.')
+              } catch (err) {
+                alert(err instanceof Error ? err.message : '구글시트 백업에 실패했습니다.')
+              } finally {
+                setIsSyncingSheet(false)
+              }
+            }}
+            disabled={isSyncingSheet}
+            className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-50 shrink-0"
+          >
+            {isSyncingSheet ? '백업 중...' : '구글시트로 백업'}
+          </button>
+        )}
       </div>
 
       {isVillageLeaderOrAbove && (
