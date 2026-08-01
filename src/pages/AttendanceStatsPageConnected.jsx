@@ -63,6 +63,7 @@ function mapMemberStats(items) {
     onlineRate: toRate(item.onlineRate),
     famRate: toRate(item.famRate),
     avatarKey: item.avatarKey ?? null,
+    avatarPhotoUrl: item.avatarPhotoUrl ?? null,
   }))
 }
 
@@ -179,8 +180,8 @@ function MemberStatList({ members, isLoading, weekAttendMap = {}, emptyLabel = '
         const weekRecord = weekAttendMap[member.id]
         return (
           <div key={member.id} className="bg-surface rounded-2xl shadow-sm px-5 py-3 flex items-center gap-3">
-            {member.avatarKey
-              ? <BibleAvatarIcon avatarKey={member.avatarKey} size={32} />
+            {(member.avatarKey || member.avatarPhotoUrl)
+              ? <BibleAvatarIcon avatarKey={member.avatarKey} photoUrl={member.avatarPhotoUrl} size={32} />
               : <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
             }
             <div className="flex-1 min-w-0">
@@ -294,8 +295,8 @@ function WeeklyFamView({ famName, weekDate, callAuthedApi, onBack }) {
             const record = attendMap[member.id]
             return (
               <div key={member.id} className="bg-surface rounded-2xl shadow-sm px-5 py-3 flex items-center gap-3">
-                {member.avatarKey
-                  ? <BibleAvatarIcon avatarKey={member.avatarKey} size={32} />
+                {(member.avatarKey || member.avatarPhotoUrl)
+                  ? <BibleAvatarIcon avatarKey={member.avatarKey} photoUrl={member.avatarPhotoUrl} size={32} />
                   : <div className={`w-8 h-8 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
                 }
                 <div className="flex-1 min-w-0">

@@ -77,6 +77,7 @@ function normalizePrayer(item, currentUser) {
     week: item?.week ?? null,
     famName: item?.famName ?? '',
     avatarKey: item?.userId === currentUser?.id ? (currentUser?.avatarKey ?? null) : (item?.avatarKey ?? null),
+    avatarPhotoUrl: item?.userId === currentUser?.id ? (currentUser?.avatarPhotoUrl ?? null) : (item?.avatarPhotoUrl ?? null),
   }
 }
 
@@ -344,8 +345,8 @@ export default function PrayerPageConnected() {
             const color = getColor(prayer.id)
             return (
               <div key={prayer.id} className="flex items-start gap-2 py-3 border-b border-gray-300 last:border-b-0">
-                {prayer.avatarKey ? (
-                  <BibleAvatarIcon avatarKey={prayer.avatarKey} size={28} />
+                {(prayer.avatarKey || prayer.avatarPhotoUrl) ? (
+                  <BibleAvatarIcon avatarKey={prayer.avatarKey} photoUrl={prayer.avatarPhotoUrl} size={28} />
                 ) : (
                   <div className={`w-7 h-7 rounded-full ${color.bg} flex items-center justify-center text-[11px] font-medium ${color.text} shrink-0 mt-0.5`}>
                     {getInitial(prayer.name)}

@@ -68,6 +68,7 @@ function mapMember(item, currentFam) {
     worshipRate: Number(item?.worshipRate ?? 0),
     famRate: Number(item?.famRate ?? 0),
     avatarKey: item?.avatarKey ?? null,
+    avatarPhotoUrl: item?.avatarPhotoUrl ?? null,
   }
 }
 
@@ -376,8 +377,8 @@ function FamDetailViewConnected({ fam, village, leaderName, canChangeRole, canCh
             return (
               <div key={member.id} onClick={() => setEditTarget(member)}
                 className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0 cursor-pointer hover:bg-gray-100 -mx-5 px-5 transition-colors">
-                {member.avatarKey
-                  ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                {(member.avatarKey || member.avatarPhotoUrl)
+                  ? <BibleAvatarIcon avatarKey={member.avatarKey} photoUrl={member.avatarPhotoUrl} size={36} />
                   : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
                 }
                 <div className="flex-1">
@@ -734,8 +735,8 @@ export default function VillageManagePageConnected() {
                   <div key={`member_${result.member.id}_${index}`}
                     onClick={() => setEditingMember({ member: result.member, famName: result.famName })}
                     className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0 cursor-pointer hover:bg-gray-100 -mx-5 px-5 transition-colors">
-                    {result.member.avatarKey
-                      ? <BibleAvatarIcon avatarKey={result.member.avatarKey} size={36} />
+                    {(result.member.avatarKey || result.member.avatarPhotoUrl)
+                      ? <BibleAvatarIcon avatarKey={result.member.avatarKey} photoUrl={result.member.avatarPhotoUrl} size={36} />
                       : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{result.member.name[0]}</div>
                     }
                     <div className="flex-1">
@@ -816,8 +817,8 @@ export default function VillageManagePageConnected() {
                         const color = getAvatarColor(member.id)
                         return (
                           <div key={member.id} onClick={() => setEditingMember({ member, famName: null })} className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors ${index < unassignedMembers.length - 1 ? 'border-b border-gray-300' : ''}`}>
-                            {member.avatarKey
-                              ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                            {(member.avatarKey || member.avatarPhotoUrl)
+                              ? <BibleAvatarIcon avatarKey={member.avatarKey} photoUrl={member.avatarPhotoUrl} size={36} />
                               : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{member.name[0]}</div>
                             }
                             <div className="flex-1">

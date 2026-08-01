@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { Camera } from 'lucide-react'
 import { BIBLE_AVATARS, BibleAvatarIcon } from '../components/BibleAvatars'
 
 const THEME_LABELS = { light: '라이트', dark: '다크', sepia: '세피아' }
@@ -36,6 +37,10 @@ export default function MyPage() {
 
   const [showAvatarModal, setShowAvatarModal] = useState(false)
   const [pendingKey, setPendingKey] = useState(null)
+  const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
+  const [uploadError, setUploadError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const accessTokenRef = useRef(accessToken)
   accessTokenRef.current = accessToken
@@ -47,13 +52,63 @@ export default function MyPage() {
 
   const openModal = () => {
     setPendingKey(user.avatarKey ?? null)
+    setPendingPhotoUrl(user.avatarPhotoUrl ?? null)
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setUploadError('')
     setShowAvatarModal(true)
   }
 
+  // 성경 인물 아바타와 내 사진은 둘 중 하나만 적용됨 — 한쪽을 고르면 다른 쪽 선택은 해제한다.
+  const selectAvatarKey = (key) => {
+    setPendingKey(key)
+    setPendingPhotoUrl(null)
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setUploadError('')
+  }
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setUploadError('이미지 파일만 선택할 수 있습니다.'); return }
+    if (file.size > 30 * 1024 * 1024) { setUploadError('이미지 크기는 30MB 이하여야 합니다.'); return }
+    setUploadError('')
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+    setPendingKey(null)
+    setPendingPhotoUrl(null)
+  }
+
+  const hasPhoto = Boolean(photoPreview || pendingPhotoUrl)
+  const isChanged = photoFile !== null
+    || pendingKey !== (user.avatarKey ?? null)
+    || pendingPhotoUrl !== (user.avatarPhotoUrl ?? null)
+
   const handleApply = async () => {
-    if (isSaving) return
+    if (isSaving || !isChanged) return
     setIsSaving(true)
+    setUploadError('')
     try {
+      let photoUrl = pendingPhotoUrl
+      // 새로 고른 사진이 있으면 S3에 먼저 올리고, 반환된 URL을 적용 요청에 실어 보낸다.
+      if (photoFile) {
+        const formData = new FormData()
+        formData.append('photo', photoFile)
+        const uploadRes = await fetch(`${API_BASE_URL}/api/users/me/avatar-photo`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessTokenRef.current}` },
+          credentials: 'include',
+          body: formData,
+        })
+        const uploadPayload = await uploadRes.json().catch(() => null)
+        if (!uploadRes.ok || !uploadPayload?.success) {
+          throw new Error(uploadPayload?.error?.message ?? '사진 업로드에 실패했습니다.')
+        }
+        photoUrl = uploadPayload.data.avatarPhotoUrl
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/users/me/avatar`, {
         method: 'PATCH',
         headers: {
@@ -61,14 +116,20 @@ export default function MyPage() {
           Authorization: `Bearer ${accessTokenRef.current}`,
         },
         credentials: 'include',
-        body: JSON.stringify({ avatarKey: pendingKey }),
+        body: JSON.stringify({ avatarKey: photoUrl ? null : pendingKey, avatarPhotoUrl: photoUrl }),
       })
-      if (res.ok) {
-        setUser((prev) => ({ ...prev, avatarKey: pendingKey }))
-        setShowAvatarModal(false)
+      const payload = await res.json().catch(() => null)
+      if (!res.ok || !payload?.success) {
+        throw new Error(payload?.error?.message ?? '프로필 적용에 실패했습니다.')
       }
-    } catch {
-      // 실패 시 무시
+      setUser((prev) => ({
+        ...prev,
+        avatarKey: photoUrl ? null : pendingKey,
+        avatarPhotoUrl: photoUrl ?? null,
+      }))
+      setShowAvatarModal(false)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : '프로필 적용에 실패했습니다.')
     } finally {
       setIsSaving(false)
     }
@@ -89,8 +150,8 @@ export default function MyPage() {
             className="relative shrink-0 border-none bg-transparent p-0 cursor-pointer"
             style={{ width: 48, height: 48 }}
           >
-            {user.avatarKey ? (
-              <BibleAvatarIcon avatarKey={user.avatarKey} size={48} />
+            {(user.avatarKey || user.avatarPhotoUrl) ? (
+              <BibleAvatarIcon avatarKey={user.avatarKey} photoUrl={user.avatarPhotoUrl} size={48} />
             ) : (
               <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center text-base font-medium text-primary">
                 {user.name[0]}
@@ -271,6 +332,44 @@ export default function MyPage() {
 
             {/* 스크롤 영역 */}
             <div style={{ overflowY: 'auto', flex: 1, padding: '16px 16px 0' }}>
+              {/* 내 사진 */}
+              <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)', marginBottom: 10 }}>내 사진</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                <label style={{ cursor: 'pointer', display: 'block' }}>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
+                  {hasPhoto ? (
+                    <div style={{
+                      borderRadius: '50%', overflow: 'hidden', width: 54, height: 54,
+                      outline: '3px solid #4285F4', outlineOffset: 2,
+                    }}>
+                      <img
+                        src={photoPreview ?? pendingPhotoUrl}
+                        alt=""
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: 54, height: 54, borderRadius: '50%',
+                      border: '1.5px dashed var(--color-border-secondary)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'var(--color-text-tertiary)',
+                    }}>
+                      <Camera size={20} />
+                    </div>
+                  )}
+                </label>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13 }}>{hasPhoto ? '내 사진이 선택되어 있어요' : '사진을 올려 프로필로 쓸 수 있어요'}</p>
+                  <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 2 }}>
+                    {hasPhoto ? '아래에서 아바타를 고르면 사진은 해제됩니다' : '동그라미를 눌러 사진을 선택하세요'}
+                  </p>
+                </div>
+              </div>
+              {uploadError && (
+                <p style={{ fontSize: 11, color: '#EA4335', marginTop: -12, marginBottom: 16 }}>{uploadError}</p>
+              )}
+
               {/* 구약 */}
               <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)', marginBottom: 10 }}>구약</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
@@ -279,7 +378,7 @@ export default function MyPage() {
                     key={avatar.key}
                     avatar={avatar}
                     selected={pendingKey === avatar.key}
-                    onSelect={() => setPendingKey(avatar.key)}
+                    onSelect={() => selectAvatarKey(avatar.key)}
                   />
                 ))}
               </div>
@@ -291,7 +390,7 @@ export default function MyPage() {
                     key={avatar.key}
                     avatar={avatar}
                     selected={pendingKey === avatar.key}
-                    onSelect={() => setPendingKey(avatar.key)}
+                    onSelect={() => selectAvatarKey(avatar.key)}
                   />
                 ))}
               </div>
@@ -306,13 +405,13 @@ export default function MyPage() {
             }}>
               <button
                 onClick={handleApply}
-                disabled={isSaving || pendingKey === user.avatarKey}
+                disabled={isSaving || !isChanged}
                 style={{
                   width: '100%', padding: '14px',
                   borderRadius: 12, border: 'none',
-                  background: (isSaving || pendingKey === user.avatarKey) ? 'var(--color-background-secondary)' : '#4285F4',
-                  color: (isSaving || pendingKey === user.avatarKey) ? 'var(--color-text-tertiary)' : 'white',
-                  fontSize: 15, fontWeight: 500, cursor: (isSaving || pendingKey === user.avatarKey) ? 'default' : 'pointer',
+                  background: (isSaving || !isChanged) ? 'var(--color-background-secondary)' : '#4285F4',
+                  color: (isSaving || !isChanged) ? 'var(--color-text-tertiary)' : 'white',
+                  fontSize: 15, fontWeight: 500, cursor: (isSaving || !isChanged) ? 'default' : 'pointer',
                   transition: 'background 0.15s',
                 }}
               >
