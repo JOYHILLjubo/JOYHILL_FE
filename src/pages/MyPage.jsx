@@ -102,6 +102,11 @@ export default function MyPage() {
           credentials: 'include',
           body: formData,
         })
+        // 413은 nginx가 본문 크기 제한으로 막은 것 — 응답이 JSON이 아니라 HTML이라
+        // 아래 payload 파싱이 실패하므로 상태코드로 따로 구분해준다.
+        if (uploadRes.status === 413) {
+          throw new Error('사진 용량이 너무 큽니다. 더 작은 사진으로 다시 시도해주세요.')
+        }
         const uploadPayload = await uploadRes.json().catch(() => null)
         if (!uploadRes.ok || !uploadPayload?.success) {
           throw new Error(uploadPayload?.error?.message ?? '사진 업로드에 실패했습니다.')
