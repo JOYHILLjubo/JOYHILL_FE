@@ -188,6 +188,7 @@ function normalizeBirthday(item) {
     famName: item?.famName ?? '',
     villageName: item?.villageName ?? '',
     avatarKey: item?.avatarKey ?? null,
+    avatarPhotoUrl: item?.avatarPhotoUrl ?? null,
     day: item?.day ?? null,
     isToday: Boolean(item?.isToday),
   }
@@ -575,8 +576,8 @@ export default function HomePageConnected() {
           onClick={() => navigate('/my')}
           className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium border-none cursor-pointer hover:bg-gray-200 transition-colors overflow-hidden"
         >
-          {user?.avatarKey
-            ? <BibleAvatarIcon avatarKey={user.avatarKey} size={32} />
+          {(user?.avatarKey || user?.avatarPhotoUrl)
+            ? <BibleAvatarIcon avatarKey={user.avatarKey} photoUrl={user.avatarPhotoUrl} size={32} />
             : getInitial(user?.name)
           }
         </button>
@@ -695,7 +696,7 @@ export default function HomePageConnected() {
                         className="relative w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden"
                         style={{ backgroundColor: badge.variant === 'today' ? '#F9AB00' : '#9AA0A6' }}
                       >
-                        {b.avatarKey ? <BibleAvatarIcon avatarKey={b.avatarKey} size={44} /> : getInitial(b.name)}
+                        {(b.avatarKey || b.avatarPhotoUrl) ? <BibleAvatarIcon avatarKey={b.avatarKey} photoUrl={b.avatarPhotoUrl} size={44} /> : getInitial(b.name)}
                         {badge.variant === 'today' && (
                           <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-primary border-2 border-white" />
                         )}

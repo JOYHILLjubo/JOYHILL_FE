@@ -27,6 +27,7 @@ function normalizeUser(user) {
     birth: user.birth ?? '',
     passwordChanged: Boolean(user.passwordChanged),
     avatarKey: user.avatarKey ?? null,
+    avatarPhotoUrl: user.avatarPhotoUrl ?? null,
   }
 }
 

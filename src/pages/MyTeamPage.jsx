@@ -232,8 +232,8 @@ export default function MyTeamPage() {
                       const showAsLeader = item.isLeader || (currentSubTeam.teamLeaderName && item.name === currentSubTeam.teamLeaderName)
                       return (
                         <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                          {item.avatarKey
-                            ? <BibleAvatarIcon avatarKey={item.avatarKey} size={36} />
+                          {(item.avatarKey || item.avatarPhotoUrl)
+                            ? <BibleAvatarIcon avatarKey={item.avatarKey} photoUrl={item.avatarPhotoUrl} size={36} />
                             : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(item.name)}</div>
                           }
                           <div className="flex-1 ml-3">
@@ -266,8 +266,8 @@ export default function MyTeamPage() {
                 const subInfo = [item.famName, formatPhone(item.phone), formatBirth(item.birth)].filter(Boolean).join(' · ')
                 return (
                   <div key={item.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                    {item.avatarKey
-                      ? <BibleAvatarIcon avatarKey={item.avatarKey} size={36} />
+                    {(item.avatarKey || item.avatarPhotoUrl)
+                      ? <BibleAvatarIcon avatarKey={item.avatarKey} photoUrl={item.avatarPhotoUrl} size={36} />
                       : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(item.name)}</div>
                     }
                     <div className="flex-1 ml-3">

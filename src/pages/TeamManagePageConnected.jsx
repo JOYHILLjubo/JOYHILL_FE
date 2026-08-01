@@ -82,6 +82,7 @@ function mapMember(item) {
     role: item?.role ?? 'member',
     isLeader: Boolean(item?.isLeader),
     avatarKey: item?.avatarKey ?? null,
+    avatarPhotoUrl: item?.avatarPhotoUrl ?? null,
   }
 }
 
@@ -95,6 +96,7 @@ function mapUser(item) {
     phone: formatPhone(item?.phone ?? summary?.phone ?? ''),
     role: item?.role ?? summary?.role ?? 'member',
     avatarKey: item?.avatarKey ?? null,
+    avatarPhotoUrl: item?.avatarPhotoUrl ?? null,
   }
 }
 
@@ -736,8 +738,8 @@ export default function TeamManagePageConnected() {
                             ) : (
                               subCandidates.map((candidate) => (
                                 <div key={candidate.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-300 last:border-b-0">
-                                  {candidate.avatarKey
-                                    ? <BibleAvatarIcon avatarKey={candidate.avatarKey} size={36} />
+                                  {(candidate.avatarKey || candidate.avatarPhotoUrl)
+                                    ? <BibleAvatarIcon avatarKey={candidate.avatarKey} photoUrl={candidate.avatarPhotoUrl} size={36} />
                                     : <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-[13px] font-medium text-primary shrink-0">{getInitial(candidate.name)}</div>
                                   }
                                   <div className="flex-1 min-w-0">
@@ -764,8 +766,8 @@ export default function TeamManagePageConnected() {
                           const showAsLeader = member.isLeader || (currentSubTeam.teamLeaderName && member.name === currentSubTeam.teamLeaderName)
                           return (
                             <div key={member.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                              {member.avatarKey
-                                ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                              {(member.avatarKey || member.avatarPhotoUrl)
+                                ? <BibleAvatarIcon avatarKey={member.avatarKey} photoUrl={member.avatarPhotoUrl} size={36} />
                                 : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(member.name)}</div>
                               }
                               <div className="flex-1 ml-3">
@@ -842,8 +844,8 @@ export default function TeamManagePageConnected() {
                     ) : (
                       candidates.map((candidate) => (
                         <div key={candidate.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-300 last:border-b-0">
-                          {candidate.avatarKey
-                            ? <BibleAvatarIcon avatarKey={candidate.avatarKey} size={36} />
+                          {(candidate.avatarKey || candidate.avatarPhotoUrl)
+                            ? <BibleAvatarIcon avatarKey={candidate.avatarKey} photoUrl={candidate.avatarPhotoUrl} size={36} />
                             : <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center text-[13px] font-medium text-primary shrink-0">{getInitial(candidate.name)}</div>
                           }
                           <div className="flex-1 min-w-0">
@@ -879,8 +881,8 @@ export default function TeamManagePageConnected() {
 
                   return (
                     <div key={member.userId} className="flex items-center py-3 border-b border-gray-300 last:border-b-0">
-                      {member.avatarKey
-                        ? <BibleAvatarIcon avatarKey={member.avatarKey} size={36} />
+                      {(member.avatarKey || member.avatarPhotoUrl)
+                        ? <BibleAvatarIcon avatarKey={member.avatarKey} photoUrl={member.avatarPhotoUrl} size={36} />
                         : <div className={`w-9 h-9 rounded-full ${color.bg} flex items-center justify-center text-[13px] font-medium ${color.text} shrink-0`}>{getInitial(member.name)}</div>
                       }
                       <div className="flex-1 ml-3">
