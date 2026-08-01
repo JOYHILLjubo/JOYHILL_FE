@@ -21,6 +21,50 @@ const ROLE_LABELS = {
 const OT_AVATARS = BIBLE_AVATARS.filter((a) => a.category === '구약')
 const NT_AVATARS = BIBLE_AVATARS.filter((a) => a.category === '신약')
 
+// 프로필 사진은 화면에서 최대 48px로만 표시되므로 512px이면 충분하다.
+// 서버(S3Service)에도 리사이징이 있지만 nginx의 본문 크기 제한은 요청이 백엔드에 닿기 전에
+// 걸리기 때문에(413), 실제로 업로드를 통과시키려면 브라우저에서 미리 줄여 보내야 한다.
+// 요즘 폰 사진 3~8MB → 대략 50~150KB로 줄어든다.
+const PHOTO_MAX_SIZE = 512
+const PHOTO_QUALITY = 0.85
+
+async function loadBitmap(file) {
+  // imageOrientation: EXIF로 회전 정보가 들어있는 폰 사진이 눕지 않도록
+  if (typeof createImageBitmap === 'function') {
+    try {
+      return await createImageBitmap(file, { imageOrientation: 'from-image' })
+    } catch {
+      // 옵션 미지원 브라우저 → 옵션 없이 재시도
+      try { return await createImageBitmap(file) } catch { /* 아래 img 폴백으로 */ }
+    }
+  }
+  return await new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img) }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('사진을 읽지 못했습니다.')) }
+    img.src = url
+  })
+}
+
+async function downscalePhoto(file) {
+  const source = await loadBitmap(file)
+  const srcW = source.width, srcH = source.height
+  const scale = Math.min(1, PHOTO_MAX_SIZE / Math.max(srcW, srcH))
+  const w = Math.max(1, Math.round(srcW * scale))
+  const h = Math.max(1, Math.round(srcH * scale))
+
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  canvas.getContext('2d').drawImage(source, 0, 0, w, h)
+  source.close?.()
+
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', PHOTO_QUALITY))
+  if (!blob) throw new Error('사진을 처리하지 못했습니다. 다른 사진으로 시도해주세요.')
+  return blob
+}
+
 export default function MyPage() {
   const navigate = useNavigate()
   const {
@@ -94,8 +138,9 @@ export default function MyPage() {
       let photoUrl = pendingPhotoUrl
       // 새로 고른 사진이 있으면 S3에 먼저 올리고, 반환된 URL을 적용 요청에 실어 보낸다.
       if (photoFile) {
+        const compressed = await downscalePhoto(photoFile)
         const formData = new FormData()
-        formData.append('photo', photoFile)
+        formData.append('photo', compressed, 'avatar.jpg')
         const uploadRes = await fetch(`${API_BASE_URL}/api/users/me/avatar-photo`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${accessTokenRef.current}` },
