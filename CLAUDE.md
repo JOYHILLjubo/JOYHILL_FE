@@ -19,6 +19,20 @@
 - 화면 시각 스타일(카드/배경/보더)을 바꿀 땐 기본적으로 앱 전체 적용을 전제로 할 것 — 자세한 배경은 아래 "테마 시스템" 절 참고.
 - **아이콘은 이모지 대신 `lucide-react`를 쓸 것**(이미 설치돼 있고 `BottomNav.jsx`에서 사용 중). 이모지는 폰트/OS마다 렌더링이 달라 조잡해 보이고, 이 프로젝트 안에서도 두 아이콘 언어가 섞이면 통일감이 깨짐(2026-07-25, 설교노트 폴더 화면을 이모지→lucide 아이콘으로 교체하며 확정). `<select>`의 `<option>`처럼 React 컴포넌트를 못 넣는 자리는 예외.
 
+## 아바타 / 프로필 사진
+
+`components/BibleAvatars.jsx`에 성경 인물 아바타 **56종**(구약 32 / 신약 24)이 인라인 SVG 컴포넌트로 들어있다. 구조는 `BIBLE_AVATARS` 배열(key/label/category) + 컴포넌트 함수 + `SVG_MAP`(key→컴포넌트) 세 곳이며, **새 아바타를 추가하면 이 세 곳을 모두 건드려야 한다**(한 곳만 빠뜨리면 조용히 안 그려짐). 추가 후 정합성은 스크립트로 한 번에 확인할 수 있다 — 키/맵/컴포넌트 개수가 같은지, 고아 항목이 없는지, `clipPath` id가 중복되지 않는지.
+
+- **`clipPath` id는 파일 전체에서 유일해야 한다.** 아바타 선택 모달은 56종을 **동시에 렌더링**하므로 id가 겹치면 다른 아바타의 클리핑이 적용돼 그림이 깨진다. `av-` 접두어 + 인물별 축약(`av-job`, `av-sml` …) 규칙을 따를 것.
+- `BibleAvatarIcon`은 `avatarKey`(성경 인물)와 `photoUrl`(업로드한 내 사진)을 둘 다 받고 **photoUrl이 있으면 그걸 우선** 그린다. 둘 다 없으면 `null`을 반환하므로, 호출부는 `{(x.avatarKey || x.avatarPhotoUrl) ? <BibleAvatarIcon .../> : 이름첫글자}` 형태로 쓴다. 아바타 노출 지점이 9개 화면에 흩어져 있으니 렌더 방식을 바꿀 땐 전부 확인할 것.
+- 아바타와 사진은 **상호 배타**다(서버에서도 강제 — 사진을 적용하면 `avatarKey`가 null이 되고, 아바타로 되돌리면 이전 S3 오브젝트가 삭제됨).
+
+**사진은 업로드 전에 브라우저에서 512px/JPEG 0.85로 줄여서 보낸다(`MyPage.jsx`의 `downscalePhoto`)**. 서버(`S3Service`)에도 리사이징이 있지만 **nginx의 본문 크기 제한은 요청이 백엔드에 닿기 전에 걸리므로**(413) 서버 압축으로는 413을 막을 수 없다 — 클라이언트에서 미리 줄이는 게 실제 해법이다. 곁가지로 아이폰 HEIC도 canvas를 거치며 JPEG로 바뀌어 서버 디코딩 문제까지 피해간다. EXIF 회전 사진이 눕지 않도록 `createImageBitmap(file, { imageOrientation: 'from-image' })`를 쓰고 미지원 브라우저는 `img` 폴백을 탄다.
+
+## AuthContext의 `normalizeUser()`는 화이트리스트다 — 유저 필드를 추가하면 여기도 반드시 추가할 것
+
+`AuthContext.jsx`의 `normalizeUser()`가 API 응답에서 **명시적으로 나열한 필드만** 골라 담는다. 백엔드가 새 필드를 내려줘도 여기에 안 적으면 **조용히 버려진다** — 에러도 없고 네트워크 탭에는 값이 정상적으로 보이는데 화면에만 반영이 안 되는, 원인 찾기 까다로운 버그가 된다(2026-08-01 `avatarPhotoUrl` 추가 시 실제로 겪음: 사진을 저장해도 이니셜 fallback만 뜨는데 `/api/users/me` 응답에는 URL이 멀쩡히 들어있었음). `UserSummary`에 필드를 추가할 땐 BE DTO → `normalizeUser()` → 화면 순서로 확인할 것.
+
 ## contentEditable 리치 텍스트를 쓸 때 주의
 
 `SermonNoteWritePage.jsx`의 에디터가 유일한 contentEditable 사용처. **네이티브 Enter 키 동작에 의존하면 안 됨** — 실사용자 환경에서 Enter를 눌러도 줄바꿈이 아예 안 생기는 경우가 있어(모바일 웹뷰 계열 추정), `onKeyDown`에서 Enter를 가로채 `execCommand('insertLineBreak')`(리스트 안이면 `insertParagraph`)로 명시적으로 처리해야 함. 다른 작성 화면(공지/기도)은 전부 네이티브 `<textarea>`라 이 문제가 없음 — 앞으로도 멀티라인 입력은 특별한 이유 없으면 `<textarea>`를 쓰고, contentEditable은 서식(굵게/색상 등)이 꼭 필요할 때만 쓸 것.
