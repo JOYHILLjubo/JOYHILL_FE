@@ -480,6 +480,20 @@ function VillageStatsView({
 }
 
 // ── 메인 페이지 ──
+// 마지막 백업 시각 표시용 — 오늘이면 "오늘 15:30", 아니면 "8/1 15:30"
+function formatSyncedAt(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  const today = new Date()
+  const isToday = d.getFullYear() === today.getFullYear()
+    && d.getMonth() === today.getMonth()
+    && d.getDate() === today.getDate()
+  return isToday ? `오늘 ${hh}:${mm}` : `${d.getMonth() + 1}/${d.getDate()} ${hh}:${mm}`
+}
+
 export default function AttendanceStatsPageConnected() {
   const navigate = useNavigate()
   const { user, accessToken, setAccessToken, logout, isVillageLeaderOrAbove, isPastorOrAbove } = useAuth()
@@ -501,6 +515,7 @@ export default function AttendanceStatsPageConnected() {
   const [weekAttendMap, setWeekAttendMap] = useState({})
   const [famCheckStatusMap, setFamCheckStatusMap] = useState({})
   const [isSyncingSheet, setIsSyncingSheet] = useState(false)
+  const [sheetSyncedAt, setSheetSyncedAt] = useState(undefined) // undefined=미조회, null=백업이력없음
 
   const handleExpiredSession = () => { logout(); navigate('/login', { replace: true }) }
 
@@ -520,6 +535,16 @@ export default function AttendanceStatsPageConnected() {
       throw err
     }
   }
+
+  // 마지막 구글시트 백업 시각 (교역자/관리자만 조회 가능)
+  useEffect(() => {
+    if (!isPastorOrAbove) return
+    let cancelled = false
+    callAuthedApi('/api/attendance/sync-sheet')
+      .then((data) => { if (!cancelled) setSheetSyncedAt(data?.syncedAt ?? null) })
+      .catch(() => { if (!cancelled) setSheetSyncedAt(null) })
+    return () => { cancelled = true }
+  }, [isPastorOrAbove])
 
   // 누적 통계 로드 (연도 변경 시 재조회)
   useEffect(() => {
@@ -622,23 +647,31 @@ export default function AttendanceStatsPageConnected() {
         <button onClick={() => navigate('/my')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-semibold flex-1">출석 통계</p>
         {isPastorOrAbove && (
-          <button
-            onClick={async () => {
-              setIsSyncingSheet(true)
-              try {
-                await callAuthedApi('/api/attendance/sync-sheet', { method: 'POST' })
-                alert('구글시트로 백업을 완료했습니다.')
-              } catch (err) {
-                alert(err instanceof Error ? err.message : '구글시트 백업에 실패했습니다.')
-              } finally {
-                setIsSyncingSheet(false)
-              }
-            }}
-            disabled={isSyncingSheet}
-            className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-50 shrink-0"
-          >
-            {isSyncingSheet ? '백업 중...' : '구글시트로 백업'}
-          </button>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <button
+              onClick={async () => {
+                setIsSyncingSheet(true)
+                try {
+                  const data = await callAuthedApi('/api/attendance/sync-sheet', { method: 'POST' })
+                  setSheetSyncedAt(data?.syncedAt ?? null)
+                  alert('구글시트로 백업을 완료했습니다.')
+                } catch (err) {
+                  alert(err instanceof Error ? err.message : '구글시트 백업에 실패했습니다.')
+                } finally {
+                  setIsSyncingSheet(false)
+                }
+              }}
+              disabled={isSyncingSheet}
+              className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-full border-none cursor-pointer disabled:opacity-50"
+            >
+              {isSyncingSheet ? '백업 중...' : '구글시트로 백업'}
+            </button>
+            {sheetSyncedAt !== undefined && (
+              <span className="text-[10px] text-gray-500 leading-none">
+                {sheetSyncedAt ? `마지막 백업 ${formatSyncedAt(sheetSyncedAt)}` : '백업 기록 없음'}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
