@@ -35,30 +35,30 @@ export default function BottomNav() {
   return (
     <nav
       className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-50 pointer-events-none"
-      style={{ bottom: 'calc(10px + env(safe-area-inset-bottom, 0px))' }}
+      style={{ bottom: 'calc(6px + env(safe-area-inset-bottom, 0px))' }}
     >
-      <div className="jh-floating-nav pointer-events-auto flex justify-around items-center rounded-[26px] border border-gray-200 px-1 py-1.5">
+      <div className="jh-floating-nav pointer-events-auto flex justify-around items-center rounded-[28px] border border-gray-200 px-1 py-2">
         {tabs.map((tab) => {
           const isActive = location.pathname.startsWith(tab.path)
           return (
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className="jh-nav-tab flex flex-col items-center justify-center gap-0.5 bg-transparent border-none cursor-pointer min-w-[46px] px-1 py-0.5"
+              className="jh-nav-tab flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer min-w-[52px] px-1 py-0.5"
             >
               <span
-                className={`flex items-center justify-center w-11 h-[30px] rounded-2xl transition-colors duration-150 ${
+                className={`flex items-center justify-center w-12 h-[34px] rounded-[16px] transition-colors duration-150 ${
                   isActive ? 'bg-primary-light' : 'bg-transparent'
                 }`}
               >
                 <tab.Icon
-                  size={21}
+                  size={23}
                   strokeWidth={isActive ? 2.2 : 1.7}
                   className={isActive ? 'text-primary' : 'text-gray-500'}
                 />
               </span>
               <span
-                className={`text-[10px] leading-none ${
+                className={`text-[11px] leading-none ${
                   isActive ? 'text-primary font-semibold' : 'text-gray-500'
                 }`}
               >
