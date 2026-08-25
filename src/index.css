@@ -72,6 +72,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /*
+   * 모바일에서 버튼을 누르거나 스크롤하다 손을 떼면 회색 사각형 잔상이 남는 문제
+   * (iOS/안드로이드 웹뷰의 기본 탭 하이라이트). 각 버튼이 이미 :active/hover 스타일을
+   * 갖고 있으므로 기본 하이라이트는 끈다.
+   */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
