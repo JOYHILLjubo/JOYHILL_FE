@@ -13,6 +13,7 @@ import PrayerWritePageConnected from './pages/PrayerWritePageConnected'
 import CommonPrayerWritePage from './pages/CommonPrayerWritePage'
 import MyPage from './pages/MyPage'
 import MyEditPage from './pages/MyEditPage'
+import MyProfilePage from './pages/MyProfilePage'
 import NewcomerPageConnected from './pages/NewcomerPageConnected'
 import TeamManagePageConnected from './pages/TeamManagePageConnected'
 import FamManagePageConnected from './pages/FamManagePageConnected'
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="/prayer/common/write" element={<CommonPrayerWritePage />} />
           <Route path="/my" element={<MyPage />} />
           <Route path="/my/edit" element={<MyEditPage />} />
+          <Route path="/my/profile" element={<MyProfilePage />} />
           <Route path="/newcomer" element={<NewcomerPageConnected />} />
           <Route path="/team/manage" element={<TeamManagePageConnected />} />
           <Route path="/fam/manage" element={<FamManagePageConnected />} />
