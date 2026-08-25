@@ -138,3 +138,38 @@ input, textarea, select {
 .note-rich-editor li {
   margin: 0.15em 0;
 }
+
+/*
+ * 플로팅 하단 네비게이션 바 (BottomNav) — 화면 바닥/좌우에서 띄워둔 알약 형태라
+ * 카드처럼 "떠 있는" 느낌이 나야 해서 그림자를 직접 준다.
+ * backdrop-filter를 지원하는 브라우저에서만 반투명 + 블러로 바꿔서, 스크롤되는 컨텐츠가
+ * 바 뒤로 은은하게 비치게 한다(미지원 브라우저는 불투명 배경 그대로라 안전).
+ */
+.jh-floating-nav {
+  background-color: rgb(var(--jh-surface));
+  box-shadow: 0 6px 24px rgba(20, 22, 42, 0.12), 0 1px 3px rgba(20, 22, 42, 0.06);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .jh-floating-nav {
+    background-color: rgb(var(--jh-surface) / 0.82);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+}
+
+/* 탭 눌렀을 때 살짝 눌리는 피드백 (모바일에서 반응이 있다는 신호) */
+.jh-nav-tab {
+  transition: transform 0.12s ease;
+}
+.jh-nav-tab:active {
+  transform: scale(0.92);
+}
+
+/* 출석 화면의 플로팅 저장 알약 — 하단 네비 위로 떠오르므로 그림자로 층을 구분한다 */
+.jh-save-pill {
+  box-shadow: 0 10px 24px rgba(66, 133, 244, 0.35);
+}
+.jh-save-pill:disabled {
+  box-shadow: none;
+}

@@ -186,7 +186,7 @@ export default function MyPage() {
   }
 
   return (
-    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="px-5 pt-5 pb-4">
         <p className="text-lg font-semibold flex-1">MY</p>
       </div>

@@ -195,7 +195,7 @@ export default function SermonNoteListPage() {
   }, [notes, filter, searchQuery])
 
   return (
-    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={() => navigate('/sermon-note')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-semibold flex-1">{pageTitle}</p>
