@@ -281,7 +281,7 @@ export default function NoticeWritePageConnected() {
   }
 
   return (
-    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', overflowX: 'hidden' }}>
+    <div style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))', overflowX: 'hidden' }}>
       <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
         <button onClick={handleBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <p className="text-base font-semibold flex-1">{isEdit ? '공지사항 수정' : '공지사항 등록'}</p>

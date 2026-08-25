@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BottomNav from '../components/BottomNav'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -47,6 +48,17 @@ function getSundayLabel(key) {
   while (firstSunday.getDay() !== 0) firstSunday.setDate(firstSunday.getDate() + 1)
   const week = Math.floor((date - firstSunday) / (7 * 24 * 60 * 60 * 1000)) + 1
   return `${month}월 ${week}주차`
+}
+
+// 저장된 내용과 지금 화면 상태가 다른지 비교하기 위한 서명값.
+// (멤버 순서/체크 3종을 그대로 문자열로 직렬화 — 객체 비교보다 단순하고 오탐이 없다)
+function buildAttendanceSignature(members, map) {
+  return members
+    .map((m) => {
+      const rec = map[m.id] ?? {}
+      return `${m.id}:${rec.worship === true ? 1 : 0}${rec.online === true ? 1 : 0}${rec.fam === true ? 1 : 0}`
+    })
+    .join('|')
 }
 
 function mapMembers(items) {
@@ -129,6 +141,8 @@ export default function AttendancePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [pageError, setPageError] = useState('')
   const [saveError, setSaveError] = useState('')
+  // 마지막으로 서버에 저장된(=불러온) 상태의 서명. 지금 상태와 다르면 "저장 안 된 변경"이 있는 것.
+  const [savedSignature, setSavedSignature] = useState('')
 
   const famName = user?.fam ?? ''
   const currentYear = new Date().getFullYear()
@@ -167,11 +181,14 @@ export default function AttendancePage() {
         callAuthedApi(`/api/fams/${encodeURIComponent(famName)}/members?year=${currentYear}`),
         callAuthedApi(`/api/attendance?${params.toString()}`),
       ])
-      setMembers(Array.isArray(membersData) ? mapMembers(membersData) : [])
-      setAttendanceMap(Array.isArray(attendanceData) ? buildAttendanceMap(attendanceData) : {})
+      const loadedMembers = Array.isArray(membersData) ? mapMembers(membersData) : []
+      const loadedMap = Array.isArray(attendanceData) ? buildAttendanceMap(attendanceData) : {}
+      setMembers(loadedMembers)
+      setAttendanceMap(loadedMap)
+      setSavedSignature(buildAttendanceSignature(loadedMembers, loadedMap))
     } catch (err) {
       setPageError(err instanceof Error ? err.message : '출석 정보를 불러오지 못했습니다.')
-      setMembers([]); setAttendanceMap({})
+      setMembers([]); setAttendanceMap({}); setSavedSignature('')
     } finally { setIsLoading(false) }
   }
 
@@ -193,6 +210,17 @@ export default function AttendancePage() {
     }))
   }
 
+  // 저장 안 된 변경이 있는지 / 몇 명이 바뀌었는지
+  const currentSignature = buildAttendanceSignature(members, attendanceMap)
+  const isDirty = members.length > 0 && currentSignature !== savedSignature
+  const changedCount = (() => {
+    if (!isDirty) return 0
+    const savedParts = savedSignature.split('|')
+    return currentSignature.split('|').filter((part, i) => part !== savedParts[i]).length
+  })()
+  // 저장 알약은 "저장할 게 있을 때 / 저장 중 / 방금 저장됨 / 에러"일 때만 떠오른다
+  const showSaveBar = isDirty || isSaving || saved || Boolean(saveError)
+
   const worshipCount = members.filter((m) => getChecked(m.id, 'worship') === true).length
   const onlineCount = members.filter((m) => getChecked(m.id, 'online') === true).length
   const famCount = members.filter((m) => getChecked(m.id, 'fam') === true).length
@@ -201,6 +229,9 @@ export default function AttendancePage() {
     if (!famName) { setSaveError('소속 팸 정보가 없어 저장할 수 없습니다.'); return }
     if (members.length === 0) { setSaveError('저장할 팸원이 없습니다.'); return }
     setIsSaving(true); setSaveError(''); setSaved(false)
+    // 저장 요청을 만든 시점의 상태를 서명으로 박아둔다 — 저장 중에 체크를 더 건드리면
+    // 그건 "아직 저장 안 된 변경"으로 남아야 하므로, 완료 후 현재 상태로 서명하면 안 된다.
+    const sentSignature = buildAttendanceSignature(members, attendanceMap)
     try {
       await callAuthedApi('/api/attendance', {
         method: 'POST',
@@ -216,13 +247,24 @@ export default function AttendancePage() {
         },
       })
       setSaved(true)
+      setSavedSignature(sentSignature)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : '출석 저장에 실패했습니다.')
     } finally { setIsSaving(false) }
   }
 
   return (
-    <div className="pb-24">
+    <div
+      style={{
+        // 하단에 떠 있는 것들만큼 정확히 비워둬서, 팸원이 많아 스크롤이 생겨도 마지막 사람이
+        // 저장 버튼/네비게이션바에 가려지지 않게 한다.
+        //   네비게이션바: 아래 10 + 높이 60 = 70
+        //   저장 알약   : 아래 80 + 높이 52 = 132  (에러 문구가 뜨면 +46)
+        // 여기에 여유 20px을 더한 값이다.
+        paddingBottom: `calc(${showSaveBar ? (saveError ? 198 : 152) : 90}px + env(safe-area-inset-bottom, 0px))`,
+        transition: 'padding-bottom 0.2s ease',
+      }}
+    >
       <div className="flex items-center gap-3 px-5 pt-4 pb-2">
         <button onClick={() => navigate('/home')} className="text-lg bg-transparent border-none cursor-pointer">←</button>
         <div>
@@ -304,13 +346,42 @@ export default function AttendancePage() {
         <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full border border-gray-300" /><span className="text-[11px] text-gray-500">결석</span></div>
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 py-3 bg-surface border-t border-gray-300">
-        {saveError && <p className="text-xs text-danger mb-2">{saveError}</p>}
-        <button onClick={handleSave} disabled={isLoading || isSaving || members.length === 0}
-          className={`w-full py-3 rounded-lg text-sm font-medium border-none transition-colors ${saved ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary-hover'} ${isLoading || isSaving || members.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
-          {isSaving ? '저장 중...' : saved ? '✓ 저장되었습니다' : '출석 저장하기'}
-        </button>
+      {/*
+        예전에는 화면 바닥을 저장 바가 통째로 차지하느라 하단 네비게이션바를 못 띄웠다(리더가
+        출석 화면에 들어오면 다른 탭으로 못 넘어감). 이제 저장 버튼은 "저장할 변경이 있을 때만"
+        네비 위로 떠오르는 알약이라, 네비게이션바를 항상 켜둔 채로 출석 체크가 가능하다.
+      */}
+      <div
+        className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-40 pointer-events-none"
+        style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <div
+          className={`transition-all duration-200 ${
+            showSaveBar ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+          }`}
+        >
+          {saveError && (
+            <p className="jh-floating-nav pointer-events-auto text-xs text-danger rounded-2xl px-4 py-2.5 mb-2">
+              {saveError}
+            </p>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={isLoading || isSaving || members.length === 0 || !showSaveBar}
+            className={`jh-save-pill pointer-events-auto w-full py-3.5 rounded-[22px] text-sm font-bold text-white border-none transition-colors ${
+              saved ? 'bg-success' : 'bg-primary hover:bg-primary-hover'
+            } ${isLoading || isSaving || members.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+          >
+            {isSaving
+              ? '저장 중...'
+              : saved
+                ? '저장되었습니다'
+                : `출석 저장하기${changedCount > 0 ? ` · ${changedCount}명 변경` : ''}`}
+          </button>
+        </div>
       </div>
+
+      <BottomNav />
     </div>
   )
 }
