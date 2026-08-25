@@ -566,7 +566,7 @@ export default function HomePageConnected() {
   }
 
   return (
-    <div className="bg-[var(--jh-page-bg)] min-h-screen" style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="bg-[var(--jh-page-bg)] min-h-screen" style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="flex justify-between items-center px-5 pt-6 pb-3">
         <div>
           <img src={logoHome} alt="joyhill" className="h-8" />

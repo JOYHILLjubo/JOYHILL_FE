@@ -258,10 +258,10 @@ export default function AttendancePage() {
       style={{
         // 하단에 떠 있는 것들만큼 정확히 비워둬서, 팸원이 많아 스크롤이 생겨도 마지막 사람이
         // 저장 버튼/네비게이션바에 가려지지 않게 한다.
-        //   네비게이션바: 아래 6 + 높이 71 = 77
-        //   저장 알약   : 아래 85 + 높이 52 = 137  (에러 문구가 뜨면 +46)
+        //   네비게이션바: 아래 6 + 높이 64 = 70
+        //   저장 알약   : 아래 78 + 높이 52 = 130  (에러 문구가 뜨면 +46)
         // 여기에 여유 20px을 더한 값이다.
-        paddingBottom: `calc(${showSaveBar ? (saveError ? 203 : 157) : 97}px + env(safe-area-inset-bottom, 0px))`,
+        paddingBottom: `calc(${showSaveBar ? (saveError ? 196 : 150) : 90}px + env(safe-area-inset-bottom, 0px))`,
         transition: 'padding-bottom 0.2s ease',
       }}
     >
@@ -353,7 +353,7 @@ export default function AttendancePage() {
       */}
       <div
         className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-40 pointer-events-none"
-        style={{ bottom: 'calc(85px + env(safe-area-inset-bottom, 0px))' }}
+        style={{ bottom: 'calc(78px + env(safe-area-inset-bottom, 0px))' }}
       >
         <div
           className={`transition-all duration-200 ${
