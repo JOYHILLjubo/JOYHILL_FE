@@ -130,9 +130,11 @@ export default function MyEditPage() {
       setUser((prevUser) => prevUser ? { ...prevUser, passwordChanged: true } : prevUser)
       setPwSuccess(true)
 
-      // 비밀번호 변경 후 홈으로 이동
+      // 최초 로그인이었다면 이제 앱을 쓸 수 있으니 홈으로,
+      // 그냥 비밀번호만 바꾸러 온 경우엔 왔던 화면(내 정보)으로 돌려보낸다.
+      const destination = isFirstLogin ? '/home' : '/my/profile'
       setTimeout(() => {
-        navigate('/home', { replace: true })
+        navigate(destination, { replace: true })
       }, 1200)
     } catch (err) {
       const message = err instanceof Error ? err.message : '비밀번호 변경 중 오류가 발생했습니다.'
@@ -149,7 +151,7 @@ export default function MyEditPage() {
         {/* 최초 로그인 시 뒤로가기 막기 */}
         {!isFirstLogin && (
           <button
-            onClick={() => navigate('/my')}
+            onClick={() => navigate('/my/profile')}
             className="text-lg bg-transparent border-none cursor-pointer"
           >
             ←
