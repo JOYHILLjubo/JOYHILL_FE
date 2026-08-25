@@ -63,6 +63,66 @@ function isAllowedTextColor(value) {
   return COLOR_SWATCHES.some((swatch) => swatch.value && colorsEqual(value, swatch.value))
 }
 
+// 에디터 루트의 직계 자식으로 허용되는 "줄 블록" 태그.
+const LINE_BLOCK_TAGS = new Set(['DIV', 'P', 'UL', 'OL', 'BLOCKQUOTE'])
+
+// 본문의 모든 줄을 <div> 블록으로 통일한다.
+//
+// 이게 없으면 한 본문 안에 세 가지 줄 표현이 섞인다 — 맨 위 줄은 감싸지지 않은 생 텍스트,
+// 엔터로 만든 줄은 <div>, 예전에 저장된 노트는 <br>. 그런데 execCommand('insertParagraph')는
+// 이 셋에서 **각각 다르게 동작한다**. 특히 감싸지지 않은 첫 줄 중간에서 엔터를 치면 그 뒤의
+// <div> 줄들을 통째로 새 <div> 안에 중첩시켜버려서, 화면상 줄이 밀리고 글자가 엉뚱한 줄에 붙는다
+// ("가끔 -1줄이 되는데 규칙을 모르겠다"는 제보의 정체. 재현 확인:
+//  첫줄<div>둘째줄</div> 에서 "첫|줄" 위치 엔터 → 첫<div>줄<div>둘째줄</div></div>).
+//
+// 줄이 전부 같은 모양(블록)이면 insertParagraph의 동작도 한 가지로 고정된다.
+// 노드를 새로 만들지 않고 옮기기만 하므로, 호출부가 잡아둔 커서(노드 참조)는 그대로 유효하다.
+function normalizeEditorBlocks(editor) {
+  if (!editor) return false
+  let changed = false
+  let group = []
+
+  const flushGroup = () => {
+    if (group.length === 0) return
+    const line = document.createElement('div')
+    editor.insertBefore(line, group[0])
+    group.forEach((node) => line.appendChild(node))
+    group = []
+    changed = true
+  }
+
+  Array.from(editor.childNodes).forEach((child) => {
+    if (child.nodeType === Node.ELEMENT_NODE && LINE_BLOCK_TAGS.has(child.nodeName)) {
+      flushGroup()
+      return
+    }
+    if (child.nodeName === 'BR') {
+      if (group.length === 0) {
+        // 빈 줄 — <br>을 그대로 빈 블록의 내용물로 재사용한다
+        const line = document.createElement('div')
+        editor.insertBefore(line, child)
+        line.appendChild(child)
+      } else {
+        // 줄 구분자 역할이던 <br>은 블록이 대신하므로 없앤다(남기면 빈 줄이 하나 더 생김)
+        flushGroup()
+        child.remove()
+      }
+      changed = true
+      return
+    }
+    group.push(child)
+  })
+  flushGroup()
+  return changed
+}
+
+function editorNeedsBlockNormalize(editor) {
+  if (!editor) return false
+  return Array.from(editor.childNodes).some(
+    (node) => !(node.nodeType === Node.ELEMENT_NODE && LINE_BLOCK_TAGS.has(node.nodeName)),
+  )
+}
+
 // 이 노드가 속한 "블록" — 에디터 루트이거나, 목록을 빠져나올 때 생기는 <div>/<li> 같은 중간 블록.
 // ── 자동 임시저장(로컬) ─────────────────────────────────────────────────────
 // 서버에 바로 쓰지 않고 이 기기에만 저장한다. 서버 자동저장은 아직 저장 버튼을 누르지 않은
@@ -389,6 +449,7 @@ export default function SermonNoteWritePage() {
     } else {
       editor.innerHTML = serverContent
     }
+    normalizeEditorBlocks(editor)
     setCharCount((editor.textContent || '').length)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -647,6 +708,36 @@ export default function SermonNoteWritePage() {
     sel.addRange(newRange)
   }
 
+  // 줄 구조를 <div> 블록으로 통일한다. 노드를 옮기기만 하므로 커서가 가리키는 노드 자체는
+  // 살아있지만, 커서가 에디터 루트를 가리키는 경우(자식 인덱스 기준)엔 인덱스가 어긋난다 —
+  // 그래서 임시 표식을 심어두고 정규화 후 그 자리로 커서를 되돌린다.
+  const ensureBlockStructure = () => {
+    const editor = editorRef.current
+    if (!editor || !editorNeedsBlockNormalize(editor)) return
+
+    const sel = window.getSelection()
+    const hasCaret = sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)
+    let marker = null
+    if (hasCaret) {
+      marker = document.createElement('span')
+      marker.setAttribute('data-caret-marker', '')
+      sel.getRangeAt(0).insertNode(marker)
+    }
+
+    normalizeEditorBlocks(editor)
+
+    if (marker) {
+      const restored = document.createRange()
+      restored.setStartBefore(marker)
+      restored.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(restored)
+      marker.remove()
+      // 표식을 심느라 쪼개진 텍스트 노드를 다시 붙인다
+      editor.normalize()
+    }
+  }
+
   // execCommand가 없거나 실패했을 때 쓰는 수동 줄바꿈. Enter를 preventDefault로 가로챈 뒤
   // 명령이 실패하면 아무 일도 안 일어나서 "엔터가 아예 안 먹는" 상태가 되므로 반드시 대비가 필요하다
   // (insertLineBreak는 비표준이라 지원하지 않는 브라우저가 있다).
@@ -729,6 +820,9 @@ export default function SermonNoteWritePage() {
 
     if (e.key === 'Enter' && !isComposing) {
       e.preventDefault()
+      // 줄이 전부 같은 모양(블록)이어야 insertParagraph가 한 가지로만 동작한다.
+      // 맨 위 생 텍스트 줄이 남아있으면 그 줄에서 엔터를 칠 때 뒷줄들이 통째로 중첩된다.
+      ensureBlockStructure()
       const before = editorRef.current?.innerHTML ?? ''
       let handled = false
       try { handled = document.execCommand('insertParagraph') } catch { handled = false }
@@ -781,6 +875,7 @@ export default function SermonNoteWritePage() {
         }
       }
     }
+    ensureBlockStructure()
     handleEditorInput()
   }
 
@@ -1105,7 +1200,12 @@ export default function SermonNoteWritePage() {
       <div
         className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-40 flex items-center gap-2.5 pointer-events-none"
         style={{
-          bottom: keyboardInset > 0 ? keyboardInset + 12 : 'calc(22px + env(safe-area-inset-bottom, 0px))',
+          bottom: 'calc(22px + env(safe-area-inset-bottom, 0px))',
+          // 키보드가 가린 만큼 위로 올린다. bottom 값을 바꾸면 그때마다 레이아웃을 다시 잡아서
+          // 뚝뚝 끊겨 보이는데, transform은 합성 단계에서만 처리돼서 부드럽게 따라온다.
+          transform: keyboardInset > 0 ? `translateY(-${keyboardInset}px)` : 'none',
+          transition: 'transform 0.18s cubic-bezier(0.32, 0.72, 0, 1)',
+          willChange: 'transform',
         }}
       >
         <div className="jh-write-toolbar pointer-events-auto flex-1 flex items-center gap-2.5 bg-surface border border-gray-200 rounded-full px-3.5 py-2.5 min-w-0">

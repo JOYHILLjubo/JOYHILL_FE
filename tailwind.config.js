@@ -1,5 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  // 터치 기기에서 버튼을 한 번 누르면 hover 스타일이 그대로 눌러붙어서(다른 곳을 누를 때까지)
+  // "색이 남아있다"로 보인다. 이 플래그를 켜면 hover: 유틸리티가 hover를 실제로 지원하는
+  // 기기에서만 적용된다(@media (hover: hover)로 감싸짐).
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",

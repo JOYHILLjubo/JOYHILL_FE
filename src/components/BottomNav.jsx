@@ -35,7 +35,10 @@ export default function BottomNav() {
   return (
     <nav
       className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-50 pointer-events-none"
-      style={{ bottom: 'calc(6px + env(safe-area-inset-bottom, 0px))' }}
+      // 아이폰에서는 홈 인디케이터 영역 바로 위에 붙인다. 예전처럼 안전영역 "위에 6px을 더"
+      // 띄우면 바와 홈 인디케이터 사이에 빈 띠가 생기고, 그 띠로 아래 컨텐츠가 눌린다.
+      // 안전영역이 없는 기기(안드로이드·데스크톱)에서만 6px을 띄워 떠 있는 느낌을 유지한다.
+      style={{ bottom: 'max(6px, env(safe-area-inset-bottom, 0px))' }}
     >
       <div className="jh-floating-nav pointer-events-auto flex justify-around items-center rounded-[27px] border border-gray-200 px-1 py-1.5">
         {tabs.map((tab) => {
