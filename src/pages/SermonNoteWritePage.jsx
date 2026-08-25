@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Folder, BookOpen } from 'lucide-react'
+import { ArrowLeft, BookOpen, Check, Folder, Plus, Star, X } from 'lucide-react'
 import VersePickerSheet from '../components/VersePickerSheet'
 import { useAuth } from '../context/AuthContext'
 
@@ -286,6 +286,8 @@ export default function SermonNoteWritePage() {
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [draftSavedAt, setDraftSavedAt] = useState(null)
+  // 모바일 키보드가 가리는 높이. 저장 버튼을 키보드 바로 위에 붙여두기 위해 쓴다.
+  const [keyboardInset, setKeyboardInset] = useState(0)
   const [draftRestoredAt, setDraftRestoredAt] = useState(null)
 
   // 수정 중인 노트는 노트별로, 새 노트는 하나의 키로 임시저장한다
@@ -401,6 +403,30 @@ export default function SermonNoteWritePage() {
 
   useEffect(() => () => {
     if (draftTimerRef.current) window.clearTimeout(draftTimerRef.current)
+  }, [])
+
+  // 키보드가 올라와도 저장 버튼이 키보드 뒤로 숨거나 스크롤 따라 왔다갔다 하지 않게,
+  // 실제로 가려진 높이만큼 버튼을 띄운다.
+  //
+  // iOS는 키보드가 떠도 레이아웃 뷰포트(window.innerHeight)가 그대로라서 position:fixed 요소가
+  // 키보드 뒤로 숨는다 — visualViewport로 실제 보이는 영역을 읽어야만 알 수 있다.
+  // 안드로이드는 보통 레이아웃 뷰포트 자체가 줄어들어 이 값이 0이 되고, 그때는 예전처럼
+  // 화면 바닥에 붙는 게 맞는 동작이다.
+  useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return undefined
+    const update = () => {
+      const hidden = window.innerHeight - viewport.height - viewport.offsetTop
+      // 주소창이 접히는 정도(수십 px)는 키보드가 아니므로 무시한다
+      setKeyboardInset(hidden > 80 ? Math.round(hidden) : 0)
+    }
+    viewport.addEventListener('resize', update)
+    viewport.addEventListener('scroll', update)
+    update()
+    return () => {
+      viewport.removeEventListener('resize', update)
+      viewport.removeEventListener('scroll', update)
+    }
   }, [])
 
   const handleExpiredSession = () => { logout(); navigate('/login', { replace: true }) }
@@ -621,9 +647,6 @@ export default function SermonNoteWritePage() {
     sel.addRange(newRange)
   }
 
-  const isCursorInList = () =>
-    document.queryCommandState('insertUnorderedList') || document.queryCommandState('insertOrderedList')
-
   // execCommand가 없거나 실패했을 때 쓰는 수동 줄바꿈. Enter를 preventDefault로 가로챈 뒤
   // 명령이 실패하면 아무 일도 안 일어나서 "엔터가 아예 안 먹는" 상태가 되므로 반드시 대비가 필요하다
   // (insertLineBreak는 비표준이라 지원하지 않는 브라우저가 있다).
@@ -687,20 +710,30 @@ export default function SermonNoteWritePage() {
     return true
   }
 
-  // 일부 브라우저에서 contentEditable의 기본 Enter 동작(줄바꿈)이 씹히는 경우가 있어 직접 처리.
-  // 목록 안에서는 insertParagraph를 써야 다음 항목 생성/빈 항목에서 목록 탈출이 정상 동작함.
+  // 엔터는 항상 insertParagraph로 처리한다(= 브라우저가 엔터에 실제로 쓰는 동작).
+  //
+  // 예전에는 목록 밖에서 insertLineBreak를 썼는데, 그게 "줄바꿈하고 타이핑하면 한 줄 위로
+  // 붙어버리는"(전체적으로 -1줄) 버그의 원인이었다. insertLineBreak는 <br>만 하나 꽂아 넣기
+  // 때문에, 브라우저가 문단 맨 끝에 두는 눈에 안 보이는 보정용 <br>과 커서 위치가 어긋나면
+  // 다음에 친 글자가 이전 줄로 들어간다(모바일에서 특히 잘 뜬다).
+  // insertParagraph는 줄을 진짜 블록으로 쪼개기 때문에 빈 줄에도 실체가 있어서 커서가 갈 곳이
+  // 명확하고, 이 어긋남 자체가 생기지 않는다. 목록 안 엔터는 예전부터 이 명령을 쓰고 있었고
+  // 거기서는 -1줄 문제가 보고된 적이 없다는 점도 근거.
+  //
+  // 그래도 "엔터를 눌러도 줄바꿈이 아예 안 생긴다"는 제보가 있었으므로(모바일 웹뷰 계열 추정)
+  // 명령이 실패하면 직접 <br>을 넣는 안전망은 남긴다.
   const handleEditorKeyDown = (e) => {
-    // 한글 조합 중에는 절대 가로채지 않는다 — 조합이 끊기거나 마지막 글자가 중복된다.
+    // 한글 조합 중에는 아무것도 하지 않는다 — 조합이 끊기거나 마지막 글자가 중복된다.
     // 안드로이드 키보드 일부는 isComposing을 안 채우고 keyCode만 229로 보내므로 둘 다 본다.
     const isComposing = e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229
 
     if (e.key === 'Enter' && !isComposing) {
       e.preventDefault()
+      const before = editorRef.current?.innerHTML ?? ''
       let handled = false
-      try {
-        handled = document.execCommand(isCursorInList() ? 'insertParagraph' : 'insertLineBreak')
-      } catch { handled = false }
-      if (!handled) insertLineBreakManually()
+      try { handled = document.execCommand('insertParagraph') } catch { handled = false }
+      // true를 돌려주고도 실제로는 아무것도 안 하는 경우가 있어서 결과까지 확인한다
+      if (!handled || editorRef.current?.innerHTML === before) insertLineBreakManually()
       handleEditorInput()
       return
     }
@@ -850,16 +883,28 @@ export default function SermonNoteWritePage() {
   }
 
   return (
-    <div style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}>
-      <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-300">
-        <button onClick={handleBack} className="text-lg bg-transparent border-none cursor-pointer">←</button>
-        <p className="text-base font-semibold flex-1">{isEdit ? '노트 수정' : '노트 작성'}</p>
+    // 이 화면만 카드색을 페이지 배경으로 쓴다 — 본문 에디터를 카드에 가두지 않고
+    // 종이에 바로 쓰는 느낌으로 두기 위해서다(.mobile-container의 page-bg 규칙에 대한 이 화면 한정 예외).
+    <div
+      className="bg-surface"
+      style={{ minHeight: '100vh', paddingBottom: 'calc(112px + env(safe-area-inset-bottom, 0px))' }}
+    >
+      <div className="flex items-center px-5 pt-4">
+        <button onClick={handleBack} className="bg-transparent border-none cursor-pointer p-0 flex items-center" aria-label="뒤로">
+          <ArrowLeft size={22} strokeWidth={2} className="text-ink" />
+        </button>
+        <div className="flex-1" />
         <button
           onClick={() => setFavorite((prev) => !prev)}
-          className="bg-transparent border-none cursor-pointer text-xl leading-none"
-          style={{ color: favorite ? '#F5A524' : '#D8DAE6' }}
+          className="bg-transparent border-none cursor-pointer p-0 flex items-center"
+          aria-label={favorite ? '즐겨찾기 해제' : '즐겨찾기'}
         >
-          {favorite ? '★' : '☆'}
+          <Star
+            size={21}
+            strokeWidth={1.8}
+            className={favorite ? 'text-warning' : 'text-gray-400'}
+            fill={favorite ? '#F9AB00' : 'none'}
+          />
         </button>
       </div>
 
@@ -877,88 +922,87 @@ export default function SermonNoteWritePage() {
         </div>
       )}
 
-      <div className="px-5 pt-4">
-        <input
-          value={title}
-          onChange={(e) => { setTitle(e.target.value); setSubmitError('') }}
-          placeholder="제목 (선택)"
-          className="w-full text-[19px] font-extrabold outline-none border-b border-gray-100 pb-3 mb-4 placeholder:text-gray-300 placeholder:font-bold"
-        />
-
-        <div className="flex items-center justify-between mb-3">
+      <div className="px-5 pt-3.5 flex flex-col gap-5">
+        <div className="flex flex-col gap-3">
           <input
-            type="date"
-            value={noteDate}
-            onChange={(e) => setNoteDate(e.target.value)}
-            className="text-xs font-semibold bg-surface shadow-sm rounded-full px-3.5 py-2 outline-none border-none"
+            value={title}
+            onChange={(e) => { setTitle(e.target.value); setSubmitError('') }}
+            placeholder="제목"
+            className="w-full text-[32px] font-black leading-tight outline-none border-none bg-transparent placeholder:text-gray-300"
+            style={{ letterSpacing: '-0.055em' }}
           />
-          <button
-            onClick={() => setShowVersePicker(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 border border-dashed border-gray-300 rounded-full px-3 py-1.5 bg-transparent cursor-pointer"
-          >
-            <BookOpen size={13} strokeWidth={2} />
-            말씀구절 추가
-          </button>
-        </div>
 
-        <div className="mb-3 relative inline-flex items-center">
-          <Folder size={13} strokeWidth={2} className="absolute left-3.5 text-gray-400 pointer-events-none" />
-          <select
-            value={selectedFolderId}
-            onChange={(e) => setSelectedFolderId(e.target.value)}
-            className="text-xs font-semibold bg-surface shadow-sm rounded-full pl-8 pr-2.5 py-2 outline-none border-none appearance-none"
-          >
-            <option value="">미분류</option>
-            {folders.map((folder) => (
-              <option key={folder.id} value={folder.id}>{folder.name}</option>
-            ))}
-          </select>
-        </div>
-
-        {verseTags.length > 0 && (
-          <div className="flex gap-1.5 flex-wrap mb-3">
-            {verseTags.map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-1.5 text-xs font-semibold bg-primary-light text-primary rounded-full pl-2.5 pr-2 py-1.5">
-                <BookOpen size={12} strokeWidth={2.2} />
-                {tag}
-                <button onClick={() => handleRemoveVerse(tag)} className="bg-transparent border-none cursor-pointer text-primary text-[11px] leading-none">✕</button>
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="flex items-center gap-1.5 bg-surface rounded-2xl p-2 mb-2.5 shadow-[0_1px_1px_rgba(20,22,42,0.03),0_4px_12px_rgba(20,22,42,0.05)]">
-          <button
-            onClick={applyBold}
-            className={`w-8 h-8 rounded-lg border-none cursor-pointer font-extrabold text-[13px] transition-colors ${
-              activeFormats.bold ? 'bg-primary text-white' : 'bg-gray-100'
-            }`}
-          >B</button>
-          <button
-            onClick={applyHighlight}
-            className="w-8 h-8 rounded-lg border-none cursor-pointer font-bold text-[13px] transition-colors bg-gray-100"
-            style={activeFormats.highlighted ? { backgroundColor: HIGHLIGHT_COLOR } : undefined}
-          >H</button>
-          <div className="w-px h-4 bg-gray-200 mx-1" />
-          {COLOR_SWATCHES.map((swatch) => (
-            <button
-              key={swatch.label}
-              onClick={() => applyColor(swatch.value)}
-              title={swatch.label}
-              className="w-[18px] h-[18px] rounded-full border-none cursor-pointer transition-[outline]"
-              style={{
-                backgroundColor: swatch.value ?? 'rgb(var(--jh-ink))',
-                outline: activeFormats.color === (swatch.value ?? 'default') ? '2px solid #4285F4' : '2px solid transparent',
-                outlineOffset: 2,
-              }}
+          {/* 날짜·폴더는 본문을 방해하지 않게 테두리만 있는 조용한 알약으로 둔다 */}
+          <div className="flex items-center gap-1.5">
+            <input
+              type="date"
+              value={noteDate}
+              onChange={(e) => setNoteDate(e.target.value)}
+              className="text-xs font-semibold text-gray-600 border border-gray-200 rounded-full px-3 py-1.5 outline-none"
             />
-          ))}
+            <div className="relative inline-flex items-center min-w-0">
+              <Folder size={13} strokeWidth={2} className="absolute left-3 text-gray-400 pointer-events-none" />
+              <select
+                value={selectedFolderId}
+                onChange={(e) => setSelectedFolderId(e.target.value)}
+                className="text-xs font-semibold text-gray-600 border border-gray-200 rounded-full pr-3 py-1.5 outline-none appearance-none max-w-[140px] truncate"
+                style={{ paddingLeft: 27 }}
+              >
+                <option value="">미분류</option>
+                {folders.map((folder) => (
+                  <option key={folder.id} value={folder.id}>{folder.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 말씀구절 — 담긴 게 없어도 이름표가 남아서 무엇을 담는 자리인지 알 수 있다 */}
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-extrabold text-primary tracking-[0.02em]">말씀구절</span>
+            {verseTags.length > 0 && (
+              <span className="text-[11px] font-bold text-white bg-primary rounded-full min-w-[16px] h-4 px-1.5 inline-flex items-center justify-center">
+                {verseTags.length}
+              </span>
+            )}
+            <div className="flex-1 h-px bg-gray-200" />
+            <button
+              onClick={() => setShowVersePicker(true)}
+              className="w-6 h-6 rounded-full bg-primary border-none cursor-pointer flex items-center justify-center shrink-0"
+              aria-label="말씀구절 추가"
+            >
+              <Plus size={14} strokeWidth={3} className="text-white" />
+            </button>
+          </div>
+
+          {verseTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {verseTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1.5 bg-primary-light text-primary rounded-xl pl-3 pr-2 py-2 text-sm font-extrabold"
+                  style={{ letterSpacing: '-0.02em' }}
+                >
+                  <BookOpen size={14} strokeWidth={2.2} />
+                  {tag}
+                  <button
+                    onClick={() => handleRemoveVerse(tag)}
+                    className="bg-transparent border-none cursor-pointer p-0 flex items-center text-gray-400"
+                    aria-label={`${tag} 삭제`}
+                  >
+                    <X size={13} strokeWidth={2.6} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div
           ref={editorRef}
-          className="note-rich-editor bg-surface rounded-2xl p-4 text-sm leading-relaxed outline-none shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]"
-          style={{ minHeight: 180 }}
+          className="note-rich-editor text-[17px] outline-none"
+          style={{ minHeight: 288, lineHeight: 1.8 }}
           contentEditable
           suppressContentEditableWarning
           data-placeholder="오늘 예배에서 느낀 점, 은혜받은 구절, 삶에 적용하고 싶은 부분을 자유롭게 적어보세요."
@@ -966,60 +1010,80 @@ export default function SermonNoteWritePage() {
           onKeyDown={handleEditorKeyDown}
           onPaste={handleEditorPaste}
         />
-        <div className="flex items-center justify-between mt-1.5">
-          <p className="text-[11px] text-gray-400">
-            {draftSavedAt ? `자동 저장됨 · ${formatDraftTime(draftSavedAt)}` : ''}
-          </p>
-          <p className="text-[11px] text-gray-400">{charCount}자</p>
+
+        <div className="flex items-center text-[11px] font-semibold text-gray-400 -mt-1">
+          <span>{draftSavedAt ? `자동 저장 · ${formatDraftTime(draftSavedAt)}` : ''}</span>
+          <div className="flex-1" />
+          <span>{charCount}자</span>
         </div>
 
-        <div className="bg-surface rounded-2xl p-4 mt-3.5 shadow-[0_1px_1px_rgba(20,22,42,0.03),0_6px_16px_rgba(20,22,42,0.05)]">
-          <div className="flex items-center justify-between mb-2.5">
-            <p className="text-[13px] font-bold">적용할 점</p>
-            <button onClick={handleAddChecklistItem} className="text-xs font-bold text-primary bg-transparent border-none cursor-pointer">+ 추가</button>
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-extrabold text-gray-500 tracking-[0.02em]">적용할 점</span>
+            <div className="flex-1 h-px bg-gray-200" />
+            <button
+              onClick={handleAddChecklistItem}
+              className="w-6 h-6 rounded-full bg-gray-100 border-none cursor-pointer flex items-center justify-center shrink-0"
+              aria-label="적용할 점 추가"
+            >
+              <Plus size={14} strokeWidth={3} className="text-gray-500" />
+            </button>
           </div>
+
           {checklist.length === 0 ? (
-            <p className="text-xs text-gray-400 py-1">이번 주 실천할 항목을 추가해보세요.</p>
+            <p className="text-xs text-gray-400">이번 주 실천할 항목을 추가해보세요.</p>
           ) : (
-            checklist.map((item) => (
-              <div key={item.id} className="flex items-start gap-2.5 py-1.5">
-                <button
-                  onClick={() => handleToggleChecklistDone(item.id)}
-                  className={`w-[18px] h-[18px] rounded-md flex items-center justify-center text-[11px] font-black border-none cursor-pointer shrink-0 mt-0.5 ${item.done ? 'bg-primary text-white' : 'bg-surface border-[1.8px] border-gray-300'}`}
-                >
-                  {item.done ? '✓' : ''}
-                </button>
-                {editingChecklistId === item.id ? (
-                  <input
-                    autoFocus
-                    value={item.text}
-                    onChange={(e) => handleChecklistTextChange(item.id, e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleChecklistTextCommit(item.id) }}
-                    onBlur={() => handleChecklistTextCommit(item.id)}
-                    placeholder="실천할 내용을 입력하세요"
-                    className="flex-1 text-[13px] outline-none border-b border-gray-200"
-                  />
-                ) : (
-                  <span
-                    onClick={() => setEditingChecklistId(item.id)}
-                    className={`flex-1 text-[13px] cursor-text ${item.done ? 'line-through text-gray-300' : ''}`}
+            <div className="flex flex-col gap-3">
+              {checklist.map((item) => (
+                <div key={item.id} className="flex items-start gap-3">
+                  <button
+                    onClick={() => handleToggleChecklistDone(item.id)}
+                    className={`w-[22px] h-[22px] rounded-lg flex items-center justify-center border-none cursor-pointer shrink-0 mt-0.5 ${
+                      item.done ? 'bg-primary' : 'bg-transparent border-2 border-gray-300'
+                    }`}
+                    style={!item.done ? { borderWidth: 2, borderStyle: 'solid' } : undefined}
+                    aria-label={item.done ? '완료 해제' : '완료'}
                   >
-                    {item.text}
-                  </span>
-                )}
-                <button onClick={() => handleRemoveChecklistItem(item.id)} className="bg-transparent border-none cursor-pointer text-gray-300 text-xs shrink-0">✕</button>
-              </div>
-            ))
+                    {item.done && <Check size={13} strokeWidth={3.2} className="text-white" />}
+                  </button>
+                  {editingChecklistId === item.id ? (
+                    <input
+                      autoFocus
+                      value={item.text}
+                      onChange={(e) => handleChecklistTextChange(item.id, e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleChecklistTextCommit(item.id) }}
+                      onBlur={() => handleChecklistTextCommit(item.id)}
+                      placeholder="실천할 내용을 입력하세요"
+                      className="flex-1 text-[15px] outline-none border-b border-gray-200"
+                    />
+                  ) : (
+                    <span
+                      onClick={() => setEditingChecklistId(item.id)}
+                      className={`flex-1 text-[15px] cursor-text ${item.done ? 'line-through text-gray-400' : ''}`}
+                    >
+                      {item.text}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => handleRemoveChecklistItem(item.id)}
+                    className="bg-transparent border-none cursor-pointer p-0 flex items-center text-gray-300 shrink-0 mt-1"
+                    aria-label="항목 삭제"
+                  >
+                    <X size={14} strokeWidth={2.4} />
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
-        {submitError && <p className="text-[12px] text-danger pt-3">{submitError}</p>}
+        {submitError && <p className="text-[12px] text-danger">{submitError}</p>}
 
         {isEdit && (
           <button
             onClick={handleDelete}
             disabled={isSubmitting}
-            className="w-full text-center text-xs text-danger bg-transparent border-none cursor-pointer pt-4 pb-1"
+            className="w-full text-center text-xs text-danger bg-transparent border-none cursor-pointer pt-1 pb-1"
           >
             노트 삭제
           </button>
@@ -1034,16 +1098,54 @@ export default function SermonNoteWritePage() {
         onClose={() => setShowVersePicker(false)}
       />
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 bg-surface border-t border-gray-300" style={{ paddingTop: '12px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
+      {/*
+        서식 툴바와 저장 버튼을 화면 아래에 나란히 띄운다. 키보드가 올라오면 그만큼 위로 올라가서
+        (keyboardInset) 키보드 뒤로 숨거나 스크롤 따라 왔다갔다 하지 않는다.
+      */}
+      <div
+        className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-40 flex items-center gap-2.5 pointer-events-none"
+        style={{
+          bottom: keyboardInset > 0 ? keyboardInset + 12 : 'calc(22px + env(safe-area-inset-bottom, 0px))',
+        }}
+      >
+        <div className="jh-write-toolbar pointer-events-auto flex-1 flex items-center gap-2.5 bg-surface border border-gray-200 rounded-full px-3.5 py-2.5 min-w-0">
+          <button
+            onClick={applyBold}
+            className={`w-7 h-7 rounded-full border-none cursor-pointer text-sm font-black shrink-0 transition-colors ${
+              activeFormats.bold ? 'bg-primary text-white' : 'bg-gray-100 text-ink'
+            }`}
+          >B</button>
+          <button
+            onClick={applyHighlight}
+            className="w-7 h-7 rounded-full border-none cursor-pointer text-sm font-extrabold shrink-0 transition-colors bg-gray-100 text-ink"
+            style={activeFormats.highlighted ? { backgroundColor: HIGHLIGHT_COLOR } : undefined}
+          >H</button>
+          <div className="w-px h-4 bg-gray-200 shrink-0" />
+          <div className="flex items-center gap-2 min-w-0">
+            {COLOR_SWATCHES.map((swatch) => (
+              <button
+                key={swatch.label}
+                onClick={() => applyColor(swatch.value)}
+                title={swatch.label}
+                className="w-4 h-4 rounded-full border-none cursor-pointer shrink-0 transition-[outline]"
+                style={{
+                  backgroundColor: swatch.value ?? 'rgb(var(--jh-ink))',
+                  outline: activeFormats.color === (swatch.value ?? 'default') ? '2px solid #4285F4' : '2px solid transparent',
+                  outlineOffset: 2,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
         <button
           onClick={handleSave}
           disabled={isSubmitting}
-          className={`w-full py-3.5 rounded-2xl text-sm font-bold border-none transition-colors ${
-            isSubmitting ? 'bg-gray-300 text-white cursor-not-allowed' : 'bg-primary text-white cursor-pointer hover:bg-primary-hover'
+          className={`jh-write-save pointer-events-auto rounded-full px-6 py-4 text-sm font-extrabold border-none shrink-0 transition-colors ${
+            isSubmitting ? 'bg-gray-300 text-white cursor-not-allowed' : 'bg-primary text-white cursor-pointer'
           }`}
-          style={!isSubmitting ? { boxShadow: '0 10px 24px rgba(66,133,244,0.35)' } : undefined}
         >
-          {isSubmitting ? '저장 중...' : '저장하기'}
+          {isSubmitting ? '저장 중' : '저장'}
         </button>
       </div>
     </div>
