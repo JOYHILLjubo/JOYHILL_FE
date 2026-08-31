@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../context/AuthContext'
 import { BibleAvatarIcon } from '../components/BibleAvatars'
+import { refreshSession as requestTokenRefresh } from '../api/session'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -101,33 +102,6 @@ function getApiErrorMessage(result, fallbackMessage) {
   if (result.response.status === 401) return '세션이 만료되었습니다. 다시 로그인해주세요.'
   if (result.response.status === 403) return result.payload?.error?.message ?? '기도제목을 조회할 권한이 없습니다.'
   return result.payload?.error?.message ?? fallbackMessage
-}
-
-async function requestTokenRefresh() {
-  let storedRefreshToken = ''
-  try {
-    const raw = window.localStorage.getItem('joyhill.auth')
-    storedRefreshToken = raw ? (JSON.parse(raw)?.refreshToken ?? '') : ''
-  } catch { /* ignore */ }
-
-  const result = await requestApi('/api/auth/refresh', {
-    method: 'POST',
-    headers: storedRefreshToken ? { 'X-Refresh-Token': storedRefreshToken } : {},
-  })
-  if (!result.response.ok || !result.payload?.success || !result.payload?.data?.accessToken) {
-    throw new Error(getApiErrorMessage(result, '세션이 만료되었습니다. 다시 로그인해주세요.'))
-  }
-
-  const newRefreshToken = result.payload.data.refreshToken
-  if (newRefreshToken) {
-    try {
-      const raw = window.localStorage.getItem('joyhill.auth')
-      const parsed = raw ? JSON.parse(raw) : {}
-      window.localStorage.setItem('joyhill.auth', JSON.stringify({ ...parsed, refreshToken: newRefreshToken }))
-    } catch { /* ignore */ }
-  }
-
-  return result.payload.data.accessToken
 }
 
 function isSessionError(message) {

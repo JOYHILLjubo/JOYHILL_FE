@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft, BookOpen, Check, Folder, Plus, Star, X } from 'lucide-react'
 import VersePickerSheet from '../components/VersePickerSheet'
 import { useAuth } from '../context/AuthContext'
+import { refreshSession as requestTokenRefresh } from '../api/session'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -271,33 +272,6 @@ function getApiErrorMessage(result, fallbackMessage) {
   if (result.response.status === 403) return result.payload?.error?.message ?? '권한이 없습니다.'
   if (result.response.status === 404) return result.payload?.error?.message ?? '노트를 찾을 수 없습니다.'
   return result.payload?.error?.message ?? fallbackMessage
-}
-
-async function requestTokenRefresh() {
-  let storedRefreshToken = ''
-  try {
-    const raw = window.localStorage.getItem('joyhill.auth')
-    storedRefreshToken = raw ? (JSON.parse(raw)?.refreshToken ?? '') : ''
-  } catch { /* ignore */ }
-
-  const result = await requestApi('/api/auth/refresh', {
-    method: 'POST',
-    headers: storedRefreshToken ? { 'X-Refresh-Token': storedRefreshToken } : {},
-  })
-  if (!result.response.ok || !result.payload?.success || !result.payload?.data?.accessToken) {
-    throw new Error(getApiErrorMessage(result, '세션이 만료되었습니다. 다시 로그인해주세요.'))
-  }
-
-  const newRefreshToken = result.payload.data.refreshToken
-  if (newRefreshToken) {
-    try {
-      const raw = window.localStorage.getItem('joyhill.auth')
-      const parsed = raw ? JSON.parse(raw) : {}
-      window.localStorage.setItem('joyhill.auth', JSON.stringify({ ...parsed, refreshToken: newRefreshToken }))
-    } catch { /* ignore */ }
-  }
-
-  return result.payload.data.accessToken
 }
 
 function isSessionError(message) {
@@ -1198,7 +1172,11 @@ export default function SermonNoteWritePage() {
         (keyboardInset) 키보드 뒤로 숨거나 스크롤 따라 왔다갔다 하지 않는다.
       */}
       <div
-        className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-40 flex items-center gap-2.5 pointer-events-none"
+        // 가운데 정렬을 left-1/2 + -translate-x-1/2로 하면 안 된다 — 아래 인라인 transform이
+        // 같은 CSS 속성이라 그 정렬을 통째로 덮어써서 바가 화면 오른쪽 절반으로 밀려나고
+        // 저장 버튼이 화면 밖으로 나간다(실제로 그렇게 눌리지 않던 버그가 있었다).
+        // transform을 쓰는 요소는 inset-x-0 + mx-auto로 정렬한다.
+        className="fixed inset-x-0 mx-auto w-full max-w-[430px] px-4 z-40 flex items-center gap-2.5 pointer-events-none"
         style={{
           bottom: 'calc(22px + env(safe-area-inset-bottom, 0px))',
           // 키보드가 가린 만큼 위로 올린다. bottom 값을 바꾸면 그때마다 레이아웃을 다시 잡아서
