@@ -166,6 +166,17 @@
 - **`transform`을 쓰는 요소의 가로 정렬은 `fixed inset-x-0 mx-auto w-full max-w-[430px]`로 한다.** 정렬이 레이아웃 단계에서 끝나므로 `transform`을 마음대로 쓸 수 있다.
 - 지금 `left-1/2 -translate-x-1/2`를 쓰는 나머지 화면들은 인라인 `transform`이 없어서 문제 없다. **새로 인라인 transform을 붙일 일이 생기면 정렬 방식부터 바꿀 것.**
 
+## 키보드를 따라다니는 요소에는 transition을 걸지 말 것 (2026-09-01)
+
+`SermonNoteWritePage`의 하단 바는 `visualViewport`를 읽어 키보드에 가려진 높이만큼 `transform`으로 올라간다. 여기에 `transition: transform 0.18s`가 걸려 있어서, **키보드는 가만히 있는데 바만 위아래로 떠다니는** 버그가 있었다(사용자 제보 영상에서 키보드 상단은 1프레임도 안 움직이는데 저장 버튼은 약 140px 폭으로 흔들림).
+
+원인: 이 값은 "부드럽게 이동할 목표 위치"가 아니라 **"지금 화면이 실제로 어디에 있는지"**다. iOS는 글자를 칠 때마다 커서를 보이게 하려고 visual viewport를 위아래로 밀고(`offsetTop`이 바뀐다), 화면은 그 즉시 움직인다. 전환 효과가 걸려 있으면 바만 0.18초씩 뒤늦게 쫓아가므로, 타이핑하는 내내 어긋난 상태가 유지된다.
+
+- **키보드가 뜨고 지는 순간에만** 전환 효과를 주고(그때는 목표 위치로의 이동이 맞다), 그 뒤 추적 중에는 `transition: none`으로 즉시 반영한다. 이전 상태를 `keyboardOpenRef`로 기억해서 판단한다.
+- **`setState` 대신 ref로 DOM에 직접 쓴다.** 뷰포트 이벤트는 스크롤 한 번에 수십 번 오는데, 그때마다 리렌더를 돌리면 그 자체로 한 박자씩 밀린다. `requestAnimationFrame`으로 프레임당 한 번만 계산한다.
+- 계산식 `window.innerHeight - visualViewport.height - visualViewport.offsetTop`은 그대로 맞다 — 문제는 식이 아니라 **반영 속도**였다.
+- 검증: 키보드 열림(가림 336px) → 바 밑이 키보드 위 22px, `offsetTop`을 0→60→10으로 흔들어도 **화면상 위치가 454px로 고정**(예전에는 그때마다 애니메이션이 다시 시작됐다).
+
 ## 하단 고정 모달/시트를 만들 때 주의
 
 `fixed inset-0` 오버레이 + `BottomNav`(`fixed bottom-0`, `z-50`)가 같은 화면에 있으면, 오버레이의 z-index가 `BottomNav`와 같거나 낮을 경우 **DOM에서 나중에 렌더링되는 쪽이 위로 그려짐** — `SermonNoteFolderListPage.jsx`의 폴더 추가 모달이 `<BottomNav />`보다 먼저(위쪽에) 렌더링되면서 같은 `z-50`이라 뷰포트가 좁아지면(키보드가 뜨는 등) `BottomNav`가 모달의 저장 버튼 위에 겹쳐 그려지는 버그가 있었음(2026-07-29). 새 모달을 만들 때는 오버레이 z-index를 `z-[60]`처럼 `BottomNav`보다 명시적으로 높게 줄 것 — DOM 순서에 기대지 말 것. 같은 커밋에서 모달 패널에 있던 불필요한 `mb-10`(바닥에서 40px 뜨는 마진)도 제거하고 `env(safe-area-inset-bottom)` 기반 패딩으로 바꿨음 — 하단 시트는 마진 없이 화면에 붙이고 안전영역은 패딩으로 처리할 것.
