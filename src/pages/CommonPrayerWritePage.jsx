@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { refreshSession as requestTokenRefresh } from '../api/session'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
@@ -43,33 +44,6 @@ function getApiErrorMessage(result, fallbackMessage) {
   }
 
   return result.payload?.error?.message ?? fallbackMessage
-}
-
-async function requestTokenRefresh() {
-  let storedRefreshToken = ''
-  try {
-    const raw = window.localStorage.getItem('joyhill.auth')
-    storedRefreshToken = raw ? (JSON.parse(raw)?.refreshToken ?? '') : ''
-  } catch { /* ignore */ }
-
-  const result = await requestApi('/api/auth/refresh', {
-    method: 'POST',
-    headers: storedRefreshToken ? { 'X-Refresh-Token': storedRefreshToken } : {},
-  })
-  if (!result.response.ok || !result.payload?.success || !result.payload?.data?.accessToken) {
-    throw new Error(getApiErrorMessage(result, '세션이 만료되었습니다. 다시 로그인해주세요.'))
-  }
-
-  const newRefreshToken = result.payload.data.refreshToken
-  if (newRefreshToken) {
-    try {
-      const raw = window.localStorage.getItem('joyhill.auth')
-      const parsed = raw ? JSON.parse(raw) : {}
-      window.localStorage.setItem('joyhill.auth', JSON.stringify({ ...parsed, refreshToken: newRefreshToken }))
-    } catch { /* ignore */ }
-  }
-
-  return result.payload.data.accessToken
 }
 
 export default function CommonPrayerWritePage() {

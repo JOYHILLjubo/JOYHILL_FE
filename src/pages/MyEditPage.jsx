@@ -1,37 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { refreshSession as requestTokenRefresh } from '../api/session'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
-
-async function requestTokenRefresh() {
-  let storedRefreshToken = ''
-  try {
-    const raw = window.localStorage.getItem('joyhill.auth')
-    storedRefreshToken = raw ? (JSON.parse(raw)?.refreshToken ?? '') : ''
-  } catch { /* ignore */ }
-
-  const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: storedRefreshToken ? { 'X-Refresh-Token': storedRefreshToken } : undefined,
-  })
-  const payload = await response.json().catch(() => null)
-  if (!response.ok || !payload?.success || !payload?.data?.accessToken) {
-    throw new Error(payload?.error?.message ?? '세션이 만료되었습니다. 다시 로그인해주세요.')
-  }
-
-  const newRefreshToken = payload.data.refreshToken
-  if (newRefreshToken) {
-    try {
-      const raw = window.localStorage.getItem('joyhill.auth')
-      const parsed = raw ? JSON.parse(raw) : {}
-      window.localStorage.setItem('joyhill.auth', JSON.stringify({ ...parsed, refreshToken: newRefreshToken }))
-    } catch { /* ignore */ }
-  }
-
-  return payload.data.accessToken
-}
 
 async function requestChangePassword({ accessToken, currentPassword, newPassword }) {
   const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {

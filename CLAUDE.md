@@ -34,6 +34,22 @@
 
 `AuthContext.jsx`의 `normalizeUser()`가 API 응답에서 **명시적으로 나열한 필드만** 골라 담는다. 백엔드가 새 필드를 내려줘도 여기에 안 적으면 **조용히 버려진다** — 에러도 없고 네트워크 탭에는 값이 정상적으로 보이는데 화면에만 반영이 안 되는, 원인 찾기 까다로운 버그가 된다(2026-08-01 `avatarPhotoUrl` 추가 시 실제로 겪음: 사진을 저장해도 이니셜 fallback만 뜨는데 `/api/users/me` 응답에는 URL이 멀쩡히 들어있었음). `UserSummary`에 필드를 추가할 땐 BE DTO → `normalizeUser()` → 화면 순서로 확인할 것.
 
+## 로그인 세션/토큰은 `src/api/session.js` 한 곳에서만 건드린다 (2026-08-31)
+
+**localStorage(`joyhill.auth`)에 직접 쓰지 말 것.** 읽기는 `readSession()`, 쓰기는 `saveSession()`(항상 병합), 로그아웃은 `clearSession()`, 갱신은 `refreshSession()`을 쓴다.
+
+배경 — "자동로그인이 가끔 혼자 풀린다"는 제보의 원인이 이 구조였다. 서버는 갱신할 때마다 refresh token을 새로 발급하고 옛것을 무효화하는데(BE `AuthService.refresh`의 슬라이딩 만료), 프론트에서는
+
+1. 페이지마다 똑같은 `requestTokenRefresh`가 20벌 복붙돼 각자 localStorage를 직접 덮어쓰고 있었고,
+2. 갱신 직후 호출하는 `setAccessToken()`이 `AuthContext`의 localStorage 동기화 effect를 깨웠는데, 그 effect가 **state에 남아있던 옛 refresh token으로 방금 저장한 새 토큰을 덮어썼다**(state에는 refreshToken을 갱신할 경로가 없었다). 기기에는 서버가 이미 버린 토큰만 남고, 다음에 앱을 켤 때 로그아웃됐다.
+3. 화면 하나가 API를 여러 개 동시에 부르면 401도 동시에 나서 갱신 요청이 여러 번 나갔고, 먼저 도착한 요청이 회전을 끝내는 순간 나머지는 무효한 토큰을 들고 있게 됐다.
+
+그래서 지금은 갱신 요청이 하나로 합쳐지고(single flight), 갱신 결과를 `subscribeTokens()`로 `AuthContext` state까지 전파한다. **AuthContext의 동기화 effect는 `saveSession()`으로 병합 저장하고, `refreshToken`은 값이 있을 때만 넘긴다.**
+
+- **실패를 이유별로 구분한다.** `refreshSession()`은 `SessionError`를 던지고 `error.isExpired`(401/403)일 때만 세션을 버린다. 배포 중 502·서버 재시작 중 500·네트워크 끊김에 로그아웃시키면, 토큰은 멀쩡한데 하필 그 순간 앱을 연 사람만 재로그인해야 한다(push = 즉시 배포라 실제로 일어난다).
+- **페이지들은 에러 메시지 문자열로 로그아웃 여부를 판단한다**(`isSessionError()`가 '세션이 만료'/'다시 로그인'을 찾는다). 그래서 만료가 아닌 실패의 메시지에는 그 문구를 절대 넣지 말 것 — 넣는 순간 잠깐 끊긴 것뿐인데 로그인 화면으로 튕긴다.
+- `clearSession()`은 세대(epoch)를 올려서, 로그아웃 뒤 뒤늦게 도착한 갱신 응답이 세션을 되살리지 못하게 한다.
+
 ## contentEditable 리치 텍스트를 쓸 때 주의
 
 `SermonNoteWritePage.jsx`의 에디터가 유일한 contentEditable 사용처. **네이티브 Enter 키 동작에 의존하면 안 됨** — 실사용자 환경에서 Enter를 눌러도 줄바꿈이 아예 안 생기는 경우가 있어(모바일 웹뷰 계열 추정), `onKeyDown`에서 Enter를 가로채 `execCommand('insertParagraph')`로 명시적으로 처리하고 실패하면 직접 `<br>`을 넣는다(아래 "엔터는 insertParagraph로" 항목 참고). 다른 작성 화면(공지/기도)은 전부 네이티브 `<textarea>`라 이 문제가 없음 — 앞으로도 멀티라인 입력은 특별한 이유 없으면 `<textarea>`를 쓰고, contentEditable은 서식(굵게/색상 등)이 꼭 필요할 때만 쓸 것.
@@ -140,6 +156,15 @@
 - `BottomNav`를 항상 렌더링하고, 저장 버튼은 **저장할 변경이 있을 때만** 네비 위로 떠오르는 알약(`.jh-save-pill`, `bottom: calc(80px + safe-area)`)이다. 변경 없음 → 버튼이 사라져 목록 공간이 넓어지고, 변경 있음 → "출석 저장하기 · N명 변경"으로 몇 명이 바뀌었는지까지 보여준다.
 - 변경 여부는 `buildAttendanceSignature(members, map)`로 "마지막 저장 시점 서명"과 현재 상태를 비교해서 판단한다. **저장 요청을 만든 시점의 서명을 따로 잡아뒀다가 성공 시 그 값을 넣는다** — 저장 중에 체크를 더 건드린 걸 저장된 걸로 오해하면 안 되기 때문.
 - **페이지 하단 패딩은 떠 있는 요소들의 실제 높이만큼 비운다**(저장 알약이 보일 때 152px, 에러 문구까지 뜨면 198px, 아닐 때 90px). 팸원이 많아 스크롤이 생겨도 맨 아래 사람이 버튼에 가려지면 안 된다 — 23명 리스트로 스크롤 끝까지 내려서 22px 여유가 남는 걸 확인함.
+
+## 떠 있는 요소를 `transform`으로 움직인다면 가운데 정렬을 `transform`으로 하지 말 것 (2026-08-31)
+
+`fixed left-1/2 -translate-x-1/2`는 이 앱에서 화면 중앙에 폭 430px짜리 바를 두는 표준 패턴인데, **같은 요소에 인라인 `style={{ transform: ... }}`을 주면 정렬이 통째로 사라진다.** 인라인 스타일이 클래스보다 우선하고 `transform`은 속성 하나라, `translateY`를 쓰는 순간 `translateX(-50%)`가 같이 날아간다.
+
+`SermonNoteWritePage`의 하단 서식 툴바+저장 버튼이 이 문제로 화면 오른쪽 절반으로 밀려나 **저장 버튼이 화면 밖에 있었다**(v0.2.0에서 키보드 대응 `visualViewport` transform을 넣을 때 같이 들어갔다). 375px 화면에서 저장 버튼 왼쪽 끝이 x=501 — 즉 아예 누를 수 없었다.
+
+- **`transform`을 쓰는 요소의 가로 정렬은 `fixed inset-x-0 mx-auto w-full max-w-[430px]`로 한다.** 정렬이 레이아웃 단계에서 끝나므로 `transform`을 마음대로 쓸 수 있다.
+- 지금 `left-1/2 -translate-x-1/2`를 쓰는 나머지 화면들은 인라인 `transform`이 없어서 문제 없다. **새로 인라인 transform을 붙일 일이 생기면 정렬 방식부터 바꿀 것.**
 
 ## 하단 고정 모달/시트를 만들 때 주의
 
