@@ -13,6 +13,13 @@
  */
 export const RELEASE_NOTES = [
   {
+    version: '0.2.2',
+    date: '2026-09-01',
+    changes: [
+      { type: 'fix', text: '설교노트를 쓸 때 화면 아래 저장 버튼 줄이 위아래로 흔들리던 문제를 고쳤어요. 이제 키보드 바로 위에 붙어 있어요.' },
+    ],
+  },
+  {
     version: '0.2.1',
     date: '2026-08-31',
     changes: [

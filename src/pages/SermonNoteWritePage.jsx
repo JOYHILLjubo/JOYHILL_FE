@@ -320,8 +320,10 @@ export default function SermonNoteWritePage() {
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [draftSavedAt, setDraftSavedAt] = useState(null)
-  // 모바일 키보드가 가리는 높이. 저장 버튼을 키보드 바로 위에 붙여두기 위해 쓴다.
-  const [keyboardInset, setKeyboardInset] = useState(0)
+  // 모바일 키보드가 가리는 높이만큼 하단 바를 띄운다. state가 아니라 DOM에 직접 쓴다 —
+  // 이유는 아래 useEffect 주석 참고.
+  const bottomBarRef = useRef(null)
+  const keyboardOpenRef = useRef(false)
   const [draftRestoredAt, setDraftRestoredAt] = useState(null)
 
   // 수정 중인 노트는 노트별로, 새 노트는 하나의 키로 임시저장한다
@@ -440,27 +442,52 @@ export default function SermonNoteWritePage() {
     if (draftTimerRef.current) window.clearTimeout(draftTimerRef.current)
   }, [])
 
-  // 키보드가 올라와도 저장 버튼이 키보드 뒤로 숨거나 스크롤 따라 왔다갔다 하지 않게,
-  // 실제로 가려진 높이만큼 버튼을 띄운다.
+  // 키보드가 올라와도 저장 버튼이 키보드 뒤로 숨지 않게, 실제로 가려진 높이만큼 띄운다.
   //
   // iOS는 키보드가 떠도 레이아웃 뷰포트(window.innerHeight)가 그대로라서 position:fixed 요소가
   // 키보드 뒤로 숨는다 — visualViewport로 실제 보이는 영역을 읽어야만 알 수 있다.
   // 안드로이드는 보통 레이아웃 뷰포트 자체가 줄어들어 이 값이 0이 되고, 그때는 예전처럼
   // 화면 바닥에 붙는 게 맞는 동작이다.
+  //
+  // **이 값에 transition을 걸면 안 된다.** 이건 "부드럽게 이동할 목표 위치"가 아니라
+  // "지금 화면이 실제로 어디에 있는지"다. iOS는 글자를 칠 때마다 커서를 보이게 하려고
+  // visual viewport를 위아래로 밀고(`offsetTop`이 바뀐다), 화면은 그 즉시 움직인다.
+  // 전환 효과가 걸려 있으면 바만 0.18초씩 뒤늦게 쫓아가느라, 키보드는 가만히 있는데
+  // 바가 위아래로 떠다닌다 — 실제로 그 증상이 있었다(키보드 고정, 바는 140px 폭으로 흔들림).
+  // 그래서 **키보드가 뜨고 지는 순간에만** 전환 효과를 주고, 그 뒤 추적 중에는 즉시 반영한다.
+  //
+  // 리렌더를 거치지 않고 DOM에 직접 쓴다 — 뷰포트 이벤트는 스크롤 한 번에도 수십 번 오는데
+  // 그때마다 setState를 하면 그 자체가 한 박자씩 밀린다.
   useEffect(() => {
     const viewport = window.visualViewport
-    if (!viewport) return undefined
-    const update = () => {
+    const bar = bottomBarRef.current
+    if (!viewport || !bar) return undefined
+
+    let frame = 0
+    const apply = () => {
+      frame = 0
       const hidden = window.innerHeight - viewport.height - viewport.offsetTop
       // 주소창이 접히는 정도(수십 px)는 키보드가 아니므로 무시한다
-      setKeyboardInset(hidden > 80 ? Math.round(hidden) : 0)
+      const inset = hidden > 80 ? Math.round(hidden) : 0
+      const isOpen = inset > 0
+      bar.style.transition = keyboardOpenRef.current === isOpen
+        ? 'none'
+        : 'transform 0.18s cubic-bezier(0.32, 0.72, 0, 1)'
+      bar.style.transform = isOpen ? `translate3d(0, ${-inset}px, 0)` : ''
+      keyboardOpenRef.current = isOpen
     }
-    viewport.addEventListener('resize', update)
-    viewport.addEventListener('scroll', update)
-    update()
+    // 이벤트가 몰려와도 프레임당 한 번만 계산한다
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(apply) }
+
+    viewport.addEventListener('resize', schedule)
+    viewport.addEventListener('scroll', schedule)
+    window.addEventListener('scroll', schedule, { passive: true })
+    apply()
     return () => {
-      viewport.removeEventListener('resize', update)
-      viewport.removeEventListener('scroll', update)
+      if (frame) window.cancelAnimationFrame(frame)
+      viewport.removeEventListener('resize', schedule)
+      viewport.removeEventListener('scroll', schedule)
+      window.removeEventListener('scroll', schedule)
     }
   }, [])
 
@@ -1168,21 +1195,21 @@ export default function SermonNoteWritePage() {
       />
 
       {/*
-        서식 툴바와 저장 버튼을 화면 아래에 나란히 띄운다. 키보드가 올라오면 그만큼 위로 올라가서
-        (keyboardInset) 키보드 뒤로 숨거나 스크롤 따라 왔다갔다 하지 않는다.
+        서식 툴바와 저장 버튼을 화면 아래에 나란히 띄운다. 키보드가 올라오면 가려진 높이만큼
+        위로 올라가서 키보드 바로 위에 붙는다(위 visualViewport useEffect가 매 프레임 반영).
       */}
       <div
-        // 가운데 정렬을 left-1/2 + -translate-x-1/2로 하면 안 된다 — 아래 인라인 transform이
+        ref={bottomBarRef}
+        // 가운데 정렬을 left-1/2 + -translate-x-1/2로 하면 안 된다 — 키보드 추적용 transform이
         // 같은 CSS 속성이라 그 정렬을 통째로 덮어써서 바가 화면 오른쪽 절반으로 밀려나고
         // 저장 버튼이 화면 밖으로 나간다(실제로 그렇게 눌리지 않던 버그가 있었다).
         // transform을 쓰는 요소는 inset-x-0 + mx-auto로 정렬한다.
         className="fixed inset-x-0 mx-auto w-full max-w-[430px] px-4 z-40 flex items-center gap-2.5 pointer-events-none"
+        // transform/transition은 위 useEffect가 뷰포트를 보고 직접 쓴다(여기서 주면 덮어쓴다).
+        // bottom 값을 바꾸는 대신 transform을 쓰는 이유는, bottom은 바꿀 때마다 레이아웃을
+        // 다시 잡아서 뚝뚝 끊겨 보이지만 transform은 합성 단계에서만 처리되기 때문이다.
         style={{
           bottom: 'calc(22px + env(safe-area-inset-bottom, 0px))',
-          // 키보드가 가린 만큼 위로 올린다. bottom 값을 바꾸면 그때마다 레이아웃을 다시 잡아서
-          // 뚝뚝 끊겨 보이는데, transform은 합성 단계에서만 처리돼서 부드럽게 따라온다.
-          transform: keyboardInset > 0 ? `translateY(-${keyboardInset}px)` : 'none',
-          transition: 'transform 0.18s cubic-bezier(0.32, 0.72, 0, 1)',
           willChange: 'transform',
         }}
       >
